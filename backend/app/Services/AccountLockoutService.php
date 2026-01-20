@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Mail\AccountLockedMail;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class AccountLockoutService
 {
@@ -61,6 +63,13 @@ class AccountLockoutService
                 'ip' => $ip,
                 'locked_until' => $user->locked_until
             ]);
+
+            // Send notification email
+            try {
+                Mail::to($user)->send(new AccountLockedMail($user, $ip, now()->toDateTimeString()));
+            } catch (\Exception $e) {
+                Log::error('Failed to send account locked email: ' . $e->getMessage());
+            }
 
             return true;
         }

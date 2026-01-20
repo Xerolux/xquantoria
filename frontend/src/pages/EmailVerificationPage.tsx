@@ -9,7 +9,7 @@ const EmailVerificationPage: React.FC = () => {
   const navigate = useNavigate();
   const [verifying, setVerifying] = useState(true);
   const [status, setStatus] = useState<'success' | 'error'>('success');
-  const [messageText, setMessageText] = useState('Verifying your email...');
+  const [messageText, setMessageText] = useState('Verifiziere E-Mail...');
 
   const token = searchParams.get('token');
   const email = searchParams.get('email');
@@ -17,7 +17,7 @@ const EmailVerificationPage: React.FC = () => {
   useEffect(() => {
     if (!token || !email) {
       setStatus('error');
-      setMessageText('Invalid verification link. Missing token or email.');
+      setMessageText('Ungültiger Link. Token oder E-Mail fehlt.');
       setVerifying(false);
       return;
     }
@@ -26,12 +26,12 @@ const EmailVerificationPage: React.FC = () => {
       try {
         await api.post('/auth/email/verify', { token, email });
         setStatus('success');
-        setMessageText('Your email has been successfully verified! You can now access all features.');
-        message.success('Email verified successfully');
+        setMessageText('Deine E-Mail wurde erfolgreich verifiziert! Du hast nun Zugriff auf alle Funktionen.');
+        message.success('E-Mail erfolgreich verifiziert');
       } catch (error: any) {
         setStatus('error');
-        setMessageText(error.response?.data?.message || 'Failed to verify email. The link may be invalid or expired.');
-        message.error('Verification failed');
+        setMessageText(error.response?.data?.message || 'Verifizierung fehlgeschlagen. Der Link ist möglicherweise ungültig oder abgelaufen.');
+        message.error('Verifizierung fehlgeschlagen');
       } finally {
         setVerifying(false);
       }
@@ -50,20 +50,20 @@ const EmailVerificationPage: React.FC = () => {
         flex: 1
       }}>
         {verifying ? (
-          <Spin size="large" tip="Verifying email..." />
+          <Spin size="large" tip="Verifiziere E-Mail..." />
         ) : (
           <Result
             status={status}
             icon={status === 'success' ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
-            title={status === 'success' ? 'Email Verified!' : 'Verification Failed'}
+            title={status === 'success' ? 'E-Mail Verifiziert!' : 'Verifizierung fehlgeschlagen'}
             subTitle={messageText}
             extra={[
               <Button type="primary" key="console" onClick={() => navigate('/dashboard')}>
-                Go to Dashboard
+                Zum Dashboard
               </Button>,
               status === 'error' && (
                 <Button key="resend" onClick={() => navigate('/profile')}>
-                  Resend Verification
+                  Erneut senden
                 </Button>
               ),
             ]}

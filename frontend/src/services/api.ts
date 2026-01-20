@@ -87,6 +87,16 @@ const authService = {
       password_confirmation
     });
     return data;
+  },
+
+  async register(name: string, email: string, password: string, password_confirmation: string) {
+    const { data } = await api.post('/auth/register', {
+      name,
+      email,
+      password,
+      password_confirmation
+    });
+    return data;
   }
 };
 

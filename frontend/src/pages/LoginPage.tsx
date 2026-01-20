@@ -63,6 +63,8 @@ const LoginPage: React.FC = () => {
           <Text type="secondary" style={{ fontSize: '12px' }}>
             Test-Account: admin@example.com / password
           </Text>
+            <br />
+            <Text>Noch kein Konto? <Button type="link" onClick={() => navigate('/register')} style={{ padding: 0 }}>Registrieren</Button></Text>
         </div>
 
         <Form

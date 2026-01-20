@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Mail\EmailVerificationMail;
+use App\Mail\WelcomeMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -112,6 +113,14 @@ class EmailVerificationController extends Controller
         DB::table('email_verification_tokens')
             ->where('email', $request->email)
             ->delete();
+
+        // Send welcome email
+        try {
+            Mail::to($user)->send(new WelcomeMail($user));
+        } catch (\Throwable $e) {
+            // Log error but don't fail the verification
+            \Illuminate\Support\Facades\Log::error('Failed to send welcome email: ' . $e->getMessage());
+        }
 
         return response()->json([
             'message' => 'Email verified successfully'
