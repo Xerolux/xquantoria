@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, List, Tag, Typography, Space, Button, Row, Col, Statistic, Empty } from 'antd';
-import { SearchOutlined, FireOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { SearchOutlined, FireOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { searchService } from '../services/api';
 import type { Post } from '../types';
@@ -225,7 +225,7 @@ const SearchPage: React.FC = () => {
           <Empty
             description={
               <Space direction="vertical">
-                <Text>No results found for "{query}"</Text>
+                <Text>No results found for &quot;{query}&quot;</Text>
                 <Text type="secondary">
                   Try different keywords or check spelling
                 </Text>

@@ -18,7 +18,6 @@ import {
   SaveOutlined,
   ReloadOutlined,
   CheckCircleOutlined,
-  ExclamationCircleOutlined,
   FileTextOutlined,
   GlobalOutlined,
   CodeOutlined,
@@ -27,7 +26,7 @@ import {
 } from '@ant-design/icons';
 import { seoService } from '../services/api';
 
-const { Title, Text, Paragraph } = Typography;
+const { Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
 const { TextArea } = Input;
 
@@ -403,7 +402,7 @@ const SEOPage: React.FC = () => {
                         <strong>Include sitemap:</strong> Always add your sitemap URL
                       </li>
                       <li>
-                        <strong>Don't block CSS/JS:</strong> Search engines need these for
+                        <strong>Don&apos;t block CSS/JS:</strong> Search engines need these for
                         rendering
                       </li>
                       <li>
@@ -451,7 +450,7 @@ const SEOPage: React.FC = () => {
                   description={
                     <ul style={{ margin: 0, paddingLeft: 20 }}>
                       <li>
-                        Use Google Search Console's Robots.txt Tester tool
+                        Use Google Search Console&apos;s Robots.txt Tester tool
                       </li>
                       <li>
                         Check Bing Webmaster Tools for testing

@@ -32,7 +32,7 @@ import {
   SecurityScanOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import type { UploadFile } from 'antd/es/upload/interface';
+// import type { UploadFile } from 'antd/es/upload/interface';
 import { settingsService } from '../services/api';
 import type { Setting, SettingGroup } from '../types';
 
@@ -335,7 +335,7 @@ const SettingsPage: React.FC = () => {
       <Card type="inner" title={<Space><InfoCircleOutlined /> Tips</Space>}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <Text>
-            • Changes are saved immediately when clicking "Save All"
+            • Changes are saved immediately when clicking &quot;Save All&quot;
           </Text>
           <Text>
             • Public settings are accessible via <code>/api/v1/settings/public</code>

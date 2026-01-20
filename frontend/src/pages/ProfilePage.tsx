@@ -269,7 +269,7 @@ const ProfilePage: React.FC = () => {
                   <Alert
                     type="warning"
                     message="Two-factor authentication is not enabled"
-                    description="Enable 2FA to add an extra layer of security to your account. You'll need an authenticator app like Google Authenticator, Authy, or Microsoft Authenticator."
+                    description="Enable 2FA to add an extra layer of security to your account. You&apos;ll need an authenticator app like Google Authenticator, Authy, or Microsoft Authenticator."
                     showIcon
                     closable
                   />
@@ -434,7 +434,7 @@ const ProfilePage: React.FC = () => {
               onChange={(e) => setDisableCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             />
             <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
-              Leave empty if you don't have access to your authenticator
+              Leave empty if you don&apos;t have access to your authenticator
             </div>
           </div>
         </Space>

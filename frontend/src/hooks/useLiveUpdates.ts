@@ -162,12 +162,18 @@ export const withLiveUpdates = <P extends object>(
   fetchFn: () => Promise<any>,
   config: LiveUpdateConfig
 ) => {
-  return (props: P) => {
+  const WithLiveUpdates = (props: P) => {
     const liveUpdates = useLiveUpdates(fetchFn, config);
 
     return React.createElement(WrappedComponent, { ...props, liveUpdates });
   };
+  WithLiveUpdates.displayName = `WithLiveUpdates(${getDisplayName(WrappedComponent)})`;
+  return WithLiveUpdates;
 };
+
+function getDisplayName<P>(WrappedComponent: React.ComponentType<P>) {
+  return WrappedComponent.displayName || (WrappedComponent as any).name || 'Component';
+}
 
 /**
  * Live Updates Button Component

@@ -200,7 +200,7 @@ const SearchBar: React.FC = () => {
            searchResults.categories.length === 0 &&
            searchResults.tags.length === 0 && (
             <div style={{ textAlign: 'center', padding: 24 }}>
-              <Text type="secondary">No results found for "{searchValue}"</Text>
+              <Text type="secondary">No results found for &quot;{searchValue}&quot;</Text>
             </div>
           )}
 
