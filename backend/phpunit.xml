@@ -41,13 +41,6 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
     </php>
     <coverage>
-        <include>
-            <directory suffix=".php">./app</directory>
-        </include>
-        <exclude>
-            <directory suffix=".php">./app/Models</directory>
-            <directory>./app/Providers</directory>
-        </exclude>
         <report>
             <html outputDirectory="coverage/html"/>
             <text outputFile="php://stdout" showUncoveredFiles="false"/>
