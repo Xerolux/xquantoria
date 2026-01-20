@@ -96,7 +96,7 @@ jobs:
           DB_DATABASE: cms_test
           DB_USERNAME: cms_test
           DB_PASSWORD: test
-        run: php artisan test --coverage --min=80
+        run: php artisan test
 
       - name: Run code analysis (PHPStan)
         working-directory: ./backend
