@@ -20,7 +20,7 @@ class CommentFactory extends Factory
             'content' => fake()->paragraphs(rand(2, 5), true),
             'status' => fake()->randomElement(['pending', 'approved', 'spam']),
             'parent_id' => null,
-            'ip_address' => fake()->ipv4(),
+            'author_ip' => fake()->ipv4(),
             'user_agent' => fake()->userAgent(),
         ];
     }

@@ -19,6 +19,7 @@ return new class extends Migration {
             $table->string('author_name')->nullable();
             $table->string('author_email')->nullable();
             $table->string('author_ip')->nullable();
+            $table->string('user_agent')->nullable();
             $table->text('content');
 
             $table->enum('status', ['pending', 'approved', 'rejected', 'spam'])->default('pending');

@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
+            $table->string('color', 7)->nullable()->default('#3B82F6');
             $table->integer('usage_count')->default(0);
             $table->string('language', 2)->default('de');
             $table->foreignId('translation_of_id')->nullable()->constrained('tags');
