@@ -5,9 +5,17 @@ namespace App\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Services\SvgSanitizerService;
 
 class FileValidationService
 {
+    protected SvgSanitizerService $svgSanitizer;
+
+    public function __construct(SvgSanitizerService $svgSanitizer)
+    {
+        $this->svgSanitizer = $svgSanitizer;
+    }
+
     /**
      * Erlaubte MIME-Types für Bilder
      */
@@ -118,8 +126,20 @@ class FileValidationService
      */
     protected function validateMagicBytes(UploadedFile $file, string $mimeType): bool
     {
-        // Für SVG überspringen wir Magic Bytes Check
+        // Für SVG: Sanitize statt nur Check
         if ($mimeType === 'image/svg+xml') {
+            $sanitizedContent = $this->svgSanitizer->sanitizeFile($file->getRealPath());
+
+            if ($sanitizedContent === false) {
+                Log::warning('SVG sanitization failed', [
+                    'filename' => $file->getClientOriginalName(),
+                    'ip' => request()->ip(),
+                ]);
+                return false;
+            }
+
+            // Schreibe sanitized content zurück
+            file_put_contents($file->getRealPath(), $sanitizedContent);
             return true;
         }
 

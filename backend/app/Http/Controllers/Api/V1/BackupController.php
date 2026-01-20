@@ -7,6 +7,7 @@ use App\Models\Backup;
 use App\Services\BackupService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class BackupController extends Controller
 {
@@ -22,7 +23,9 @@ class BackupController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Backup::with('creator')
+        Gate::authorize('backups.viewAny');
+
+        $query = Backup::with('creator:id,name,email')
             ->orderBy('created_at', 'desc');
 
         // Filter by type
@@ -45,7 +48,9 @@ class BackupController extends Controller
      */
     public function show($id)
     {
-        $backup = Backup::with('creator')->findOrFail($id);
+        Gate::authorize('backups.view');
+
+        $backup = Backup::with('creator:id,name,email')->findOrFail($id);
 
         return response()->json($backup);
     }
@@ -55,6 +60,8 @@ class BackupController extends Controller
      */
     public function store(Request $request)
     {
+        Gate::authorize('backups.create');
+
         $validated = $request->validate([
             'name' => 'nullable|string|max:255',
             'type' => 'required|in:full,database,files',
@@ -86,6 +93,8 @@ class BackupController extends Controller
      */
     public function download($id)
     {
+        Gate::authorize('backups.download');
+
         $backup = Backup::findOrFail($id);
 
         if (!$backup->exists()) {
@@ -106,6 +115,8 @@ class BackupController extends Controller
      */
     public function restore(Request $request, $id)
     {
+        Gate::authorize('backups.restore');
+
         $validated = $request->validate([
             'restore_database' => 'nullable|boolean',
             'restore_files' => 'nullable|boolean',
@@ -140,6 +151,8 @@ class BackupController extends Controller
      */
     public function destroy($id)
     {
+        Gate::authorize('backups.delete');
+
         $backup = Backup::findOrFail($id);
 
         try {
@@ -161,6 +174,8 @@ class BackupController extends Controller
      */
     public function stats()
     {
+        Gate::authorize('backups.viewStats');
+
         $totalBackups = Backup::count();
         $completedBackups = Backup::completed()->count();
         $failedBackups = Backup::failed()->count();

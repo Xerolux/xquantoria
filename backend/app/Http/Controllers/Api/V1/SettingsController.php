@@ -49,11 +49,13 @@ class SettingsController extends Controller
     }
 
     /**
-     * Get a specific setting by key.
+     * Get a specific setting by key (cached for 1 hour).
      */
     public function show($key)
     {
-        $setting = Setting::where('key', $key)->firstOrFail();
+        $setting = Cache::remember("setting_{$key}", 3600, function () use ($key) {
+            return Setting::where('key', $key)->firstOrFail();
+        });
 
         return response()->json([
             'setting' => [
@@ -110,7 +112,10 @@ class SettingsController extends Controller
             'updated_by' => auth()->id(),
         ]);
 
-        // Clear cache
+        // Clear cache for this specific setting
+        Cache::forget("setting_{$key}");
+
+        // Clear general cache
         $this->clearCache();
 
         return response()->json([

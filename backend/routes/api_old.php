@@ -36,10 +36,6 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/login', [AuthController::class, 'login'])
         ->middleware('throttle:5,1');
 
-    // Public comment creation with strict rate limiting (MOVED OUTSIDE auth group)
-    Route::post('/comments', [CommentController::class, 'store'])
-        ->middleware('throttle:10,1'); // 10 comments per minute max
-
     // Geschützte Routes mit Standard Rate Limit (100/Minute)
     Route::middleware(['auth:sanctum', 'throttle:100,1'])->group(function () {
         Route::apiResource('posts', PostController::class);
@@ -63,9 +59,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/auth/refresh', [AuthController::class, 'refresh']);
         Route::get('/auth/me', [AuthController::class, 'me']);
 
-        // User management - Admin only
-        Route::apiResource('users', UserController::class)
-            ->middleware('role:admin,super_admin');
+        Route::apiResource('users', UserController::class);
 
         // Analytics
         Route::prefix('analytics')->group(function () {
@@ -97,17 +91,14 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('pages', PageController::class);
         Route::get('/pages/menu', [PageController::class, 'menu'])->withoutMiddleware('auth:sanctum');
 
-        // Comments Management (authenticated users)
-        Route::apiResource('comments', CommentController::class)->except(['store']);
-        Route::post('/comments/{id}/approve', [CommentController::class, 'approve'])
-            ->middleware('role:admin,super_admin,editor');
-        Route::post('/comments/{id}/reject', [CommentController::class, 'reject'])
-            ->middleware('role:admin,super_admin,editor');
-        Route::post('/comments/{id}/spam', [CommentController::class, 'markAsSpam'])
-            ->middleware('role:admin,super_admin,editor');
+        // Comments Management
+        Route::apiResource('comments', CommentController::class);
+        Route::post('/comments/{id}/approve', [CommentController::class, 'approve']);
+        Route::post('/comments/{id}/reject', [CommentController::class, 'reject']);
+        Route::post('/comments/{id}/spam', [CommentController::class, 'markAsSpam']);
 
-        // Newsletter Management - Admin/Editor only
-        Route::prefix('newsletters')->middleware('role:admin,super_admin,editor')->group(function () {
+        // Newsletter Management
+        Route::prefix('newsletters')->group(function () {
             Route::get('/', [NewsletterController::class, 'index']);
             Route::post('/', [NewsletterController::class, 'store']);
             Route::get('/stats', [NewsletterController::class, 'getStats']);
@@ -117,7 +108,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/{id}/send', [NewsletterController::class, 'send']);
         });
 
-        Route::prefix('newsletter')->middleware('role:admin,super_admin,editor')->group(function () {
+        Route::prefix('newsletter')->group(function () {
             Route::get('/subscribers', [NewsletterController::class, 'subscribers']);
             Route::get('/subscribers/{id}', [NewsletterController::class, 'showSubscriber']);
             Route::put('/subscribers/{id}', [NewsletterController::class, 'updateSubscriber']);
@@ -125,8 +116,8 @@ Route::prefix('v1')->group(function () {
             Route::get('/subscribers/export', [NewsletterController::class, 'exportSubscribers']);
         });
 
-        // Robots.txt Management - Admin only
-        Route::prefix('seo')->middleware('role:admin,super_admin')->group(function () {
+        // Robots.txt Management
+        Route::prefix('seo')->group(function () {
             Route::get('/robots', [RobotsTxtController::class, 'index']);
             Route::post('/robots/validate', [RobotsTxtController::class, 'validateContent']);
             Route::put('/robots', [RobotsTxtController::class, 'update']);
@@ -144,8 +135,8 @@ Route::prefix('v1')->group(function () {
             Route::post('/recovery-codes/regenerate', [TwoFactorAuthController::class, 'regenerateRecoveryCodes']);
         });
 
-        // Backup Management - Super Admin only
-        Route::prefix('backups')->middleware('role:super_admin')->group(function () {
+        // Backup Management
+        Route::prefix('backups')->group(function () {
             Route::get('/', [BackupController::class, 'index']);
             Route::post('/', [BackupController::class, 'store']);
             Route::get('/stats', [BackupController::class, 'stats']);
@@ -155,20 +146,18 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{id}', [BackupController::class, 'destroy']);
         });
 
-        // Settings Management - Admin only
+        // Settings Management
         Route::prefix('settings')->group(function () {
             Route::get('/public', [SettingsController::class, 'public'])->withoutMiddleware('auth:sanctum');
-            Route::middleware('role:admin,super_admin')->group(function () {
-                Route::get('/', [SettingsController::class, 'index']);
-                Route::post('/bulk', [SettingsController::class, 'updateBulk']);
-                Route::get('/{key}', [SettingsController::class, 'show']);
-                Route::put('/{key}', [SettingsController::class, 'update']);
-                Route::post('/{key}/reset', [SettingsController::class, 'reset']);
-            });
+            Route::get('/', [SettingsController::class, 'index']);
+            Route::post('/bulk', [SettingsController::class, 'updateBulk']);
+            Route::get('/{key}', [SettingsController::class, 'show']);
+            Route::put('/{key}', [SettingsController::class, 'update']);
+            Route::post('/{key}/reset', [SettingsController::class, 'reset']);
         });
 
-        // Activity Log Management - Admin only
-        Route::prefix('activity-logs')->middleware('role:admin,super_admin')->group(function () {
+        // Activity Log Management
+        Route::prefix('activity-logs')->group(function () {
             Route::get('/', [ActivityLogController::class, 'index']);
             Route::get('/stats', [ActivityLogController::class, 'stats']);
             Route::get('/export', [ActivityLogController::class, 'export']);
@@ -176,14 +165,14 @@ Route::prefix('v1')->group(function () {
             Route::get('/{id}', [ActivityLogController::class, 'show']);
         });
 
-        // System Health Monitoring - Admin only
-        Route::prefix('system')->middleware('role:admin,super_admin')->group(function () {
+        // System Health Monitoring
+        Route::prefix('system')->group(function () {
             Route::get('/health', [SystemHealthController::class, 'index']);
             Route::get('/ping', [SystemHealthController::class, 'ping']);
         });
 
-        // AI Assistant Features - Author and above
-        Route::prefix('ai')->middleware('role:author,editor,admin,super_admin')->group(function () {
+        // AI Assistant Features
+        Route::prefix('ai')->group(function () {
             Route::post('/generate-content', [AIController::class, 'generateContent']);
             Route::post('/generate-summary', [AIController::class, 'generateSummary']);
             Route::post('/generate-keywords', [AIController::class, 'generateKeywords']);
@@ -204,22 +193,19 @@ Route::prefix('v1')->group(function () {
             Route::delete('/shares/{share}', [PostShareController::class, 'destroy']);
         });
 
-        // Plugin Management - Admin/Super Admin only
-        Route::prefix('plugins')->middleware('role:admin,super_admin')->group(function () {
+        // Plugin Management
+        Route::prefix('plugins')->group(function () {
             Route::get('/', [PluginController::class, 'index']);
             Route::get('/stats', [PluginController::class, 'getStats']);
             Route::get('/hooks', [PluginController::class, 'getHooks']);
             Route::get('/hooks/available', [PluginController::class, 'getAvailableHooks']);
-            // Plugin installation and uninstallation - Super Admin only
-            Route::middleware('role:super_admin')->group(function () {
-                Route::post('/', [PluginController::class, 'install']);
-                Route::post('/hooks', [PluginController::class, 'registerHook']);
-                Route::delete('/{plugin}', [PluginController::class, 'uninstall']);
-            });
+            Route::post('/', [PluginController::class, 'install']);
+            Route::post('/hooks', [PluginController::class, 'registerHook']);
             Route::get('/{plugin}', [PluginController::class, 'show']);
             Route::put('/{plugin}/config', [PluginController::class, 'updateConfig']);
             Route::post('/{plugin}/activate', [PluginController::class, 'activate']);
             Route::post('/{plugin}/deactivate', [PluginController::class, 'deactivate']);
+            Route::delete('/{plugin}', [PluginController::class, 'uninstall']);
         });
     });
 

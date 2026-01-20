@@ -12,7 +12,15 @@ class PostController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Post::with(['author', 'categories', 'tags', 'featuredImage']);
+        $this->authorize('viewAny', Post::class);
+
+        // Eager loading to prevent N+1 queries - only select needed fields
+        $query = Post::with([
+            'author:id,name,email,display_name',
+            'categories:id,name,slug',
+            'tags:id,name,slug',
+            'featuredImage:id,file_path,alt_text,width,height'
+        ]);
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -43,6 +51,8 @@ class PostController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Post::class);
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -86,10 +96,18 @@ class PostController extends Controller
 
     public function show($id)
     {
-        $post = Post::with(['author', 'categories', 'tags', 'featuredImage', 'downloads'])
+        $post = Post::with([
+            'author:id,name,email,display_name',
+            'categories:id,name,slug',
+            'tags:id,name,slug',
+            'featuredImage:id,file_path,alt_text,width,height',
+            'downloads:id,title,file_path,file_size'
+        ])
             ->where('id', $id)
             ->orWhere('slug', $id)
             ->firstOrFail();
+
+        $this->authorize('view', $post);
 
         $post->increment('view_count');
 
@@ -99,6 +117,8 @@ class PostController extends Controller
     public function update(Request $request, $id)
     {
         $post = Post::findOrFail($id);
+
+        $this->authorize('update', $post);
 
         $validated = $request->validate([
             'title' => 'sometimes|required|string|max:255',
@@ -135,6 +155,9 @@ class PostController extends Controller
     public function destroy($id)
     {
         $post = Post::findOrFail($id);
+
+        $this->authorize('delete', $post);
+
         $post->delete();
 
         return response()->json(null, 204);
@@ -142,6 +165,8 @@ class PostController extends Controller
 
     public function bulkStore(Request $request)
     {
+        $this->authorize('bulkCreate', Post::class);
+
         $validated = $request->validate([
             'posts' => 'required|array',
             'posts.*.title' => 'required|string|max:255',
@@ -163,6 +188,8 @@ class PostController extends Controller
 
     public function bulkDestroy(Request $request)
     {
+        $this->authorize('bulkDelete', Post::class);
+
         $validated = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:posts,id',

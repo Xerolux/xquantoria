@@ -12,7 +12,9 @@ class DownloadController extends Controller
 {
     public function index()
     {
-        $downloads = Download::with(['uploader'])
+        $this->authorize('viewAny', Download::class);
+
+        $downloads = Download::with(['uploader:id,name,email'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
@@ -21,6 +23,8 @@ class DownloadController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorize('create', Download::class);
+
         $validated = $request->validate([
             'file' => 'required|file|max:102400',
             'description' => 'nullable|string',
@@ -51,7 +55,10 @@ class DownloadController extends Controller
 
     public function show($id)
     {
-        $download = Download::with(['uploader'])->findOrFail($id);
+        $download = Download::with(['uploader:id,name,email'])->findOrFail($id);
+
+        $this->authorize('view', $download);
+
         return response()->json($download);
     }
 
@@ -66,6 +73,19 @@ class DownloadController extends Controller
 
         $download = $tokenModel->download;
 
+        // Check if download has expired
+        if ($download->expires_at && $download->expires_at < now()) {
+            abort(403, 'This download has expired');
+        }
+
+        // If user is authenticated, check access level permissions
+        if (auth()->check()) {
+            $this->authorize('view', $download);
+        } elseif ($download->access_level !== 'public') {
+            // Non-authenticated users can only access public downloads
+            abort(403, 'Authentication required for this download');
+        }
+
         $tokenModel->markAsUsed();
         $download->incrementDownloadCount();
 
@@ -75,6 +95,8 @@ class DownloadController extends Controller
     public function destroy($id)
     {
         $download = Download::findOrFail($id);
+
+        $this->authorize('delete', $download);
 
         Storage::disk('local')->delete($download->filepath);
         $download->delete();

@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Gate;
 
 class PluginController extends Controller
 {
@@ -17,6 +18,8 @@ class PluginController extends Controller
      */
     public function index(): JsonResponse
     {
+        Gate::authorize('plugins.viewAny');
+
         $plugins = Plugin::with('hooks')->orderBy('created_at', 'desc')->get();
 
         return response()->json($plugins);
@@ -27,6 +30,8 @@ class PluginController extends Controller
      */
     public function show(Plugin $plugin): JsonResponse
     {
+        Gate::authorize('plugins.view');
+
         $plugin->load('hooks');
 
         return response()->json($plugin);
@@ -37,6 +42,8 @@ class PluginController extends Controller
      */
     public function install(Request $request): JsonResponse
     {
+        Gate::authorize('plugins.install');
+
         $request->validate([
             'name' => 'required|string|max:255',
             'version' => 'required|string|max:20',
@@ -68,6 +75,8 @@ class PluginController extends Controller
      */
     public function uninstall(Plugin $plugin): JsonResponse
     {
+        Gate::authorize('plugins.uninstall');
+
         // Deactivate first
         if ($plugin->is_active) {
             $this->deactivate($plugin);
@@ -88,6 +97,8 @@ class PluginController extends Controller
      */
     public function activate(Plugin $plugin): JsonResponse
     {
+        Gate::authorize('plugins.activate');
+
         $plugin->update(['is_active' => true]);
 
         // Execute activation hooks
@@ -108,6 +119,8 @@ class PluginController extends Controller
      */
     public function deactivate(Plugin $plugin): JsonResponse
     {
+        Gate::authorize('plugins.deactivate');
+
         $plugin->update(['is_active' => false]);
 
         // Execute deactivation hooks
@@ -128,6 +141,8 @@ class PluginController extends Controller
      */
     public function updateConfig(Request $request, Plugin $plugin): JsonResponse
     {
+        Gate::authorize('plugins.updateConfig');
+
         $request->validate([
             'config' => 'required|array',
         ]);
@@ -153,6 +168,8 @@ class PluginController extends Controller
      */
     public function getHooks(): JsonResponse
     {
+        Gate::authorize('plugins.viewAny');
+
         $hooks = PluginHook::with('plugin')
             ->orderBy('priority', 'desc')
             ->get()
@@ -166,6 +183,8 @@ class PluginController extends Controller
      */
     public function registerHook(Request $request): JsonResponse
     {
+        Gate::authorize('plugins.manageHooks');
+
         $request->validate([
             'plugin_id' => 'required|exists:plugins,id',
             'hook' => 'required|string|max:255',
@@ -220,6 +239,8 @@ class PluginController extends Controller
      */
     public function getAvailableHooks(): JsonResponse
     {
+        Gate::authorize('plugins.viewAny');
+
         $availableHooks = [
             ['name' => 'post.created', 'description' => 'When a post is created'],
             ['name' => 'post.updated', 'description' => 'When a post is updated'],
@@ -245,6 +266,8 @@ class PluginController extends Controller
      */
     public function getStats(): JsonResponse
     {
+        Gate::authorize('plugins.viewStats');
+
         $totalPlugins = Plugin::count();
         $activePlugins = Plugin::where('is_active', true)->count();
         $inactivePlugins = Plugin::where('is_active', false)->count();

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class CommentController extends Controller
 {
@@ -44,6 +45,9 @@ class CommentController extends Controller
             'author_email' => 'nullable|email|max:255',
         ]);
 
+        // Sanitize content to prevent XSS
+        $sanitizedContent = $this->sanitizeContent($validated['content']);
+
         // Spam detection (basic)
         $spamScore = $this->detectSpam($request, $validated);
 
@@ -54,7 +58,7 @@ class CommentController extends Controller
             'author_name' => $validated['author_name'] ?? null,
             'author_email' => $validated['author_email'] ?? null,
             'author_ip' => $request->ip(),
-            'content' => $validated['content'],
+            'content' => $sanitizedContent,
             'status' => $spamScore > 5 ? 'spam' : 'pending',
         ]);
 
@@ -113,6 +117,26 @@ class CommentController extends Controller
         $comment->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * Sanitize comment content to prevent XSS
+     */
+    protected function sanitizeContent(string $content): string
+    {
+        // Remove all HTML tags except safe ones
+        $allowedTags = '<p><br><strong><em><u><ol><ul><li><blockquote><code>';
+        $sanitized = strip_tags($content, $allowedTags);
+
+        // Remove any remaining script tags or event handlers
+        $sanitized = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', '', $sanitized);
+        $sanitized = preg_replace('/on\w+\s*=\s*["\'].*?["\']/i', '', $sanitized);
+        $sanitized = preg_replace('/javascript:/i', '', $sanitized);
+
+        // Convert special characters to HTML entities
+        $sanitized = htmlspecialchars($sanitized, ENT_QUOTES, 'UTF-8', false);
+
+        return trim($sanitized);
     }
 
     /**
