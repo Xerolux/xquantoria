@@ -243,7 +243,7 @@ const PostEditorPage: React.FC = () => {
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                     automatic_uploads: true,
                     file_picker_types: 'image',
-                    images_upload_handler: async (blobInfo, progress) => {
+                    images_upload_handler: async (blobInfo: any, progress: any) => {
                       try {
                         const file = blobInfo.blob();
                         const result = await mediaService.upload(file, {

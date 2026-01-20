@@ -382,7 +382,7 @@ const NewslettersPage: React.FC = () => {
           <Progress
             percent={record.engagement_rate || 0}
             size="small"
-            status={record.engagement_rate > 50 ? 'success' : 'normal'}
+            status={(record.engagement_rate || 0) > 50 ? 'success' : 'normal'}
           />
           <div style={{ fontSize: 11, color: '#999' }}>
             {record.emails_opened}/{record.emails_sent} opened
@@ -598,7 +598,7 @@ const NewslettersPage: React.FC = () => {
                 content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
               }}
               value={newsletterForm.content}
-              onEditorChange={(content) =>
+              onEditorChange={(content: string) =>
                 setNewsletterForm({ ...newsletterForm, content })
               }
             />
