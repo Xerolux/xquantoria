@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Newsletter;
 use App\Models\NewsletterSubscriber;
 use App\Models\NewsletterSent;
+use App\Jobs\SendNewsletterEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -83,34 +84,27 @@ class NewsletterController extends Controller
     {
         $newsletter = Newsletter::findOrFail($id);
 
-        if ($newsletter->status === 'sent') {
-            return response()->json(['message' => 'Newsletter already sent'], 400);
+        if ($newsletter->status === 'sent' || $newsletter->status === 'sending') {
+            return response()->json(['message' => 'Newsletter already sent or sending'], 400);
         }
 
+        $newsletter->update(['status' => 'sending']);
+
         $activeSubscribers = NewsletterSubscriber::active()->get();
-        $recipientsCount = 0;
+        $recipientsCount = $activeSubscribers->count();
 
         foreach ($activeSubscribers as $subscriber) {
-            // Create sent record
-            NewsletterSent::create([
-                'newsletter_id' => $newsletter->id,
-                'subscriber_id' => $subscriber->id,
-                'sent_at' => now(),
-                'unsubscribe_token' => $subscriber->unsubscribe_token,
-            ]);
-
-            $subscriber->incrementSent();
-            $recipientsCount++;
+            SendNewsletterEmail::dispatch($newsletter, $subscriber);
         }
 
         $newsletter->update([
-            'status' => 'sent',
+            'status' => 'sent', // Will be marked 'sent' immediately here, but jobs process in background
             'sent_at' => now(),
             'recipients_count' => $recipientsCount,
         ]);
 
         return response()->json([
-            'message' => 'Newsletter sent successfully',
+            'message' => 'Newsletter queued for sending',
             'recipients_count' => $recipientsCount,
         ]);
     }
