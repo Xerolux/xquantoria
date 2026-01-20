@@ -14,6 +14,7 @@ class Tag extends Model
         'slug',
         'language',
         'translation_of_id',
+        'usage_count',
     ];
 
     public function posts()

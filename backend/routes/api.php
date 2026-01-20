@@ -23,6 +23,8 @@ use App\Http\Controllers\Api\V1\SystemHealthController;
 use App\Http\Controllers\Api\V1\AIController;
 use App\Http\Controllers\Api\V1\PostShareController;
 use App\Http\Controllers\Api\V1\PluginController;
+use App\Http\Controllers\NewsletterSubscriptionController;
+use App\Http\Controllers\SitemapController;
 
 Route::prefix('v1')->group(function () {
     // Public Health Check (kein Rate Limit)
@@ -208,28 +210,22 @@ Route::prefix('v1')->group(function () {
     });
 
     // Public Newsletter Subscription (Double-Opt-in)
-    Route::post('/newsletter/subscribe', [\App\Http\Controllers\NewsletterSubscriptionController::class, 'subscribe']);
-    Route::get('/newsletter/confirm/{token}', [\App\Http\Controllers\NewsletterSubscriptionController::class, 'confirm']);
-    Route::get('/newsletter/unsubscribe/{token}', [\App\Http\Controllers\NewsletterSubscriptionController::class, 'unsubscribe']);
-    Route::get('/newsletter/status', [\App\Http\Controllers\NewsletterSubscriptionController::class, 'status']);
+    Route::post('/newsletter/subscribe', [NewsletterSubscriptionController::class, 'subscribe']);
+    Route::get('/newsletter/confirm/{token}', [NewsletterSubscriptionController::class, 'confirm']);
+    Route::get('/newsletter/unsubscribe/{token}', [NewsletterSubscriptionController::class, 'unsubscribe']);
+    Route::get('/newsletter/status', [NewsletterSubscriptionController::class, 'status']);
 
     // Newsletter Tracking (öffentlich für Pixel-Tracking)
-    Route::get('/newsletter/track/open/{id}', [\App\Http\Controllers\NewsletterSubscriptionController::class, 'trackOpen']);
-    Route::get('/newsletter/track/click/{id}', [\App\Http\Controllers\NewsletterSubscriptionController::class, 'trackClick']);
+    Route::get('/newsletter/track/open/{id}', [NewsletterSubscriptionController::class, 'trackOpen']);
+    Route::get('/newsletter/track/click/{id}', [NewsletterSubscriptionController::class, 'trackClick']);
 
     // Öffentlicher Download ohne Auth aber mit Rate Limit (100/Minute)
     Route::get('dl/{token}', [DownloadController::class, 'download'])
         ->middleware('throttle:100,1');
 
     // Sitemap (öffentlich)
-    Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
+    Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 
     // Robots.txt (öffentlich)
     Route::get('/robots.txt', [RobotsTxtController::class, 'show']);
 });
-
-// Public robots.txt route (ohne /api/v1 prefix)
-Route::get('/robots.txt', [RobotsTxtController::class, 'show']);
-
-// Public sitemap route (ohne /api/v1 prefix)
-Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);

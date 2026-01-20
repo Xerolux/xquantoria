@@ -11,6 +11,7 @@ class RobotsTxt extends Model
     protected $fillable = [
         'content',
         'updated_by',
+        'last_generated_at',
     ];
 
     protected $casts = [
