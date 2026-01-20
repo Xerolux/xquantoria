@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\V1\SystemHealthController;
 use App\Http\Controllers\Api\V1\AIController;
 use App\Http\Controllers\Api\V1\PostShareController;
 use App\Http\Controllers\Api\V1\PluginController;
+use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\SitemapController;
 
@@ -34,6 +35,12 @@ Route::prefix('v1')->group(function () {
 
     // Login mit striktem Rate Limit (5 Versuche/Minute)
     Route::post('/auth/login', [AuthController::class, 'login'])
+        ->middleware('throttle:5,1');
+
+    // Password Reset (public)
+    Route::post('/auth/password/reset-request', [PasswordResetController::class, 'requestReset'])
+        ->middleware('throttle:3,1'); // 3 attempts per minute
+    Route::post('/auth/password/reset', [PasswordResetController::class, 'reset'])
         ->middleware('throttle:5,1');
 
     // Public comment creation with strict rate limiting (MOVED OUTSIDE auth group)

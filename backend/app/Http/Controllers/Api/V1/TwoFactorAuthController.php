@@ -133,11 +133,16 @@ class TwoFactorAuthController extends Controller
         }
 
         if ($user->verifyTwoFactorCode($request->code)) {
-            // Mark session as 2FA confirmed
-            session(['2fa.confirmed' => true]);
+            // Mark session as 2FA confirmed with timestamp and user ID
+            session([
+                '2fa.confirmed' => true,
+                '2fa_verified_at' => now(),
+                '2fa_user_id' => $user->id
+            ]);
 
             return response()->json([
                 'message' => 'Two-factor authentication verified successfully',
+                'verified_at' => now()->toIso8601String(),
             ]);
         }
 

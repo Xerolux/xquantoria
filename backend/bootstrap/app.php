@@ -31,6 +31,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // Register middleware aliases
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            '2fa' => \App\Http\Middleware\Require2FA::class,
+            'super_admin_ip' => \App\Http\Middleware\CheckSuperAdminIP::class,
+        ]);
+
+        // Apply security headers globally to API routes
+        $middleware->appendToGroup('api', [
+            \App\Http\Middleware\SecurityHeaders::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
