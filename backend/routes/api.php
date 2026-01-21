@@ -92,6 +92,15 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{revisionId}', [PostRevisionController::class, 'destroy']);
         });
 
+        // Post Translations
+        Route::prefix('posts/{id}/translations')->group(function () {
+            Route::get('/', [TranslationController::class, 'translations']);
+            Route::post('/', [TranslationController::class, 'translate']);
+            Route::get('/detect', [TranslationController::class, 'detect']);
+        });
+        Route::post('translations/link', [TranslationController::class, 'link']);
+        Route::get('translations/languages', [TranslationController::class, 'languages']);
+
         Route::apiResource('categories', CategoryController::class);
 
         Route::apiResource('tags', TagController::class);
@@ -238,6 +247,8 @@ Route::prefix('v1')->group(function () {
         Route::prefix('seo')->group(function () {
             // Get SEO metadata for a post (public for published posts)
             Route::get('/posts/{id}', [SeoController::class, 'show']);
+            Route::get('/posts/{id}/schema', [SeoController::class, 'schemaScript']);
+            Route::get('/schema-types', [SeoController::class, 'schemaTypes']);
         });
 
         // Two-Factor Authentication

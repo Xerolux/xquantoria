@@ -19,6 +19,8 @@ class SeoController extends Controller
 
         $this->authorize('view', $post);
 
+        $schemaType = $request->get('schema_type', 'article');
+
         $seo = [
             'title' => $this->getTitle($post),
             'description' => $this->getDescription($post),
@@ -27,15 +29,61 @@ class SeoController extends Controller
             'alternate_urls' => $this->getAlternateUrls($post),
             'og_tags' => $this->getOpenGraphTags($post),
             'twitter_card' => $this->getTwitterCard($post),
-            'schema' => $this->getSchemaMarkup($post),
+            'schema' => $this->getSchemaMarkup($post, $schemaType),
             'robots' => $this->getRobotsMeta($post),
             'hreflang' => $this->getHreflangTags($post),
         ];
 
         return response()->json([
             'post_id' => $post->id,
+            'schema_type' => $schemaType,
             'seo' => $seo,
         ]);
+    }
+
+    /**
+     * Get all available schema types.
+     */
+    public function schemaTypes()
+    {
+        return response()->json([
+            'schema_types' => [
+                'article' => 'Article (default)',
+                'blog_posting' => 'BlogPosting',
+                'news_article' => 'NewsArticle',
+                'tech_article' => 'TechArticle',
+                'opinion_news_article' => 'OpinionNewsArticle',
+                'report_news_article' => 'ReportageNewsArticle',
+                'review' => 'Review (with rating)',
+                'product' => 'Product (with offers)',
+                'event' => 'Event',
+                'recipe' => 'Recipe',
+                'video' => 'VideoObject',
+                'faq' => 'FAQPage',
+                'how_to' => 'HowTo',
+            ],
+        ]);
+    }
+
+    /**
+     * Get JSON-LD schema script tag.
+     */
+    public function schemaScript(Request $request, $id)
+    {
+        $post = Post::where('id', $id)
+            ->orWhere('slug', $id)
+            ->firstOrFail();
+
+        $this->authorize('view', $post);
+
+        $schemaType = $request->get('schema_type', 'article');
+        $schema = $this->getSchemaMarkup($post, $schemaType);
+
+        $jsonLd = json_encode($schema, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+
+        return response()
+            ->json(['schema' => $schema, 'json_ld' => $jsonLd])
+            ->header('Content-Type', 'application/ld+json');
     }
 
     /**
@@ -162,13 +210,13 @@ class SeoController extends Controller
     }
 
     /**
-     * Get Schema.org JSON-LD markup.
+     * Get Schema.org JSON-LD markup with support for different schema types.
      */
-    protected function getSchemaMarkup(Post $post): array
+    protected function getSchemaMarkup(Post $post, string $schemaType = 'article'): array
     {
-        $schema = [
+        $baseSchema = [
             '@context' => 'https://schema.org',
-            '@type' => 'Article',
+            '@type' => $this->getSchemaType($schemaType),
             'headline' => $post->title,
             'description' => $this->getDescription($post),
             'image' => $post->featuredImage?->url ?? asset('images/default-og.jpg'),
@@ -187,15 +235,132 @@ class SeoController extends Controller
                     'url' => asset('images/logo.png'),
                 ],
             ],
+            'mainEntityOfPage' => [
+                '@type' => 'WebPage',
+                '@id' => $this->getCanonicalUrl($post),
+            ],
         ];
 
-        // Add mainEntityOfPage
-        $schema['mainEntityOfPage'] = [
-            '@type' => 'WebPage',
-            '@id' => $this->getCanonicalUrl($post),
-        ];
+        // Add type-specific properties
+        return $this->addSchemaTypeSpecificProperties($baseSchema, $post, $schemaType);
+    }
 
-        return $schema;
+    /**
+     * Map schema type string to Schema.org type.
+     */
+    protected function getSchemaType(string $schemaType): string
+    {
+        return match($schemaType) {
+            'blog_posting' => 'BlogPosting',
+            'news_article' => 'NewsArticle',
+            'tech_article' => 'TechArticle',
+            'opinion_news_article' => 'OpinionNewsArticle',
+            'report_news_article' => 'ReportageNewsArticle',
+            'review' => 'Review',
+            'product' => 'Product',
+            'event' => 'Event',
+            'recipe' => 'Recipe',
+            'video' => 'VideoObject',
+            'faq' => 'FAQPage',
+            'how_to' => 'HowTo',
+            default => 'Article',
+        };
+    }
+
+    /**
+     * Add type-specific properties to schema.
+     */
+    protected function addSchemaTypeSpecificProperties(array $schema, Post $post, string $schemaType): array
+    {
+        switch ($schemaType) {
+            case 'blog_posting':
+                return array_merge($schema, [
+                    '@type' => 'BlogPosting',
+                ]);
+
+            case 'news_article':
+                return array_merge($schema, [
+                    '@type' => 'NewsArticle',
+                    'dateline' => $post->published_at?->format('Y-m-d'),
+                ]);
+
+            case 'tech_article':
+                return array_merge($schema, [
+                    '@type' => 'TechArticle',
+                    'proficiencyLevel' => 'Beginner',
+                ]);
+
+            case 'review':
+                return array_merge($schema, [
+                    '@type' => 'Review',
+                    'itemReviewed' => [
+                        '@type' => 'Thing',
+                        'name' => $post->title,
+                    ],
+                    'reviewRating' => [
+                        '@type' => 'Rating',
+                        'ratingValue' => $post->rating ?? 4.5,
+                        'bestRating' => 5,
+                    ],
+                ]);
+
+            case 'product':
+                return array_merge($schema, [
+                    '@type' => 'Product',
+                    'name' => $post->title,
+                    'offers' => [
+                        '@type' => 'Offer',
+                        'price' => $post->price ?? '0.00',
+                        'priceCurrency' => $post->currency ?? 'USD',
+                        'availability' => 'https://schema.org/InStock',
+                    ],
+                ]);
+
+            case 'event':
+                return array_merge($schema, [
+                    '@type' => 'Event',
+                    'name' => $post->title,
+                    'startDate' => $post->event_start_date ?? $post->published_at,
+                    'endDate' => $post->event_end_date ?? $post->published_at,
+                    'location' => [
+                        '@type' => 'Place',
+                        'name' => $post->event_location ?? 'TBD',
+                    ],
+                ]);
+
+            case 'recipe':
+                return array_merge($schema, [
+                    '@type' => 'Recipe',
+                    'name' => $post->title,
+                    'recipeCategory' => $post->categories->first()?->name,
+                    'recipeCuisine' => $post->cuisine ?? 'International',
+                ]);
+
+            case 'video':
+                return array_merge($schema, [
+                    '@type' => 'VideoObject',
+                    'name' => $post->title,
+                    'description' => $this->getDescription($post),
+                    'thumbnailUrl' => $post->featuredImage?->url,
+                    'uploadDate' => $post->published_at?->toW3cString(),
+                ]);
+
+            case 'faq':
+                return array_merge($schema, [
+                    '@type' => 'FAQPage',
+                    'mainEntity' => $post->faqs ?? [],
+                ]);
+
+            case 'how_to':
+                return array_merge($schema, [
+                    '@type' => 'HowTo',
+                    'name' => $post->title,
+                    'step' => $post->how_to_steps ?? [],
+                ]);
+
+            default:
+                return $schema;
+        }
     }
 
     /**
