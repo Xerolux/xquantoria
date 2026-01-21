@@ -423,7 +423,7 @@ const MediaPage: React.FC = () => {
             <Tooltip title="Image Processing">
               <Button
                 type="text"
-                icon={<CropOutlined />}
+                icon={<EditOutlined />}
                 onClick={() => handleOpenImageProcessing(record)}
               />
             </Tooltip>
