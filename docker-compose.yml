@@ -83,7 +83,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: cms-queue-worker
-    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    entrypoint: ["php", "artisan"]
+    command: queue:work --sleep=3 --tries=3 --max-time=3600
     environment:
       - DB_CONNECTION=pgsql
       - DB_HOST=database
@@ -113,13 +114,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: cms-scheduler
-    command: >
-      sh -c "
-      while true; do
-        php artisan schedule:run --verbose --no-interaction &
-        sleep 60
-      done
-      "
+    entrypoint: ["sh", "/var/www/html/scheduler.sh"]
     environment:
       - DB_CONNECTION=pgsql
       - DB_HOST=database

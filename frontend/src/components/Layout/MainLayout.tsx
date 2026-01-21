@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Layout, Menu, Button, Dropdown, Avatar, Space } from 'antd';
+import Breadcrumb from '../Breadcrumb';
 import {
   HomeOutlined,
   FileTextOutlined,
@@ -130,6 +131,7 @@ const MainLayout: React.FC = () => {
           </Space>
         </Header>
         <Content style={{ margin: '24px 16', padding: 24, background: '#fff', minHeight: 280 }}>
+          <Breadcrumb />
           <Outlet />
         </Content>
       </Layout>

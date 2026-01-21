@@ -1,7 +1,8 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ConfigProvider, theme, Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import QuickSearch from './components/QuickSearch';
 
 // Code Splitting - Lazy load all pages
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -46,6 +47,21 @@ const PageLoader = () => (
 );
 
 function App() {
+  const [quickSearchVisible, setQuickSearchVisible] = useState(false);
+
+  // Cmd+K shortcut for Quick Search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setQuickSearchVisible(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <ConfigProvider
       theme={{
@@ -55,6 +71,10 @@ function App() {
         },
       }}
     >
+      <QuickSearch
+        visible={quickSearchVisible}
+        onClose={() => setQuickSearchVisible(false)}
+      />
       <BrowserRouter>
         <Suspense fallback={<PageLoader />}>
           <Routes>

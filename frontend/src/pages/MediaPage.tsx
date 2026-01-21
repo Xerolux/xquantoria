@@ -538,6 +538,8 @@ const MediaPage: React.FC = () => {
                           <img
                             alt={item.alt_text || item.original_filename}
                             src={item.url}
+                            loading="lazy"
+                            decoding="async"
                             style={{
                               width: '100%',
                               height: '100%',
