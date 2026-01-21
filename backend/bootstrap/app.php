@@ -34,12 +34,16 @@ return Application::configure(basePath: dirname(__DIR__))
             '2fa' => \App\Http\Middleware\Require2FA::class,
             'super_admin_ip' => \App\Http\Middleware\CheckSuperAdminIP::class,
             'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
+            'session.timeout' => \App\Http\Middleware\SessionTimeout::class,
+            'set.locale' => \App\Http\Middleware\SetLocale::class,
         ]);
 
         // Apply security headers and session tracking globally to API routes
         $middleware->appendToGroup('api', [
             \App\Http\Middleware\SecurityHeaders::class,
             \App\Http\Middleware\TrackSessionActivity::class,
+            \App\Http\Middleware\SessionTimeout::class,
+            \App\Http\Middleware\SetLocale::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

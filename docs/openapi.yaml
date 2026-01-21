@@ -1,0 +1,1481 @@
+openapi: 3.0.3
+info:
+  title: CMS REST API
+  description: |
+    A comprehensive Content Management System API built with Laravel 11 and React 18.
+    Features include content management, user authentication, workflow management,
+    social media integration, and advanced search capabilities.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+  - url: https://staging.example.com/api/v1
+    description: Staging server
+  - url: https://api.example.com/v1
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Users
+    description: User management
+  - name: Posts
+    description: Blog post management
+  - name: Categories
+    description: Post categories
+  - name: Tags
+    description: Post tags
+  - name: Comments
+    description: Post comments
+  - name: Media
+    description: Media file management
+  - name: Workflow
+    description: Content workflow and approval process
+  - name: Social Media
+    description: Social media sharing and integration
+  - name: Search
+    description: Advanced search functionality
+  - name: Analytics
+    description: Content analytics and statistics
+  - name: SEO
+    description: SEO metadata and optimization
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: password123
+                remember_me:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Logout authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful logout
+
+  /auth/me:
+    get:
+      tags:
+        - Authentication
+      summary: Get current user
+      description: Get authenticated user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      description: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  format: password
+                  example: password123
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /auth/sessions:
+    get:
+      tags:
+        - Authentication
+      summary: Get active sessions
+      description: Get all active user sessions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+
+    delete:
+      tags:
+        - Authentication
+      summary: Revoke all sessions
+      description: Revoke all other active sessions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Sessions revoked
+
+  /auth/sessions/{tokenId}:
+    delete:
+      tags:
+        - Authentication
+      summary: Revoke session
+      description: Revoke specific session
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: tokenId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Session revoked
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: List users
+      description: Get paginated list of users
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - $ref: '#/components/parameters/SearchParam'
+        - $ref: '#/components/parameters/RoleParam'
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUsers'
+
+    post:
+      tags:
+        - Users
+      summary: Create user
+      description: Create new user (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/{id}:
+    get:
+      tags:
+        - Users
+      summary: Get user
+      description: Get user by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+    put:
+      tags:
+        - Users
+      summary: Update user
+      description: Update user details
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: Delete user (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: User deleted
+
+  /posts:
+    get:
+      tags:
+        - Posts
+      summary: List posts
+      description: Get paginated list of posts
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - $ref: '#/components/parameters/StatusParam'
+        - $ref: '#/components/parameters/CategoryParam'
+        - $ref: '#/components/parameters/TagParam'
+      responses:
+        '200':
+          description: List of posts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPosts'
+
+    post:
+      tags:
+        - Posts
+      summary: Create post
+      description: Create new post
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+  /posts/{id}:
+    get:
+      tags:
+        - Posts
+      summary: Get post
+      description: Get post by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Post details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+    put:
+      tags:
+        - Posts
+      summary: Update post
+      description: Update post details
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePostRequest'
+      responses:
+        '200':
+          description: Post updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+
+    delete:
+      tags:
+        - Posts
+      summary: Delete post
+      description: Delete post
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Post deleted
+
+  /posts/{id}/publish:
+    post:
+      tags:
+        - Posts
+      summary: Publish post
+      description: Publish draft post
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Post published
+
+  /posts/{id}/schedule:
+    post:
+      tags:
+        - Posts
+      summary: Schedule post
+      description: Schedule post for future publication
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - published_at
+              properties:
+                published_at:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Post scheduled
+
+  /posts/{id}/comments:
+    get:
+      tags:
+        - Comments
+      summary: List post comments
+      description: Get all comments for a post
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: List of comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+
+    post:
+      tags:
+        - Comments
+      summary: Create comment
+      description: Add comment to post
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommentRequest'
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: List categories
+      description: Get all categories
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+
+    post:
+      tags:
+        - Categories
+      summary: Create category
+      description: Create new category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '201':
+          description: Category created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+
+  /categories/{id}:
+    get:
+      tags:
+        - Categories
+      summary: Get category
+      description: Get category with posts
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Category details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+
+    put:
+      tags:
+        - Categories
+      summary: Update category
+      description: Update category details
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        '200':
+          description: Category updated
+
+    delete:
+      tags:
+        - Categories
+      summary: Delete category
+      description: Delete category
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Category deleted
+
+  /tags:
+    get:
+      tags:
+        - Tags
+      summary: List tags
+      description: Get all tags
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of tags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Tag'
+
+    post:
+      tags:
+        - Tags
+      summary: Create tag
+      description: Create new tag
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTagRequest'
+      responses:
+        '201':
+          description: Tag created
+
+  /workflow/stats:
+    get:
+      tags:
+        - Workflow
+      summary: Get workflow statistics
+      description: Get content workflow statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Workflow stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowStats'
+
+  /workflow/calendar:
+    get:
+      tags:
+        - Workflow
+      summary: Get editorial calendar
+      description: Get editorial calendar for specified month
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+          example: 2024
+        - name: month
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+          example: 1
+      responses:
+        '200':
+          description: Editorial calendar data
+
+  /workflow/posts/{postId}/assign:
+    post:
+      tags:
+        - Workflow
+      summary: Assign user to post
+      description: Assign user to post with role
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - role
+              properties:
+                user_id:
+                  type: integer
+                role:
+                  type: string
+                  enum: [author, reviewer, editor]
+      responses:
+        '200':
+          description: User assigned
+
+  /workflow/posts/{postId}/submit:
+    post:
+      tags:
+        - Workflow
+      summary: Submit post for review
+      description: Submit draft post for review
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostIdParam'
+      responses:
+        '200':
+          description: Post submitted
+
+  /workflow/posts/{postId}/approve:
+    post:
+      tags:
+        - Workflow
+      summary: Approve post
+      description: Approve post for publication
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostIdParam'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                feedback:
+                  type: string
+      responses:
+        '200':
+          description: Post approved
+
+  /workflow/posts/{postId}/request-changes:
+    post:
+      tags:
+        - Workflow
+      summary: Request changes
+      description: Request changes to post
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - feedback
+              properties:
+                feedback:
+                  type: string
+      responses:
+        '200':
+          description: Changes requested
+
+  /workflow/posts/{postId}/seo-score:
+    get:
+      tags:
+        - Workflow
+      summary: Get SEO score
+      description: Calculate and return SEO score for post
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostIdParam'
+      responses:
+        '200':
+          description: SEO score
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SEOScore'
+
+  /social-media/stats:
+    get:
+      tags:
+        - Social Media
+      summary: Get social media stats
+      description: Get social media sharing statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Social media stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialMediaStats'
+
+  /social-media/posts/{postId}/share:
+    post:
+      tags:
+        - Social Media
+      summary: Share post
+      description: Share post to social media platforms
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PostIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - platforms
+              properties:
+                platforms:
+                  type: array
+                  items:
+                    type: string
+                    enum: [twitter, facebook, linkedin]
+                custom_message:
+                  type: string
+                  maxLength: 280
+      responses:
+        '200':
+          description: Post shared
+
+  /search:
+    get:
+      tags:
+        - Search
+      summary: Advanced search
+      description: Search posts with advanced filters
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          description: Search query
+          schema:
+            type: string
+        - name: categories
+          in: query
+          description: Category IDs
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: tags
+          in: query
+          description: Tag IDs
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: authors
+          in: query
+          description: Author IDs
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: status
+          in: query
+          description: Post status
+          schema:
+            type: string
+            enum: [draft, published, archived, scheduled]
+        - name: date_from
+          in: query
+          description: Start date
+          schema:
+            type: string
+            format: date
+        - name: date_to
+          in: query
+          description: End date
+          schema:
+            type: string
+            format: date
+        - name: sort_by
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum: [relevance, date, views]
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      posts:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Post'
+                      total:
+                        type: integer
+
+  /media:
+    get:
+      tags:
+        - Media
+      summary: List media
+      description: Get paginated list of media files
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [image, video, document, other]
+      responses:
+        '200':
+          description: List of media
+
+    post:
+      tags:
+        - Media
+      summary: Upload media
+      description: Upload media file
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                alt_text:
+                  type: string
+      responses:
+        '201':
+          description: Media uploaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Media'
+
+  /media/{id}:
+    delete:
+      tags:
+        - Media
+      summary: Delete media
+      description: Delete media file
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdParam'
+      responses:
+        '200':
+          description: Media deleted
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdParam:
+      name: id
+      in: path
+      required: true
+      description: Resource ID
+      schema:
+        type: integer
+
+    PostIdParam:
+      name: postId
+      in: path
+      required: true
+      description: Post ID
+      schema:
+        type: integer
+
+    PageParam:
+      name: page
+      in: query
+      description: Page number
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+
+    PerPageParam:
+      name: per_page
+      in: query
+      description: Items per page
+      schema:
+        type: integer
+        default: 15
+        minimum: 1
+        maximum: 100
+
+    SearchParam:
+      name: search
+      in: query
+      description: Search term
+      schema:
+        type: string
+
+    RoleParam:
+      name: role
+      in: query
+      description: Filter by role
+      schema:
+        type: string
+        enum: [admin, editor, author, subscriber]
+
+    StatusParam:
+      name: status
+      in: query
+      description: Filter by status
+      schema:
+        type: string
+        enum: [draft, published, archived, scheduled, pending_review, approved, changes_requested]
+
+    CategoryParam:
+      name: category_id
+      in: query
+      description: Filter by category
+      schema:
+        type: integer
+
+    TagParam:
+      name: tag_id
+      in: query
+      description: Filter by tag
+      schema:
+        type: integer
+
+  schemas:
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT authentication token
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [super_admin, admin, editor, author, subscriber]
+        is_active:
+          type: boolean
+        avatar:
+          type: string
+          nullable: true
+        bio:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateUserRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - role
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+        role:
+          type: string
+          enum: [admin, editor, author, subscriber]
+        is_active:
+          type: boolean
+          default: true
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [admin, editor, author, subscriber]
+        is_active:
+          type: boolean
+        bio:
+          type: string
+
+    PaginatedUsers:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        slug:
+          type: string
+        content:
+          type: string
+        excerpt:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [draft, published, archived, scheduled, pending_review, approved, changes_requested]
+        author_id:
+          type: integer
+        category_id:
+          type: integer
+          nullable: true
+        featured_image:
+          type: string
+          nullable: true
+        meta_title:
+          type: string
+          nullable: true
+        meta_description:
+          type: string
+          nullable: true
+        meta_keywords:
+          type: string
+          nullable: true
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        author:
+          $ref: '#/components/schemas/User'
+        category:
+          $ref: '#/components/schemas/Category'
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+
+    CreatePostRequest:
+      type: object
+      required:
+        - title
+        - content
+        - status
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+        content:
+          type: string
+        excerpt:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, scheduled]
+        category_id:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: integer
+        featured_image:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+        meta_title:
+          type: string
+        meta_description:
+          type: string
+        meta_keywords:
+          type: string
+
+    UpdatePostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+        content:
+          type: string
+        excerpt:
+          type: string
+        status:
+          type: string
+          enum: [draft, published, scheduled]
+        category_id:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: integer
+        featured_image:
+          type: string
+        meta_title:
+          type: string
+        meta_description:
+          type: string
+        meta_keywords:
+          type: string
+
+    PaginatedPosts:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Post'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        parent_id:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateCategoryRequest:
+      type: object
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        parent_id:
+          type: integer
+
+    UpdateCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        parent_id:
+          type: integer
+
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateTagRequest:
+      type: object
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        slug:
+          type: string
+          maxLength: 255
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: integer
+        post_id:
+          type: integer
+        user_id:
+          type: integer
+          nullable: true
+        author_name:
+          type: string
+          nullable: true
+        author_email:
+          type: string
+          format: email
+          nullable: true
+        content:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected, spam]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    CreateCommentRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          minLength: 1
+        author_name:
+          type: string
+        author_email:
+          type: string
+          format: email
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: integer
+        ip_address:
+          type: string
+        user_agent:
+          type: string
+        device_type:
+          type: string
+          enum: [desktop, mobile, tablet]
+        browser:
+          type: string
+        platform:
+          type: string
+        last_activity:
+          type: string
+          format: date-time
+        is_current:
+          type: boolean
+
+    WorkflowStats:
+      type: object
+      properties:
+        pending_review:
+          type: integer
+        approved:
+          type: integer
+        changes_requested:
+          type: integer
+        draft:
+          type: integer
+
+    SEOScore:
+      type: object
+      properties:
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        grade:
+          type: string
+          enum: [A, B, C, D, F]
+        issues:
+          type: array
+          items:
+            type: string
+        warnings:
+          type: array
+          items:
+            type: string
+        passes:
+          type: array
+          items:
+            type: string
+
+    SocialMediaStats:
+      type: object
+      properties:
+        total_shares:
+          type: integer
+        total_share_count:
+          type: integer
+        by_platform:
+          type: object
+          properties:
+            twitter:
+              type: integer
+            facebook:
+              type: integer
+            linkedin:
+              type: integer
+
+    Media:
+      type: object
+      properties:
+        id:
+          type: integer
+        filename:
+          type: string
+        original_filename:
+          type: string
+        mime_type:
+          type: string
+        size:
+          type: integer
+        width:
+          type: integer
+          nullable: true
+        height:
+          type: integer
+          nullable: true
+        alt_text:
+          type: string
+          nullable: true
+        url:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        last_page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer

@@ -7,6 +7,7 @@ use App\Mail\EmailVerificationMail;
 use App\Models\User;
 use App\Services\AccountLockoutService;
 use App\Services\SessionManagementService;
+use App\Services\RememberTokenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,13 +20,16 @@ class AuthController extends Controller
 {
     protected AccountLockoutService $lockoutService;
     protected SessionManagementService $sessionService;
+    protected RememberTokenService $rememberTokenService;
 
     public function __construct(
         AccountLockoutService $lockoutService,
-        SessionManagementService $sessionService
+        SessionManagementService $sessionService,
+        RememberTokenService $rememberTokenService
     ) {
         $this->lockoutService = $lockoutService;
         $this->sessionService = $sessionService;
+        $this->rememberTokenService = $rememberTokenService;
     }
 
     public function register(Request $request)
@@ -88,6 +92,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string',
+            'remember' => 'boolean',
         ]);
 
         $user = User::where('email', $validated['email'])->first();
@@ -140,16 +145,26 @@ class AuthController extends Controller
 
         $user->update(['last_login_at' => now()]);
 
-        // Create auth token
-        $tokenResult = $user->createToken('auth_token');
+        // Create auth token with extended expiration if remember is checked
+        $tokenName = $request->boolean('remember', false) ? 'remember_token' : 'auth_token';
+        $tokenResult = $user->createToken($tokenName, ['*'], now()->addMonths(
+            $request->boolean('remember', false) ? 6 : 1
+        ));
         $token = $tokenResult->plainTextToken;
 
         // Create session record
         $this->sessionService->createSession($user, $tokenResult->accessToken->id, $request->input('device_name'));
 
+        // Create remember token if requested
+        $rememberToken = null;
+        if ($request->boolean('remember', false)) {
+            $rememberToken = $this->rememberTokenService->createRememberToken($user, $request->input('device_name'));
+        }
+
         return response()->json([
             'user' => $user,
             'token' => $token,
+            'remember_token' => $rememberToken,
             'requires_2fa' => $user->has_two_factor_enabled
         ]);
     }
@@ -189,5 +204,43 @@ class AuthController extends Controller
         $this->sessionService->revokeSession($tokenId);
 
         return response()->json(['message' => 'Logged out successfully']);
+    }
+
+    /**
+     * Login with remember token
+     */
+    public function loginWithRememberToken(Request $request)
+    {
+        $validated = $request->validate([
+            'remember_token' => 'required|string',
+        ]);
+
+        $user = $this->rememberTokenService->validateRememberToken($validated['remember_token']);
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Invalid or expired remember token'
+            ], 401);
+        }
+
+        // Check if account is active
+        if (!$user->is_active) {
+            return response()->json(['message' => 'Account is inactive'], 403);
+        }
+
+        $user->update(['last_login_at' => now()]);
+
+        // Create new auth token
+        $tokenResult = $user->createToken('remember_token', ['*'], now()->addMonths(6));
+        $token = $tokenResult->plainTextToken;
+
+        // Create session record
+        $this->sessionService->createSession($user, $tokenResult->accessToken->id, $request->input('device_name'));
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+            'requires_2fa' => $user->has_two_factor_enabled
+        ]);
     }
 }

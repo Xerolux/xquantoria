@@ -12,7 +12,7 @@ interface AuthState {
   setAuth: (user: User, token: string) => void;
   logout: () => void;
   updateUser: (user: User) => void;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -36,10 +36,11 @@ export const useAuthStore = create<AuthState>()(
         set({ user });
       },
 
-      login: async (email: string, password: string) => {
+      login: async (email: string, password: string, rememberMe = false) => {
         const response = await axios.post(`${API_BASE_URL}/auth/login`, {
           email,
           password,
+          remember_me: rememberMe,
         });
 
         const { user, token } = response.data;

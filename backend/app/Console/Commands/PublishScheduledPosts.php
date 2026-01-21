@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\Post;
+use App\Jobs\PublishScheduledPost;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class PublishScheduledPosts extends Command
 {
@@ -19,34 +21,41 @@ class PublishScheduledPosts extends Command
      *
      * @var string
      */
-    protected $description = 'Publish posts that are scheduled for publication';
+    protected $description = 'Publish scheduled posts whose publication time has arrived';
 
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): int
     {
-        $scheduledPosts = Post::scheduled()
-            ->where('scheduled_at', '<=', now())
+        $this->info('Checking for scheduled posts to publish...');
+
+        $scheduledPosts = Post::where('status', 'scheduled')
+            ->where('published_at', '<=', now())
             ->get();
 
-        $count = 0;
-        foreach ($scheduledPosts as $post) {
-            $post->update([
-                'status' => 'published',
-                'published_at' => $post->scheduled_at ?? now(),
-            ]);
-
-            $count++;
-            $this->info("Published: {$post->title}");
-        }
-
-        if ($count === 0) {
+        if ($scheduledPosts->isEmpty()) {
             $this->info('No scheduled posts to publish.');
-        } else {
-            $this->info("Successfully published {$count} scheduled post(s).");
+            return self::SUCCESS;
         }
 
-        return Command::SUCCESS;
+        $this->info("Found {$scheduledPosts->count()} scheduled post(s) to publish.");
+
+        foreach ($scheduledPosts as $post) {
+            $this->info("Dispatching job for post: {$post->title}");
+
+            // Dispatch job to handle the publishing asynchronously
+            PublishScheduledPost::dispatch($post);
+
+            Log::info("Scheduled post dispatch initiated", [
+                'post_id' => $post->id,
+                'title' => $post->title,
+                'scheduled_for' => $post->published_at,
+            ]);
+        }
+
+        $this->info("Successfully dispatched {$scheduledPosts->count()} post(s) for publishing.");
+
+        return self::SUCCESS;
     }
 }

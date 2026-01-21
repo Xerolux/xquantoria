@@ -22,6 +22,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'bio',
         'is_active',
         'last_login_at',
+        'preferred_locale',
     ];
 
     protected $hidden = [
@@ -56,6 +57,26 @@ class User extends Authenticatable implements MustVerifyEmail
     public function downloads()
     {
         return $this->hasMany(Download::class, 'uploaded_by');
+    }
+
+    public function assignedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'post_assignments')->withPivot('role', 'assigned_at');
+    }
+
+    public function approvedPosts()
+    {
+        return $this->hasMany(Post::class, 'approved_by');
+    }
+
+    public function pageAnalytics()
+    {
+        return $this->hasMany(PageAnalytics::class);
+    }
+
+    public function conversions()
+    {
+        return $this->hasMany(Conversion::class);
     }
 
     public function hasRole($role)
@@ -224,6 +245,16 @@ class User extends Authenticatable implements MustVerifyEmail
         $issuer = urlencode(config('app.name', 'Blog CMS'));
 
         return "otpauth://totp/{$issuer}:{$email}?secret={$secret}&issuer={$issuer}";
+    }
+
+    /**
+     * Get Twitter username for social media integration
+     */
+    public function getTwitterUsernameAttribute(): ?string
+    {
+        // This could be stored in a settings table or bio field
+        // For now, return null or parse from bio
+        return null;
     }
 }
 

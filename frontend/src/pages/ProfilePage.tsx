@@ -15,6 +15,8 @@ import {
   Divider,
   List,
   Progress,
+  Table,
+  Tooltip,
 } from 'antd';
 import {
   SafetyOutlined,
@@ -26,9 +28,16 @@ import {
   UnlockOutlined,
   DownloadOutlined,
   MobileOutlined,
+  DeleteOutlined,
+  GlobalOutlined,
+  LaptopOutlined,
+  TabletOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
-import { twoFactorService } from '../services/api';
+import { twoFactorService, sessionService } from '../services/api';
+import type { UserSession } from '../types/api';
+import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 
@@ -42,6 +51,12 @@ const ProfilePage: React.FC = () => {
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [recoveryCodesRemaining, setRecoveryCodesRemaining] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  // Sessions
+  const [sessions, setSessions] = useState<UserSession[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+
+  // 2FA Setup
 
   // 2FA Setup
   const [setupModalVisible, setSetupModalVisible] = useState(false);
@@ -62,6 +77,7 @@ const ProfilePage: React.FC = () => {
 
   useEffect(() => {
     fetchTwoFactorStatus();
+    fetchSessions();
   }, []);
 
   const fetchTwoFactorStatus = async () => {
@@ -71,6 +87,58 @@ const ProfilePage: React.FC = () => {
       setRecoveryCodesRemaining(status.recovery_codes_remaining);
     } catch (error) {
       console.error('Failed to fetch 2FA status');
+    }
+  };
+
+  const fetchSessions = async () => {
+    setSessionsLoading(true);
+    try {
+      const data = await sessionService.getAll();
+      setSessions(data.data || []);
+    } catch (error) {
+      console.error('Failed to fetch sessions');
+    } finally {
+      setSessionsLoading(false);
+    }
+  };
+
+  const handleRevokeSession = async (tokenId: number) => {
+    try {
+      await sessionService.revoke(tokenId);
+      message.success('Session revoked successfully');
+      fetchSessions();
+    } catch (error) {
+      message.error('Failed to revoke session');
+    }
+  };
+
+  const handleRevokeAllSessions = async () => {
+    Modal.confirm({
+      title: 'Revoke All Sessions',
+      content: 'Are you sure you want to revoke all other sessions? You will be logged out of all other devices.',
+      okText: 'Revoke All',
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          await sessionService.revokeAll();
+          message.success('All other sessions revoked successfully');
+          fetchSessions();
+        } catch (error) {
+          message.error('Failed to revoke sessions');
+        }
+      },
+    });
+  };
+
+  const getDeviceIcon = (deviceType: string) => {
+    switch (deviceType.toLowerCase()) {
+      case 'mobile':
+        return <MobileOutlined />;
+      case 'tablet':
+        return <TabletOutlined />;
+      case 'desktop':
+      default:
+        return <LaptopOutlined />;
     }
   };
 
@@ -285,6 +353,107 @@ const ProfilePage: React.FC = () => {
                 </>
               )}
             </Space>
+          </Card>
+        </Col>
+      </Row>
+
+      <Divider />
+
+      <Row gutter={16}>
+        <Col span={24}>
+          <Card
+            title={
+              <Space>
+                <MobileOutlined />
+                <span>Active Sessions</span>
+              </Space>
+            }
+            extra={
+              <Button
+                danger
+                icon={<DeleteOutlined />}
+                onClick={handleRevokeAllSessions}
+                disabled={sessions.length <= 1}
+              >
+                Revoke All Other Sessions
+              </Button>
+            }
+          >
+            <Table
+              dataSource={sessions}
+              rowKey="id"
+              loading={sessionsLoading}
+              pagination={false}
+              size="small"
+            >
+              <Table.Column
+                title="Device"
+                key="device"
+                render={(_, record: UserSession) => (
+                  <Space>
+                    <span style={{ fontSize: 18 }}>
+                      {getDeviceIcon(record.device_type)}
+                    </span>
+                    <span>
+                      {record.browser} on {record.platform}
+                    </span>
+                  </Space>
+                )}
+              />
+              <Table.Column
+                title="IP Address"
+                dataIndex="ip_address"
+                key="ip_address"
+                render={(ip: string) => (
+                  <Space>
+                    <GlobalOutlined />
+                    <Tooltip title={ip}>
+                      <span>{ip}</span>
+                    </Tooltip>
+                  </Space>
+                )}
+              />
+              <Table.Column
+                title="Last Activity"
+                dataIndex="last_activity"
+                key="last_activity"
+                render={(date: string) => (
+                  <Tooltip title={dayjs(date).format('YYYY-MM-DD HH:mm:ss')}>
+                    <Space>
+                      <ClockCircleOutlined />
+                      <span>{dayjs(date).fromNow()}</span>
+                    </Space>
+                  </Tooltip>
+                )}
+              />
+              <Table.Column
+                title="Status"
+                key="status"
+                render={(_, record: UserSession) =>
+                  record.is_current ? (
+                    <Tag color="success">Current Session</Tag>
+                  ) : (
+                    <Tag>Other</Tag>
+                  )
+                }
+              />
+              <Table.Column
+                title="Actions"
+                key="actions"
+                render={(_, record: UserSession) =>
+                  !record.is_current && (
+                    <Button
+                      danger
+                      size="small"
+                      icon={<DeleteOutlined />}
+                      onClick={() => handleRevokeSession(record.token_id)}
+                    >
+                      Revoke
+                    </Button>
+                  )
+                }
+              />
+            </Table>
           </Card>
         </Col>
       </Row>

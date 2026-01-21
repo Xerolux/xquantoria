@@ -26,6 +26,11 @@ use App\Http\Controllers\Api\V1\PluginController;
 use App\Http\Controllers\Api\V1\PasswordResetController;
 use App\Http\Controllers\Api\V1\EmailVerificationController;
 use App\Http\Controllers\Api\V1\SessionController;
+use App\Http\Controllers\Api\V1\PostRevisionController;
+use App\Http\Controllers\Api\V1\ScheduleController;
+use App\Http\Controllers\Api\V1\LanguageController;
+use App\Http\Controllers\Api\V1\ImageProcessingController;
+use App\Http\Controllers\Api\V1\SocialMediaController;
 use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\SitemapController;
 
@@ -39,9 +44,18 @@ Route::prefix('v1')->group(function () {
     Route::post('/auth/register', [AuthController::class, 'register'])
         ->middleware('throttle:5,1'); // 5 registrations per minute
 
+    // Language (public)
+    Route::get('/languages', [LanguageController::class, 'index']);
+    Route::get('/languages/current', [LanguageController::class, 'current']);
+    Route::get('/languages/localize-url', [LanguageController::class, 'getLocalizedUrl']);
+
     // Login mit striktem Rate Limit (5 Versuche/Minute)
     Route::post('/auth/login', [AuthController::class, 'login'])
         ->middleware('throttle:5,1');
+
+    // Login with remember token (public)
+    Route::post('/auth/login/remember', [AuthController::class, 'loginWithRememberToken'])
+        ->middleware('throttle:10,1');
 
     // Email Verification (public)
     Route::post('/auth/email/verify', [EmailVerificationController::class, 'verify'])
@@ -62,6 +76,19 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('posts', PostController::class);
         Route::post('posts/bulk', [PostController::class, 'bulkStore']);
         Route::delete('posts/bulk', [PostController::class, 'bulkDestroy']);
+        Route::post('posts/{id}/auto-save', [PostController::class, 'autoSave']);
+
+        // Post Revisions
+        Route::prefix('posts/{postId}/revisions')->group(function () {
+            Route::get('/', [PostRevisionController::class, 'index']);
+            Route::post('/', [PostRevisionController::class, 'store']);
+            Route::get('/stats', [PostRevisionController::class, 'stats']);
+            Route::get('/compare', [PostRevisionController::class, 'compare']);
+            Route::get('/check-conflict', [PostRevisionController::class, 'checkConflict']);
+            Route::get('/{revisionId}', [PostRevisionController::class, 'show']);
+            Route::post('/{revisionId}/restore', [PostRevisionController::class, 'restore']);
+            Route::delete('/{revisionId}', [PostRevisionController::class, 'destroy']);
+        });
 
         Route::apiResource('categories', CategoryController::class);
 
@@ -72,6 +99,27 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:20,1');
         Route::post('media/bulk-upload', [MediaController::class, 'bulkUpload'])
             ->middleware('throttle:20,1');
+
+        // Image Processing
+        Route::prefix('media/{id}/')->group(function () {
+            Route::post('thumbnails', [ImageProcessingController::class, 'generateThumbnails']);
+            Route::post('crop', [ImageProcessingController::class, 'crop']);
+            Route::post('resize', [ImageProcessingController::class, 'resize']);
+            Route::post('rotate', [ImageProcessingController::class, 'rotate']);
+            Route::post('flip', [ImageProcessingController::class, 'flip']);
+            Route::post('optimize', [ImageProcessingController::class, 'optimize']);
+            Route::post('convert-webp', [ImageProcessingController::class, 'convertToWebP']);
+            Route::post('blurhash', [ImageProcessingController::class, 'generateBlurhash']);
+            Route::get('srcset', [ImageProcessingController::class, 'getSrcset']);
+        });
+
+        Route::prefix('image-processing')->group(function () {
+            Route::post('/batch-optimize', [ImageProcessingController::class, 'batchOptimize']);
+            Route::get('/stats', [ImageProcessingController::class, 'stats']);
+            Route::post('/generate-all-blurhashes', [ImageProcessingController::class, 'generateAllBlurhashes']);
+            Route::post('/auto-optimize-all', [ImageProcessingController::class, 'autoOptimizeAll']);
+        });
+
 
         Route::apiResource('downloads', DownloadController::class);
 
@@ -92,6 +140,26 @@ Route::prefix('v1')->group(function () {
             Route::delete('/{tokenId}', [SessionController::class, 'destroy']);
             Route::delete('/', [SessionController::class, 'destroyAll']);
             Route::post('/heartbeat', [SessionController::class, 'heartbeat']);
+        });
+
+        // Content Scheduling
+        Route::prefix('schedule')->group(function () {
+            Route::get('/', [ScheduleController::class, 'index']);
+            Route::get('/stats', [ScheduleController::class, 'stats']);
+            Route::get('/calendar', [ScheduleController::class, 'calendar']);
+            Route::post('/posts/{postId}', [ScheduleController::class, 'schedulePost']);
+            Route::put('/posts/{postId}/reschedule', [ScheduleController::class, 'reschedulePost']);
+            Route::delete('/posts/{postId}/cancel', [ScheduleController::class, 'cancelScheduledPost']);
+            Route::post('/check-overdue', [ScheduleController::class, 'checkOverdue'])
+                ->middleware('role:super_admin,admin');
+        });
+
+        // Language & Translations
+        Route::prefix('languages')->group(function () {
+            Route::get('/stats', [LanguageController::class, 'stats']);
+            Route::post('/set', [LanguageController::class, 'setLanguage']);
+            Route::get('/translations', [LanguageController::class, 'translations']);
+            Route::post('/translations', [LanguageController::class, 'createTranslation']);
         });
 
         // User management - Admin only
@@ -251,6 +319,27 @@ Route::prefix('v1')->group(function () {
             Route::put('/{plugin}/config', [PluginController::class, 'updateConfig']);
             Route::post('/{plugin}/activate', [PluginController::class, 'activate']);
             Route::post('/{plugin}/deactivate', [PluginController::class, 'deactivate']);
+        });
+
+        // Social Media Management - Author and above
+        Route::prefix('social-media')->middleware('role:author,editor,admin,super_admin')->group(function () {
+            Route::get('/stats', [SocialMediaController::class, 'getStats']);
+            Route::post('/posts/{postId}/share', [SocialMediaController::class, 'sharePost']);
+            Route::post('/posts/{postId}/schedule', [SocialMediaController::class, 'scheduleShare']);
+            Route::get('/posts/{postId}/shares', [SocialMediaController::class, 'getPostShares']);
+            Route::delete('/shares/{shareId}', [SocialMediaController::class, 'deleteShare']);
+            Route::post('/batch-share', [SocialMediaController::class, 'batchShare']);
+        });
+
+        // Content Workflow - Editor and above
+        Route::prefix('workflow')->middleware('role:editor,admin,super_admin')->group(function () {
+            Route::get('/stats', [\App\Http\Controllers\Api\V1\WorkflowController::class, 'getStats']);
+            Route::get('/calendar', [\App\Http\Controllers\Api\V1\WorkflowController::class, 'getEditorialCalendar']);
+            Route::post('/posts/{postId}/assign', [\App\Http\Controllers\Api\V1\WorkflowController::class, 'assignUser']);
+            Route::post('/posts/{postId}/submit', [\App\Http\Controllers\Api\V1\WorkflowController::class, 'submitForReview']);
+            Route::post('/posts/{postId}/approve', [\App\Http\Controllers\Api\V1\WorkflowController::class, 'approvePost']);
+            Route::post('/posts/{postId}/request-changes', [\App\Http\Controllers\Api\V1\WorkflowController::class, 'requestChanges']);
+            Route::get('/posts/{postId}/seo-score', [\App\Http\Controllers\Api\V1\WorkflowController::class, 'getSEOScore']);
         });
     });
 

@@ -37,13 +37,23 @@ class CommentController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'post_id' => 'required|exists:posts,id',
-            'parent_id' => 'nullable|exists:comments,id',
-            'content' => 'required|string|min:1|max:5000',
-            'author_name' => 'nullable|string|max:255',
-            'author_email' => 'nullable|email|max:255',
-        ]);
+        // Authenticated user
+        if (Auth::check()) {
+            $validated = $request->validate([
+                'post_id' => 'required|exists:posts,id',
+                'parent_id' => 'nullable|exists:comments,id',
+                'content' => 'required|string|min:1|max:5000',
+            ]);
+        } else {
+            // Guest user - require name and email
+            $validated = $request->validate([
+                'post_id' => 'required|exists:posts,id',
+                'parent_id' => 'nullable|exists:comments,id',
+                'content' => 'required|string|min:1|max:5000',
+                'author_name' => 'required|string|max:255',
+                'author_email' => 'required|email|max:255',
+            ]);
+        }
 
         // Sanitize content to prevent XSS
         $sanitizedContent = $this->sanitizeContent($validated['content']);
@@ -55,8 +65,8 @@ class CommentController extends Controller
             'post_id' => $validated['post_id'],
             'user_id' => Auth::id(),
             'parent_id' => $validated['parent_id'] ?? null,
-            'author_name' => $validated['author_name'] ?? null,
-            'author_email' => $validated['author_email'] ?? null,
+            'author_name' => Auth::check() ? null : ($validated['author_name'] ?? null),
+            'author_email' => Auth::check() ? null : ($validated['author_email'] ?? null),
             'author_ip' => $request->ip(),
             'content' => $sanitizedContent,
             'status' => $spamScore > 5 ? 'spam' : 'pending',

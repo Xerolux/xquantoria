@@ -19,6 +19,11 @@ import {
   Switch,
   Radio,
   Progress,
+  Slider,
+  Divider,
+  Alert,
+  Typography,
+  Spin,
 } from 'antd';
 import {
   PlusOutlined,
@@ -33,12 +38,20 @@ import {
   AppstoreOutlined,
   BarsOutlined,
   SearchOutlined,
+  CropOutlined,
+  RotateLeftOutlined,
+  RotateRightOutlined,
+  SyncOutlined,
+  ThunderboltOutlined,
+  ExpandOutlined,
+  CompressOutlined,
 } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
-import { mediaService } from '../services/api';
+import { mediaService, imageProcessingService } from '../services/api';
 import type { Media, PaginatedResponse } from '../types';
 
 const { TextArea } = Input;
+const { Text } = Typography;
 const { Search } = Input;
 const { Dragger } = Upload;
 
@@ -65,6 +78,15 @@ const MediaPage: React.FC = () => {
   });
   const [fileList, setFileList] = useState<any[]>([]);
   const [editForm] = Form.useForm();
+
+  // Image Processing States
+  const [imageProcessingModalVisible, setImageProcessingModalVisible] = useState(false);
+  const [processingMedia, setProcessingMedia] = useState<Media | null>(null);
+  const [processingAction, setProcessingAction] = useState<string | null>(null);
+  const [processingLoading, setProcessingLoading] = useState(false);
+  const [cropParams, setCropParams] = useState({ x: 0, y: 0, width: 100, height: 100 });
+  const [resizeParams, setResizeParams] = useState({ width: 800, height: 600 });
+  const [rotationDegrees, setRotationDegrees] = useState(90);
 
   useEffect(() => {
     fetchMedia();
@@ -204,6 +226,102 @@ const MediaPage: React.FC = () => {
     setPreviewModalVisible(true);
   };
 
+  // Image Processing Handlers
+  const handleOpenImageProcessing = (mediaItem: Media) => {
+    if (!mediaItem.mime_type.startsWith('image/')) {
+      message.warning('Image processing is only available for images');
+      return;
+    }
+    setProcessingMedia(mediaItem);
+    setProcessingAction(null);
+    setCropParams({ x: 0, y: 0, width: 100, height: 100 });
+    setResizeParams({ width: mediaItem.width || 800, height: mediaItem.height || 600 });
+    setRotationDegrees(90);
+    setImageProcessingModalVisible(true);
+  };
+
+  const handleImageAction = async (action: string) => {
+    if (!processingMedia) return;
+
+    setProcessingLoading(true);
+    try {
+      switch (action) {
+        case 'rotate':
+          await imageProcessingService.rotate(processingMedia.id, rotationDegrees);
+          message.success(`Image rotated ${rotationDegrees} degrees`);
+          break;
+        case 'flip':
+          await imageProcessingService.flip(processingMedia.id, 'horizontal');
+          message.success('Image flipped horizontally');
+          break;
+        case 'optimize':
+          await imageProcessingService.optimize(processingMedia.id);
+          message.success('Image optimized successfully');
+          break;
+        case 'webp':
+          await imageProcessingService.convertToWebP(processingMedia.id);
+          message.success('Image converted to WebP');
+          break;
+        case 'blurhash':
+          await imageProcessingService.generateBlurhash(processingMedia.id);
+          message.success('Blurhash generated');
+          break;
+        case 'thumbnails':
+          await imageProcessingService.generateThumbnails(processingMedia.id);
+          message.success('Thumbnails generated');
+          break;
+        default:
+          message.warning('Unknown action');
+      }
+      setImageProcessingModalVisible(false);
+      fetchMedia();
+    } catch (error: any) {
+      message.error(error.response?.data?.message || `Failed to ${action} image`);
+    } finally {
+      setProcessingLoading(false);
+    }
+  };
+
+  const handleCrop = async () => {
+    if (!processingMedia) return;
+    setProcessingLoading(true);
+    try {
+      await imageProcessingService.crop(
+        processingMedia.id,
+        cropParams.x,
+        cropParams.y,
+        cropParams.width,
+        cropParams.height
+      );
+      message.success('Image cropped successfully');
+      setImageProcessingModalVisible(false);
+      fetchMedia();
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Failed to crop image');
+    } finally {
+      setProcessingLoading(false);
+    }
+  };
+
+  const handleResize = async () => {
+    if (!processingMedia) return;
+    setProcessingLoading(true);
+    try {
+      await imageProcessingService.resize(
+        processingMedia.id,
+        resizeParams.width,
+        resizeParams.height
+      );
+      message.success('Image resized successfully');
+      setImageProcessingModalVisible(false);
+      fetchMedia();
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Failed to resize image');
+    } finally {
+      setProcessingLoading(false);
+    }
+  };
+
   const getMediaIcon = (mimeType: string) => {
     if (mimeType.startsWith('image/')) return <FileImageOutlined />;
     if (mimeType.startsWith('video/')) return <PlayCircleOutlined />;
@@ -302,6 +420,15 @@ const MediaPage: React.FC = () => {
               onClick={() => handlePreview(record)}
             />
           </Tooltip>
+          {record.mime_type.startsWith('image/') && (
+            <Tooltip title="Image Processing">
+              <Button
+                type="text"
+                icon={<CropOutlined />}
+                onClick={() => handleOpenImageProcessing(record)}
+              />
+            </Tooltip>
+          )}
           <Tooltip title="Edit">
             <Button
               type="text"
@@ -698,6 +825,189 @@ const MediaPage: React.FC = () => {
                 </Col>
               </Row>
             </Card>
+          </Space>
+        )}
+      </Modal>
+
+      {/* Image Processing Modal */}
+      <Modal
+        title={`Image Processing - ${processingMedia?.original_filename}`}
+        open={imageProcessingModalVisible}
+        onCancel={() => setImageProcessingModalVisible(false)}
+        footer={null}
+        width={700}
+      >
+        {processingMedia && (
+          <Space direction="vertical" style={{ width: '100%' }} size="large">
+            <Alert
+              message="Image Processing Tools"
+              description="Transform and optimize your images with various tools. Changes are applied directly to the image."
+              type="info"
+              showIcon
+            />
+
+            <div style={{ textAlign: 'center' }}>
+              <Image
+                src={processingMedia.url}
+                alt={processingMedia.alt_text || processingMedia.original_filename}
+                style={{ maxWidth: 400, maxHeight: 300 }}
+              />
+              <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>
+                Original: {processingMedia.width} × {processingMedia.height} ({(processingMedia.filesize / 1024).toFixed(1)} KB)
+              </div>
+            </div>
+
+            <Divider />
+
+            {/* Rotation */}
+            <div>
+              <Text strong>Rotation:</Text>
+              <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
+                <Col span={12}>
+                  <Button
+                    block
+                    icon={<RotateLeftOutlined />}
+                    onClick={() => setRotationDegrees(rotationDegrees - 90)}
+                  >
+                    Rotate Left
+                  </Button>
+                </Col>
+                <Col span={12}>
+                  <Button
+                    block
+                    icon={<RotateRightOutlined />}
+                    onClick={() => setRotationDegrees(rotationDegrees + 90)}
+                  >
+                    Rotate Right
+                  </Button>
+                </Col>
+              </Row>
+              <div style={{ marginTop: 8, textAlign: 'center' }}>
+                <Text>Rotation: {rotationDegrees}°</Text>
+              </div>
+              <Button
+                type="primary"
+                block
+                onClick={() => handleImageAction('rotate')}
+                loading={processingLoading}
+                style={{ marginTop: 8 }}
+              >
+                Apply Rotation
+              </Button>
+            </div>
+
+            <Divider />
+
+            {/* Resize */}
+            <div>
+              <Text strong>Resize:</Text>
+              <Row gutter={16} style={{ marginTop: 12 }}>
+                <Col span={12}>
+                  <div>
+                    <Text style={{ fontSize: 12 }}>Width (px):</Text>
+                    <Input
+                      type="number"
+                      value={resizeParams.width}
+                      onChange={(e) => setResizeParams({ ...resizeParams, width: parseInt(e.target.value) || 800 })}
+                    />
+                  </div>
+                </Col>
+                <Col span={12}>
+                  <div>
+                    <Text style={{ fontSize: 12 }}>Height (px):</Text>
+                    <Input
+                      type="number"
+                      value={resizeParams.height}
+                      onChange={(e) => setResizeParams({ ...resizeParams, height: parseInt(e.target.value) || 600 })}
+                    />
+                  </div>
+                </Col>
+              </Row>
+              <Button
+                type="primary"
+                block
+                icon={<ExpandOutlined />}
+                onClick={handleResize}
+                loading={processingLoading}
+                style={{ marginTop: 8 }}
+              >
+                Apply Resize
+              </Button>
+            </div>
+
+            <Divider />
+
+            {/* Flip */}
+            <div>
+              <Text strong>Flip:</Text>
+              <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
+                <Col span={12}>
+                  <Button
+                    block
+                    icon={<SyncOutlined />}
+                    onClick={() => handleImageAction('flip')}
+                    loading={processingLoading}
+                  >
+                    Flip Horizontal
+                  </Button>
+                </Col>
+              </Row>
+            </div>
+
+            <Divider />
+
+            {/* Optimization & Conversion */}
+            <div>
+              <Text strong>Optimization & Conversion:</Text>
+              <Row gutter={[16, 16]} style={{ marginTop: 12 }}>
+                <Col span={12}>
+                  <Button
+                    block
+                    icon={<CompressOutlined />}
+                    onClick={() => handleImageAction('optimize')}
+                    loading={processingLoading}
+                  >
+                    Optimize
+                  </Button>
+                </Col>
+                <Col span={12}>
+                  <Button
+                    block
+                    icon={<ThunderboltOutlined />}
+                    onClick={() => handleImageAction('webp')}
+                    loading={processingLoading}
+                  >
+                    Convert to WebP
+                  </Button>
+                </Col>
+              </Row>
+              <Row gutter={[16, 16]} style={{ marginTop: 8 }}>
+                <Col span={12}>
+                  <Button
+                    block
+                    onClick={() => handleImageAction('blurhash')}
+                    loading={processingLoading}
+                  >
+                    Generate Blurhash
+                  </Button>
+                </Col>
+                <Col span={12}>
+                  <Button
+                    block
+                    onClick={() => handleImageAction('thumbnails')}
+                    loading={processingLoading}
+                  >
+                    Generate Thumbnails
+                  </Button>
+                </Col>
+              </Row>
+            </div>
+
+            <Divider />
+
+            <Button onClick={() => setImageProcessingModalVisible(false)} block>
+              Close
+            </Button>
           </Space>
         )}
       </Modal>

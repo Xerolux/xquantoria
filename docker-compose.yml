@@ -2,16 +2,17 @@ services:
   # Backend (Laravel)
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     container_name: cms-backend
     ports:
       - "9000:9000"
     environment:
       - APP_NAME=BlogCMS
-      - APP_ENV=production
-      - APP_DEBUG=false
+      - APP_ENV=local
+      - APP_DEBUG=true
       - APP_URL=http://localhost
+      - FRONTEND_URL=http://localhost:5173
       - DB_CONNECTION=pgsql
       - DB_HOST=database
       - DB_PORT=5432
@@ -23,12 +24,24 @@ services:
       - CACHE_DRIVER=redis
       - SESSION_DRIVER=redis
       - QUEUE_CONNECTION=redis
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=mailhog
+      - MAIL_PORT=1025
+      - MAIL_USERNAME=null
+      - MAIL_PASSWORD=null
+      - MAIL_ENCRYPTION=null
+      - MAIL_FROM_ADDRESS=noreply@example.com
+      - MAIL_FROM_NAME="${APP_NAME}"
     volumes:
       - ./backend:/var/www/html
       - ./backend/storage:/var/www/html/storage
     depends_on:
-      - database
-      - redis
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
     networks:
       - cms-network
     restart: unless-stopped
@@ -226,11 +239,14 @@ services:
     ports:
       - "1025:1025"  # SMTP
       - "8025:8025"  # Web UI
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8025"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - cms-network
     restart: unless-stopped
-    profiles:
-      - with-mailhog
 
 networks:
   cms-network:

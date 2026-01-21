@@ -4,12 +4,19 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use App\Services\PostRevisionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
+    protected PostRevisionService $revisionService;
+
+    public function __construct(PostRevisionService $revisionService)
+    {
+        $this->revisionService = $revisionService;
+    }
     public function index(Request $request)
     {
         $this->authorize('viewAny', Post::class);
@@ -133,6 +140,8 @@ class PostController extends Controller
             'tags.*' => 'exists:tags,id',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
+            'create_revision' => 'boolean',
+            'revision_reason' => 'nullable|string|max:255',
         ]);
 
         if (isset($validated['title'])) {
@@ -149,7 +158,48 @@ class PostController extends Controller
             $post->tags()->sync($validated['tags']);
         }
 
+        // Create revision if requested
+        if ($request->boolean('create_revision', false)) {
+            $this->revisionService->createRevision(
+                $post,
+                Auth::id(),
+                false,
+                $validated['revision_reason'] ?? 'Manual save'
+            );
+        }
+
         return response()->json($post->load(['author', 'categories', 'tags']));
+    }
+
+    /**
+     * Auto-save endpoint (called every 30 seconds by frontend).
+     */
+    public function autoSave(Request $request, $id)
+    {
+        $post = Post::findOrFail($id);
+
+        $this->authorize('update', $post);
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'excerpt' => 'nullable|string',
+            'featured_image_id' => 'nullable|exists:media,id',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+        ]);
+
+        // Update the post
+        $post->update($validated);
+
+        // Create auto-save revision
+        $revision = $this->revisionService->createAutoSave($post, Auth::id());
+
+        return response()->json([
+            'message' => 'Auto-saved successfully',
+            'revision_id' => $revision->id,
+            'saved_at' => $revision->created_at,
+        ]);
     }
 
     public function destroy($id)

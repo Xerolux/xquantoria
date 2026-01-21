@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Card, Typography, message, Space, Divider } from 'antd';
+import { Form, Input, Button, Card, Typography, message, Space, Divider, Checkbox, Alert } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, DashboardOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
@@ -9,6 +9,7 @@ const { Title, Text } = Typography;
 
 const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { login, isAuthenticated } = useAuthStore();
@@ -21,7 +22,7 @@ const LoginPage: React.FC = () => {
   const handleLogin = async (values: { email: string; password: string }) => {
     setLoading(true);
     try {
-      await login(values.email, values.password);
+      await login(values.email, values.password, rememberMe);
       const from = (location.state as any)?.from?.pathname || '/admin/dashboard';
       navigate(from, { replace: true });
       message.success('Erfolgreich eingeloggt!');
@@ -102,6 +103,14 @@ const LoginPage: React.FC = () => {
             />
           </Form.Item>
 
+          <Form.Item>
+            <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)}>
+                Angemeldet bleiben (30 Tage)
+              </Checkbox>
+            </Form.Item>
+          </Form.Item>
+
           <Form.Item style={{ marginBottom: 12 }}>
             <Button
               type="primary"
@@ -131,6 +140,16 @@ const LoginPage: React.FC = () => {
             </Button>
           </div>
         </Form>
+
+        <Divider style={{ margin: '16px 0' }} />
+
+        <Alert
+          message="Sicherheitshinweis"
+          description="Die &quot;Angemeldet bleiben&quot; Funktion speichert ein sicheres Token für 30 Tage. Verwende dies nur auf vertrauenswürdigen Geräten."
+          type="info"
+          showIcon
+          style={{ fontSize: 12 }}
+        />
       </Card>
     </div>
   );

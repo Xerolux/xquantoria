@@ -712,6 +712,335 @@ const aiService = {
   },
 };
 
+// Session Management Service
+const sessionService = {
+  async getAll() {
+    const { data } = await api.get('/sessions');
+    return data;
+  },
+
+  async revoke(tokenId: number) {
+    const { data } = await api.delete(`/sessions/${tokenId}`);
+    return data;
+  },
+
+  async revokeAll() {
+    const { data } = await api.delete('/sessions');
+    return data;
+  },
+
+  async heartbeat() {
+    const { data } = await api.post('/sessions/heartbeat');
+    return data;
+  },
+};
+
+// Workflow Service
+const workflowService = {
+  async getStats() {
+    const { data } = await api.get('/workflow/stats');
+    return data;
+  },
+
+  async getEditorialCalendar(year: number, month: number) {
+    const { data } = await api.get('/workflow/calendar', {
+      params: { year, month },
+    });
+    return data;
+  },
+
+  async assignUser(postId: number, userId: number, role: 'author' | 'reviewer' | 'editor') {
+    const { data } = await api.post(`/workflow/posts/${postId}/assign`, {
+      user_id: userId,
+      role,
+    });
+    return data;
+  },
+
+  async submitForReview(postId: number) {
+    const { data } = await api.post(`/workflow/posts/${postId}/submit`);
+    return data;
+  },
+
+  async approvePost(postId: number, feedback?: string) {
+    const { data } = await api.post(`/workflow/posts/${postId}/approve`, {
+      feedback,
+    });
+    return data;
+  },
+
+  async requestChanges(postId: number, feedback: string) {
+    const { data } = await api.post(`/workflow/posts/${postId}/request-changes`, {
+      feedback,
+    });
+    return data;
+  },
+
+  async getSEOScore(postId: number) {
+    const { data } = await api.get(`/workflow/posts/${postId}/seo-score`);
+    return data;
+  },
+};
+
+// Social Media Service
+const socialMediaService = {
+  async getStats() {
+    const { data } = await api.get('/social-media/stats');
+    return data;
+  },
+
+  async sharePost(postId: number, platforms: string[], customMessage?: string, scheduledAt?: string) {
+    const { data } = await api.post(`/social-media/posts/${postId}/share`, {
+      platforms,
+      custom_message: customMessage,
+      scheduled_at: scheduledAt,
+    });
+    return data;
+  },
+
+  async scheduleShare(postId: number, platforms: string[], scheduledAt: string, customMessage?: string) {
+    const { data } = await api.post(`/social-media/posts/${postId}/schedule`, {
+      platforms,
+      scheduled_at: scheduledAt,
+      custom_message: customMessage,
+    });
+    return data;
+  },
+
+  async getPostShares(postId: number) {
+    const { data } = await api.get(`/social-media/posts/${postId}/shares`);
+    return data;
+  },
+
+  async deleteShare(shareId: number) {
+    const { data } = await api.delete(`/social-media/shares/${shareId}`);
+    return data;
+  },
+
+  async batchShare(postIds: number[], platforms: string[]) {
+    const { data } = await api.post('/social-media/batch-share', {
+      post_ids: postIds,
+      platforms,
+    });
+    return data;
+  },
+};
+
+// Schedule Service
+const scheduleService = {
+  async getAll(params?: any) {
+    const { data } = await api.get('/schedule', { params });
+    return data;
+  },
+
+  async getStats() {
+    const { data } = await api.get('/schedule/stats');
+    return data;
+  },
+
+  async getCalendar(year: number, month: number) {
+    const { data } = await api.get('/schedule/calendar', {
+      params: { year, month },
+    });
+    return data;
+  },
+
+  async schedulePost(postId: number, publishedAt: string) {
+    const { data } = await api.post(`/schedule/posts/${postId}`, {
+      published_at: publishedAt,
+    });
+    return data;
+  },
+
+  async reschedulePost(postId: number, publishedAt: string) {
+    const { data } = await api.put(`/schedule/posts/${postId}/reschedule`, {
+      published_at: publishedAt,
+    });
+    return data;
+  },
+
+  async cancelScheduledPost(postId: number) {
+    const { data } = await api.delete(`/schedule/posts/${postId}/cancel`);
+    return data;
+  },
+
+  async checkOverdue() {
+    const { data } = await api.post('/schedule/check-overdue');
+    return data;
+  },
+};
+
+// Language Service
+const languageService = {
+  async getAll() {
+    const { data } = await api.get('/languages');
+    return data;
+  },
+
+  async getCurrent() {
+    const { data } = await api.get('/languages/current');
+    return data;
+  },
+
+  async getStats() {
+    const { data } = await api.get('/languages/stats');
+    return data;
+  },
+
+  async setLanguage(locale: string) {
+    const { data } = await api.post('/languages/set', { locale });
+    return data;
+  },
+
+  async getTranslations(postId?: number) {
+    const { data } = await api.get('/languages/translations', {
+      params: { post_id: postId },
+    });
+    return data;
+  },
+
+  async createTranslation(postId: number, locale: string, title: string, content: string) {
+    const { data } = await api.post('/languages/translations', {
+      post_id: postId,
+      locale,
+      title,
+      content,
+    });
+    return data;
+  },
+
+  async getLocalizedUrl(locale: string, url?: string) {
+    const { data } = await api.get('/languages/localize-url', {
+      params: { locale, url },
+    });
+    return data;
+  },
+};
+
+// Post Revisions Service
+const postRevisionService = {
+  async getAll(postId: number, params?: any) {
+    const { data } = await api.get(`/posts/${postId}/revisions`, { params });
+    return data;
+  },
+
+  async get(postId: number, revisionId: number) {
+    const { data } = await api.get(`/posts/${postId}/revisions/${revisionId}`);
+    return data;
+  },
+
+  async create(postId: number, data: any) {
+    const { response } = await api.post(`/posts/${postId}/revisions`, data);
+    return response;
+  },
+
+  async getStats(postId: number) {
+    const { data } = await api.get(`/posts/${postId}/revisions/stats`);
+    return data;
+  },
+
+  async compare(postId: number, fromId: number, toId: number) {
+    const { data } = await api.get(`/posts/${postId}/revisions/compare`, {
+      params: { from: fromId, to: toId },
+    });
+    return data;
+  },
+
+  async checkConflict(postId: number, editedAt: string) {
+    const { data } = await api.get(`/posts/${postId}/revisions/check-conflict`, {
+      params: { edited_at: editedAt },
+    });
+    return data;
+  },
+
+  async restore(postId: number, revisionId: number) {
+    const { data } = await api.post(`/posts/${postId}/revisions/${revisionId}/restore`);
+    return data;
+  },
+
+  async delete(postId: number, revisionId: number) {
+    await api.delete(`/posts/${postId}/revisions/${revisionId}`);
+  },
+};
+
+// Image Processing Service
+const imageProcessingService = {
+  async generateThumbnails(mediaId: number) {
+    const { data } = await api.post(`/media/${mediaId}/thumbnails`);
+    return data;
+  },
+
+  async crop(mediaId: number, x: number, y: number, width: number, height: number) {
+    const { data } = await api.post(`/media/${mediaId}/crop`, {
+      x, y, width, height,
+    });
+    return data;
+  },
+
+  async resize(mediaId: number, width: number, height: number) {
+    const { data } = await api.post(`/media/${mediaId}/resize`, {
+      width, height,
+    });
+    return data;
+  },
+
+  async rotate(mediaId: number, degrees: number) {
+    const { data } = await api.post(`/media/${mediaId}/rotate`, {
+      degrees,
+    });
+    return data;
+  },
+
+  async flip(mediaId: number, direction: 'horizontal' | 'vertical') {
+    const { data } = await api.post(`/media/${mediaId}/flip`, {
+      direction,
+    });
+    return data;
+  },
+
+  async optimize(mediaId: number) {
+    const { data } = await api.post(`/media/${mediaId}/optimize`);
+    return data;
+  },
+
+  async convertToWebP(mediaId: number) {
+    const { data } = await api.post(`/media/${mediaId}/convert-webp`);
+    return data;
+  },
+
+  async generateBlurhash(mediaId: number) {
+    const { data } = await api.post(`/media/${mediaId}/blurhash`);
+    return data;
+  },
+
+  async getSrcset(mediaId: number) {
+    const { data } = await api.get(`/media/${mediaId}/srcset`);
+    return data;
+  },
+
+  async batchOptimize(mediaIds: number[]) {
+    const { data } = await api.post('/image-processing/batch-optimize', {
+      media_ids: mediaIds,
+    });
+    return data;
+  },
+
+  async getStats() {
+    const { data } = await api.get('/image-processing/stats');
+    return data;
+  },
+
+  async generateAllBlurhashes() {
+    const { data } = await api.post('/image-processing/generate-all-blurhashes');
+    return data;
+  },
+
+  async autoOptimizeAll() {
+    const { data } = await api.post('/image-processing/auto-optimize-all');
+    return data;
+  },
+};
+
 export default api;
 export {
   authService,
@@ -734,4 +1063,11 @@ export {
   activityLogService,
   systemHealthService,
   aiService,
+  sessionService,
+  workflowService,
+  socialMediaService,
+  scheduleService,
+  languageService,
+  postRevisionService,
+  imageProcessingService,
 };

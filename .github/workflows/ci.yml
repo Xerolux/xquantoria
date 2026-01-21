@@ -188,3 +188,107 @@ jobs:
         uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: moderate
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: [backend-tests, frontend-tests, security-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: https://staging.example.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to staging server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /var/www/cms-staging
+            git pull origin develop
+            cd backend
+            composer install --no-dev --optimize-autoloader --no-interaction
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan optimize
+            cd ../frontend
+            npm ci
+            npm run build
+            sudo systemctl reload nginx
+            sudo systemctl restart php8.3-fpm
+
+      - name: Run smoke tests
+        run: |
+          curl -f ${{ secrets.STAGING_URL }}/api/v1/health || exit 1
+
+      - name: Notify deployment status
+        uses: 8398a7/action-slack@v3
+        if: always() && secrets.SLACK_WEBHOOK != ''
+        with:
+          status: ${{ job.status }}
+          text: 'Deploy to Staging: ${{ job.status }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [backend-tests, frontend-tests, security-scan]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://example.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create backup
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            cd /var/www/cms-production
+            ./scripts/backup.sh
+
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            cd /var/www/cms-production
+            git pull origin main
+            cd backend
+            composer install --no-dev --optimize-autoloader --no-interaction
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan optimize
+            cd ../frontend
+            npm ci
+            npm run build
+            sudo systemctl reload nginx
+            sudo systemctl restart php8.3-fpm
+
+      - name: Run smoke tests
+        run: |
+          curl -f ${{ secrets.PRODUCTION_URL }}/api/v1/health || exit 1
+
+      - name: Notify deployment status
+        uses: 8398a7/action-slack@v3
+        if: always() && secrets.SLACK_WEBHOOK != ''
+        with:
+          status: ${{ job.status }}
+          text: 'Deploy to Production: ${{ job.status }}'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}

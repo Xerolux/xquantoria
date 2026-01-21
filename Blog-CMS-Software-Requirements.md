@@ -231,69 +231,77 @@ POST   /api/v1/auth/refresh       - Token erneuern
 
 ## 14. Verzeichnis-Struktur & Organisation
 
-#### 14.1 Projekt-Struktur (Beispiel)
+#### 14.1 Projekt-Struktur (Laravel + React)
 ```
-/blog-cms/
-├── /app/                      # Anwendungs-Code
-│   ├── /api/                  # API-Endpoints
-│   │   ├── /v1/
-│   │   │   ├── posts.py
-│   │   │   ├── media.py
-│   │   │   ├── auth.py
-│   │   │   ├── categories.py
-│   │   │   ├── downloads.py
-│   │   │   └── ads.py
-│   ├── /models/               # Datenbank-Modelle
-│   │   ├── user.py
-│   │   ├── post.py
-│   │   ├── media.py
-│   │   ├── category.py
-│   │   ├── download.py
-│   │   └── advertisement.py
-│   ├── /services/             # Business-Logik
-│   │   ├── auth_service.py
-│   │   ├── post_service.py
-│   │   ├── media_service.py
-│   │   ├── download_service.py
-│   │   └── search_service.py
-│   ├── /middleware/           # Middleware (Auth, CORS, etc.)
-│   ├── /utils/                # Hilfsfunktionen
-│   │   ├── security.py
-│   │   ├── token_generator.py
-│   │   └── file_validator.py
-│   └── /config/               # Konfigurationsdateien
-├── /admin/                    # Admin-Frontend
+/cms-php/
+├── /backend/                  # Laravel Backend
+│   ├── /app/
+│   │   ├── /Http/
+│   │   │   ├── /Controllers/  # API Controller
+│   │   │   │   ├── PostController.php
+│   │   │   │   ├── MediaController.php
+│   │   │   │   ├── AuthController.php
+│   │   │   │   ├── CategoryController.php
+│   │   │   │   ├── DownloadController.php
+│   │   │   │   └── AdController.php
+│   │   │   ├── /Middleware/   # Auth, CORS, etc.
+│   │   │   └── /Requests/     # Form Requests
+│   │   ├── /Models/           # Eloquent Models
+│   │   │   ├── User.php
+│   │   │   ├── Post.php
+│   │   │   ├── Media.php
+│   │   │   ├── Category.php
+│   │   │   ├── Download.php
+│   │   │   └── Advertisement.php
+│   │   ├── /Services/         # Business-Logik
+│   │   │   ├── AuthService.php
+│   │   │   ├── PostService.php
+│   │   │   ├── MediaService.php
+│   │   │   ├── DownloadService.php
+│   │   │   └── SearchService.php
+│   │   └── /Providers/        # Service Providers
+│   ├── /database/
+│   │   ├── /migrations/       # Datenbank Migrationen
+│   │   └── /seeders/          # Testdaten
+│   ├── /routes/
+│   │   ├── api.php            # API Routen
+│   │   └── web.php            # Web Routen
+│   ├── /config/               # Konfigurationsdateien
+│   ├── /storage/              # File Storage
+│   ├── composer.json
+│   └── .env.example
+├── /frontend/                 # React Frontend
 │   ├── /src/
-│   │   ├── /components/
-│   │   ├── /views/
+│   │   ├── /components/       # React Komponenten
+│   │   │   ├── /common/
+│   │   │   ├── /forms/
+│   │   │   └── /layout/
+│   │   ├── /pages/            # Seiten/Komponenten
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Posts.tsx
+│   │   │   ├── Media.tsx
+│   │   │   └── Settings.tsx
+│   │   ├── /hooks/            # Custom Hooks
+│   │   │   ├── useAuth.ts
+│   │   │   └── useApi.ts
+│   │   ├── /services/         # API Services
+│   │   │   ├── api.ts
+│   │   │   ├── authService.ts
+│   │   │   └── postService.ts
+│   │   ├── /utils/            # Hilfsfunktionen
+│   │   │   ├── constants.ts
+│   │   │   └── helpers.ts
 │   │   ├── /store/            # State Management
-│   │   └── /router/
+│   │   │   ├── authStore.ts
+│   │   │   └── postStore.ts
+│   │   ├── /types/            # TypeScript Types
+│   │   └── App.tsx
+│   ├── /public/
 │   ├── package.json
-│   └── vite.config.js
-├── /public/                   # Blog-Frontend (optional)
-│   ├── /themes/
-│   │   ├── /default/
-│   │   └── /custom/
-│   └── /assets/
-├── /storage/                  # Datei-Storage
-│   ├── /media/                # Öffentliche Medien
-│   │   ├── /images/
-│   │   ├── /videos/
-│   │   └── /thumbnails/
-│   ├── /downloads/            # Geschützte Downloads
-│   └── /backups/              # Backup-Dateien
-├── /database/                 # DB-Migrationen
-│   ├── /migrations/
-│   └── /seeds/
-├── /tests/                    # Tests
-│   ├── /unit/
-│   ├── /integration/
-│   └── /e2e/
+│   ├── vite.config.ts
+│   └── tsconfig.json
 ├── /docs/                     # Dokumentation
 ├── docker-compose.yml
-├── Dockerfile
-├── requirements.txt           # Python Dependencies
-├── .env.example
 ├── .gitignore
 └── README.md
 ```
@@ -719,21 +727,22 @@ POST   /api/v1/auth/refresh       - Token erneuern
 ### 1. Tech-Stack (Empfohlen)
 
 #### Backend
-- **Sprache:** Python (FastAPI/Flask) ODER PHP (Laravel/Symfony)
+- **Sprache:** PHP (Laravel 11+)
 - **Datenbank:** 
   - PostgreSQL (empfohlen) ODER MySQL 8+
   - Redis für Caching & Sessions
 - **Datei-Storage:** Lokal ODER S3-kompatibel
-- **Task Queue:** Celery (Python) / Laravel Queue (PHP)
+- **Task Queue:** Laravel Queue mit Redis/Database Driver
 
 #### Frontend (Admin)
-- **Framework:** Vue.js 3 ODER React
-- **UI-Library:** Vuetify, Element Plus, Ant Design ODER Tailwind CSS
+- **Framework:** React 18 mit TypeScript
+- **UI-Library:** Ant Design, Material-UI ODER Tailwind CSS
 - **Build-Tool:** Vite
+- **State Management:** Zustand oder Redux Toolkit
 
 #### Frontend (Blog)
-- **SSR/SSG:** Optional (Next.js, Nuxt.js, Astro)
-- **Theme-System:** Template-basiert (Jinja2, Twig, Blade)
+- **SSR/SSG:** Optional (Next.js 14)
+- **Theme-System:** Blade Templates mit React Components
 
 ### 2. Datenbank-Schema
 
@@ -965,33 +974,36 @@ security_events
 git clone https://github.com/deinrepo/blog-cms.git
 cd blog-cms
 
-# 2. Dependencies installieren
-# Python:
-pip install -r requirements.txt
-
-# PHP:
+# 2. Backend Dependencies installieren
+cd backend
 composer install
+
+# 3. Frontend Dependencies installieren
+cd ../frontend
 npm install
 
-# 3. Umgebungsvariablen konfigurieren
+# 4. Umgebungsvariablen konfigurieren
+cd ../backend
 cp .env.example .env
 nano .env
 
-# 4. Datenbank-Migration
-# Python:
-alembic upgrade head
-
-# PHP:
+# 5. Datenbank-Migration
 php artisan migrate
 
-# 5. Admin-User erstellen
-# Python:
-python create_admin.py
-
-# PHP:
+# 6. Admin-User erstellen
 php artisan db:seed --class=AdminSeeder
 
-# 6. Webserver konfigurieren & starten
+# 7. Entwicklungsserver starten
+# Backend:
+php artisan serve
+
+# Frontend (neues Terminal):
+cd frontend
+npm run dev
+
+# 8. Produktions-Build (optional)
+cd frontend
+npm run build
 ```
 
 #### Docker-Support

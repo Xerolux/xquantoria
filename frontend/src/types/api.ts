@@ -241,3 +241,129 @@ export interface UserFormData {
   password?: string;
   role: 'admin' | 'editor' | 'author' | 'contributor';
 }
+
+// Session Management Types
+export interface UserSession {
+  id: number;
+  user_id: number;
+  token_id: number;
+  ip_address: string;
+  user_agent: string;
+  device_type: string;
+  browser: string;
+  platform: string;
+  last_activity: string;
+  created_at: string;
+  is_current: boolean;
+}
+
+// Post Revision Types
+export interface PostRevision {
+  id: number;
+  post_id: number;
+  user_id: number;
+  content: any;
+  title: string;
+  status: string;
+  revision_reason?: string;
+  is_auto_save: boolean;
+  edited_at: string;
+  edited_at_ms: number;
+  created_at: string;
+  user?: User;
+}
+
+// Schedule Types
+export interface ScheduledPost {
+  id: number;
+  title: string;
+  status: string;
+  published_at: string;
+  post?: Post;
+}
+
+// Social Media Types
+export interface SocialShare {
+  id: number;
+  post_id: number;
+  platform: 'twitter' | 'facebook' | 'linkedin';
+  url: string;
+  share_count: number;
+  shared_at: string;
+}
+
+export interface SocialMediaStats {
+  total_shares: number;
+  by_platform: {
+    twitter: number;
+    facebook: number;
+    linkedin: number;
+  };
+  recent_shares: SocialShare[];
+}
+
+// Content Workflow Types
+export interface PostAssignment {
+  id: number;
+  post_id: number;
+  user_id: number;
+  role: 'author' | 'reviewer' | 'editor';
+  assigned_at: string;
+  user?: User;
+}
+
+export interface WorkflowStats {
+  pending_review: number;
+  approved: number;
+  changes_requested: number;
+  draft: number;
+}
+
+export interface SEOScore {
+  score: number;
+  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+  issues: string[];
+  warnings: string[];
+  passes: string[];
+}
+
+export interface EditorialCalendar {
+  year: number;
+  month: number;
+  events: Array<{
+    id: number;
+    title: string;
+    status: string;
+    type: string;
+    author?: string;
+    categories: string[];
+    assignees: string[];
+    date: string;
+    time?: string;
+  }>;
+}
+
+// Language Types
+export interface Language {
+  code: string;
+  name: string;
+  native_name: string;
+}
+
+export interface LanguageStats {
+  total_posts: number;
+  by_language: Array<{
+    code: string;
+    name: string;
+    count: number;
+  }>;
+}
+
+// Image Processing Types
+export interface ImageProcessingStats {
+  total_images: number;
+  optimized_images: number;
+  blurhash_images: number;
+  total_space_saved: number;
+}
+

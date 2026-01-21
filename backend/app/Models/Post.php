@@ -22,12 +22,21 @@ class Post extends Model
         'view_count',
         'meta_title',
         'meta_description',
+        'meta_robots',
         'language',
         'translation_of_id',
+        'submitted_for_review_at',
+        'approved_at',
+        'approved_by',
+        'reviewer_feedback',
+        'changes_requested_at',
     ];
 
     protected $casts = [
         'published_at' => 'datetime',
+        'submitted_for_review_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'changes_requested_at' => 'datetime',
         'view_count' => 'integer',
     ];
 
@@ -59,6 +68,56 @@ class Post extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function revisions()
+    {
+        return $this->hasMany(PostRevision::class)->orderBy('created_at', 'desc');
+    }
+
+    public function latestRevision()
+    {
+        return $this->hasOne(PostRevision::class)->latestOfMany();
+    }
+
+    public function socialShares()
+    {
+        return $this->hasMany(SocialShare::class);
+    }
+
+    public function pageAnalytics()
+    {
+        return $this->hasMany(PageAnalytics::class);
+    }
+
+    public function conversions()
+    {
+        return $this->hasMany(Conversion::class);
+    }
+
+    public function assignments()
+    {
+        return $this->hasMany(PostAssignment::class);
+    }
+
+    public function assignees()
+    {
+        return $this->belongsToMany(User::class, 'post_assignments')->withPivot('role', 'assigned_at');
+    }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function translationParent()
+    {
+        return $this->belongsTo(Post::class, 'translation_of_id');
+    }
+
+    public function translations()
+    {
+        return $this->hasMany(Post::class, 'translation_of_id');
     }
 
     public function scopePublished($query)
@@ -99,5 +158,17 @@ class Post extends Model
     public function getIsHiddenAttribute(): bool
     {
         return (bool) $this->is_hidden;
+    }
+
+    /**
+     * Get the full URL for this post.
+     */
+    public function getFullUrl(): string
+    {
+        $localePrefix = $this->language && $this->language !== config('app.locale')
+            ? '/' . $this->language
+            : '';
+
+        return url($localePrefix . '/blog/' . $this->slug);
     }
 }
