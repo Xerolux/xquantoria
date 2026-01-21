@@ -83,7 +83,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: cms-queue-worker
-    command: php artisan queue:work --sleep=3 --tries=3
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
     environment:
       - DB_CONNECTION=pgsql
       - DB_HOST=database
@@ -93,16 +93,19 @@ services:
       - DB_PASSWORD=secret
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - CACHE_DRIVER=redis
+      - QUEUE_CONNECTION=redis
     volumes:
       - ./backend:/var/www/html
+      - ./backend/storage:/var/www/html/storage
     depends_on:
-      - database
-      - redis
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - cms-network
     restart: unless-stopped
-    profiles:
-      - with-worker
 
   # Scheduler (for cron jobs)
   scheduler:
@@ -126,16 +129,19 @@ services:
       - DB_PASSWORD=secret
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - CACHE_DRIVER=redis
+      - QUEUE_CONNECTION=redis
     volumes:
       - ./backend:/var/www/html
+      - ./backend/storage:/var/www/html/storage
     depends_on:
-      - database
-      - redis
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - cms-network
     restart: unless-stopped
-    profiles:
-      - with-scheduler
 
   # PostgreSQL Database (Default)
   database:

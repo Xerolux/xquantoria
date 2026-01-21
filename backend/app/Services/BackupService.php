@@ -234,8 +234,18 @@ class BackupService
             $basePath . '/public',
             $basePath . '/resources',
             $basePath . '/routes',
-            $basePath . '/.env',
         ];
+
+        // Always exclude sensitive files
+        $exclude[] = $basePath . '/.env';
+        $exclude[] = $basePath . '/.env.*';
+        $exclude[] = $basePath . '/node_modules';
+        $exclude[] = $basePath . '/vendor';
+        $exclude[] = $basePath . '/storage/framework/cache';
+        $exclude[] = $basePath . '/storage/framework/sessions';
+        $exclude[] = $basePath . '/storage/framework/views';
+        $exclude[] = $basePath . '/storage/logs';
+        $exclude[] = $basePath . '/storage/debugbar';
 
         foreach ($directories as $directory) {
             if (is_dir($directory)) {

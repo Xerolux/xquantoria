@@ -1,35 +1,49 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { ConfigProvider, theme } from 'antd';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import PostsPage from './pages/PostsPage';
-import PostEditorPage from './pages/PostEditorPage';
-import CategoriesPage from './pages/CategoriesPage';
-import TagsPage from './pages/TagsPage';
-import MediaPage from './pages/MediaPage';
-import UsersPage from './pages/UsersPage';
-import CommentsPage from './pages/CommentsPage';
-import NewslettersPage from './pages/NewslettersPage';
-import SEOPage from './pages/SEOPage';
-import BackupsPage from './pages/BackupsPage';
-import SettingsPage from './pages/SettingsPage';
-import ActivityLogsPage from './pages/ActivityLogsPage';
-import SystemHealthPage from './pages/SystemHealthPage';
-import DownloadsPage from './pages/DownloadsPage';
-import AdsPage from './pages/AdsPage';
-import AIAssistantPage from './pages/AIAssistantPage';
-import PostSharingPage from './pages/PostSharingPage';
-import PluginManagerPage from './pages/PluginManagerPage';
-import RoleHierarchyPage from './pages/RoleHierarchyPage';
-import MainLayout from './components/Layout/MainLayout';
-import HomePage from './pages/HomePage';
-import RegisterPage from './pages/RegisterPage';
-import EmailVerificationPage from './pages/EmailVerificationPage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import CookieBanner from './components/CookieBanner';
-import ProtectedRoute from './components/ProtectedRoute';
+import { ConfigProvider, theme, Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
+
+// Code Splitting - Lazy load all pages
+const HomePage = lazy(() => import('./pages/HomePage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const EmailVerificationPage = lazy(() => import('./pages/EmailVerificationPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+
+// Admin Pages
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const PostsPage = lazy(() => import('./pages/PostsPage'));
+const PostEditorPage = lazy(() => import('./pages/PostEditorPage'));
+const CategoriesPage = lazy(() => import('./pages/CategoriesPage'));
+const TagsPage = lazy(() => import('./pages/TagsPage'));
+const MediaPage = lazy(() => import('./pages/MediaPage'));
+const UsersPage = lazy(() => import('./pages/UsersPage'));
+const CommentsPage = lazy(() => import('./pages/CommentsPage'));
+const NewslettersPage = lazy(() => import('./pages/NewslettersPage'));
+const SEOPage = lazy(() => import('./pages/SEOPage'));
+const BackupsPage = lazy(() => import('./pages/BackupsPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const ActivityLogsPage = lazy(() => import('./pages/ActivityLogsPage'));
+const SystemHealthPage = lazy(() => import('./pages/SystemHealthPage'));
+const DownloadsPage = lazy(() => import('./pages/DownloadsPage'));
+const AdsPage = lazy(() => import('./pages/AdsPage'));
+const AIAssistantPage = lazy(() => import('./pages/AIAssistantPage'));
+const PostSharingPage = lazy(() => import('./pages/PostSharingPage'));
+const PluginManagerPage = lazy(() => import('./pages/PluginManagerPage'));
+const RoleHierarchyPage = lazy(() => import('./pages/RoleHierarchyPage'));
+
+// Components
+const MainLayout = lazy(() => import('./components/Layout/MainLayout'));
+const CookieBanner = lazy(() => import('./components/CookieBanner'));
+const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
+
+// Loading component for Suspense
+const PageLoader = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} size="large" />
+  </div>
+);
 
 function App() {
   return (
@@ -42,55 +56,250 @@ function App() {
       }}
     >
       <BrowserRouter>
-        <Routes>
-          {/* Public Home Page */}
-          <Route path="/" element={<HomePage />} />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Public Home Page */}
+            <Route path="/" element={<HomePage />} />
 
-          {/* Admin Routes with Layout and Auth */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <MainLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="posts" element={<PostsPage />} />
-            <Route path="posts/new" element={<PostEditorPage />} />
-            <Route path="posts/:id/edit" element={<PostEditorPage />} />
-            <Route path="pages" element={<PostsPage />} />
-            <Route path="categories" element={<CategoriesPage />} />
-            <Route path="tags" element={<TagsPage />} />
-            <Route path="media" element={<MediaPage />} />
-            <Route path="users" element={<UsersPage />} />
-            <Route path="comments" element={<CommentsPage />} />
-            <Route path="newsletters" element={<NewslettersPage />} />
-            <Route path="seo" element={<SEOPage />} />
-            <Route path="backups" element={<BackupsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="activity-logs" element={<ActivityLogsPage />} />
-            <Route path="system-health" element={<SystemHealthPage />} />
-            <Route path="downloads" element={<DownloadsPage />} />
-            <Route path="ads" element={<AdsPage />} />
-            <Route path="ai-assistant" element={<AIAssistantPage />} />
-            <Route path="post-sharing" element={<PostSharingPage />} />
-            <Route path="plugin-manager" element={<PluginManagerPage />} />
-            <Route path="role-hierarchy" element={<RoleHierarchyPage />} />
-          </Route>
+            {/* Admin Routes with Layout and Auth */}
+            <Route
+              path="/admin"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <ProtectedRoute>
+                    <MainLayout />
+                  </ProtectedRoute>
+                </Suspense>
+              }
+            >
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route
+                path="dashboard"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <DashboardPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="posts"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PostsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="posts/new"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PostEditorPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="posts/:id/edit"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PostEditorPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="pages"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PostsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="categories"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <CategoriesPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="tags"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <TagsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="media"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <MediaPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="users"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <UsersPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="comments"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <CommentsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="newsletters"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <NewslettersPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="seo"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <SEOPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="backups"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <BackupsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="settings"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <SettingsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="activity-logs"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <ActivityLogsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="system-health"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <SystemHealthPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="downloads"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <DownloadsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="ads"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <AdsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="ai-assistant"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <AIAssistantPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="post-sharing"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PostSharingPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="plugin-manager"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PluginManagerPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="role-hierarchy"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <RoleHierarchyPage />
+                  </Suspense>
+                }
+              />
+            </Route>
 
-          {/* Standalone Login Page */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/verify-email" element={<EmailVerificationPage />} />
+            {/* Standalone Auth Pages */}
+            <Route
+              path="/login"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <LoginPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <RegisterPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <ForgotPasswordPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/reset-password"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <ResetPasswordPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/verify-email"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <EmailVerificationPage />
+                </Suspense>
+              }
+            />
 
-          {/* Catch all - redirect to home */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        <CookieBanner />
+            {/* Catch all - redirect to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <Suspense fallback={null}>
+            <CookieBanner />
+          </Suspense>
+        </Suspense>
       </BrowserRouter>
     </ConfigProvider>
   );

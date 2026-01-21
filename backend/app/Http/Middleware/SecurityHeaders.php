@@ -21,8 +21,8 @@ class SecurityHeaders
         // X-Content-Type-Options
         $response->headers->set('X-Content-Type-Options', 'nosniff');
 
-        // X-Frame-Options
-        $response->headers->set('X-Frame-Options', 'DENY');
+        // X-Frame-Options (allow same origin for iframes)
+        $response->headers->set('X-Frame-Options', 'SAMEORIGIN');
 
         // X-XSS-Protection
         $response->headers->set('X-XSS-Protection', '1; mode=block');
@@ -33,17 +33,21 @@ class SecurityHeaders
         // Permissions-Policy
         $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 
-        // Content-Security-Policy
+        // Content-Security-Policy (enhanced for CDN and editor support)
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-            "style-src 'self' 'unsafe-inline'",
-            "img-src 'self' data: https:",
-            "font-src 'self' data:",
-            "connect-src 'self'",
-            "frame-ancestors 'none'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdn.tiny.cloud",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
+            "img-src 'self' data: blob: https: http:",
+            "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com data:",
+            "connect-src 'self' https://api.deepl.com",
+            "media-src 'self' blob:",
+            "object-src 'none'",
+            "frame-src 'self' https://www.youtube.com", // for video embeds
+            "frame-ancestors 'self'",
             "base-uri 'self'",
-            "form-action 'self'"
+            "form-action 'self'",
+            "upgrade-insecure-requests"
         ]);
         $response->headers->set('Content-Security-Policy', $csp);
 

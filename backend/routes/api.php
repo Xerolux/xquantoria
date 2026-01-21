@@ -31,6 +31,7 @@ use App\Http\Controllers\Api\V1\ScheduleController;
 use App\Http\Controllers\Api\V1\LanguageController;
 use App\Http\Controllers\Api\V1\ImageProcessingController;
 use App\Http\Controllers\Api\V1\SocialMediaController;
+use App\Http\Controllers\Api\V1\SeoController;
 use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\SitemapController;
 
@@ -230,6 +231,12 @@ Route::prefix('v1')->group(function () {
             Route::post('/robots/validate', [RobotsTxtController::class, 'validateContent']);
             Route::put('/robots', [RobotsTxtController::class, 'update']);
             Route::post('/robots/reset', [RobotsTxtController::class, 'reset']);
+        });
+
+        // SEO Metadata - Public (get) and Protected (update)
+        Route::prefix('seo')->group(function () {
+            // Get SEO metadata for a post (public for published posts)
+            Route::get('/posts/{id}', [SeoController::class, 'show']);
         });
 
         // Two-Factor Authentication

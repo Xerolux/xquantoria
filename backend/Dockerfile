@@ -21,6 +21,10 @@ RUN docker-php-ext-install pdo pdo_pgsql pdo_mysql mbstring exif pcntl bcmath gd
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Copy entrypoint script FIRST (before setting workdir and copying app files)
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Set working directory
 WORKDIR /var/www/html
 
@@ -44,8 +48,8 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/storage \
     && chmod -R 775 /var/www/html/bootstrap/cache
 
-# Copy entrypoint script
-COPY docker-entrypoint.sh /usr/local/bin/
+# Copy entrypoint script (before copying app files to ensure it's available)
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 # Expose port 9000 for PHP-FPM
