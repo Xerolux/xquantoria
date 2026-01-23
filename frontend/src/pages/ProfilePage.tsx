@@ -156,7 +156,7 @@ const ProfilePage: React.FC = () => {
 
       setSetupStep('show');
       setSetupModalVisible(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       message.error(error.response?.data?.message || 'Failed to setup 2FA');
     } finally {
       setLoading(false);
@@ -176,7 +176,7 @@ const ProfilePage: React.FC = () => {
       setSetupModalVisible(false);
       setVerificationCode('');
       fetchTwoFactorStatus();
-    } catch (error: any) {
+    } catch (error: unknown) {
       message.error(error.response?.data?.message || 'Invalid verification code');
     } finally {
       setLoading(false);
@@ -197,7 +197,7 @@ const ProfilePage: React.FC = () => {
       setDisablePassword('');
       setDisableCode('');
       fetchTwoFactorStatus();
-    } catch (error: any) {
+    } catch (error: unknown) {
       message.error(error.response?.data?.message || 'Failed to disable 2FA');
     } finally {
       setLoading(false);

@@ -191,7 +191,7 @@ const AdsPage: React.FC = () => {
         { text: 'Footer', value: 'footer' },
         { text: 'In-Content', value: 'in-content' },
       ],
-      onFilter: (value: any, record: Advertisement) => record.zone === value,
+      onFilter: (value: unknown, record: Advertisement) => record.zone === value,
     },
     {
       title: 'Type',
@@ -203,7 +203,7 @@ const AdsPage: React.FC = () => {
         { text: 'Image', value: 'image' },
         { text: 'Script', value: 'script' },
       ],
-      onFilter: (value: any, record: Advertisement) => record.ad_type === value,
+      onFilter: (value: unknown, record: Advertisement) => record.ad_type === value,
     },
     {
       title: 'Status',
@@ -218,7 +218,7 @@ const AdsPage: React.FC = () => {
         { text: 'Active', value: true },
         { text: 'Inactive', value: false },
       ],
-      onFilter: (value: any, record: Advertisement) => record.is_active === value,
+      onFilter: (value: unknown, record: Advertisement) => record.is_active === value,
     },
     {
       title: 'Impressions',
@@ -245,7 +245,7 @@ const AdsPage: React.FC = () => {
     {
       title: 'Date Range',
       key: 'dateRange',
-      render: (_: any, record: Advertisement) => {
+      render: (_: unknown, record: Advertisement) => {
         if (!record.start_date && !record.end_date) {
           return <Tag color="default">Always Active</Tag>;
         }
@@ -260,7 +260,7 @@ const AdsPage: React.FC = () => {
     {
       title: 'Actions',
       key: 'actions',
-      render: (_: any, record: Advertisement) => (
+      render: (_: unknown, record: Advertisement) => (
         <Space>
           <Button
             type="text"

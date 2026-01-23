@@ -139,7 +139,7 @@ const TagsPage: React.FC = () => {
         { text: 'German', value: 'de' },
         { text: 'English', value: 'en' },
       ],
-      onFilter: (value: any, record: TagType) => record.language === value,
+      onFilter: (value: unknown, record: TagType) => record.language === value,
     },
     {
       title: 'Created',
@@ -153,7 +153,7 @@ const TagsPage: React.FC = () => {
       title: 'Actions',
       key: 'actions',
       width: 120,
-      render: (_: any, record: TagType) => (
+      render: (_: unknown, record: TagType) => (
         <Space>
           <Button
             type="text"

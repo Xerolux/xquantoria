@@ -79,7 +79,7 @@ const SchedulePage: React.FC = () => {
     }
   };
 
-  const handleOpenScheduleModal = (post: any) => {
+  const handleOpenScheduleModal = (post: Post) => {
     setSelectedPost(post);
     setScheduleDate(post.published_at ? dayjs(post.published_at) : null);
     setScheduleModalVisible(true);
@@ -102,7 +102,7 @@ const SchedulePage: React.FC = () => {
       fetchScheduledPosts();
       fetchStats();
       fetchCalendar(scheduleDate.year(), scheduleDate.month() + 1);
-    } catch (error: any) {
+    } catch (error: unknown) {
       message.error(error.response?.data?.message || 'Failed to schedule post');
     } finally {
       setLoading(false);
@@ -115,7 +115,7 @@ const SchedulePage: React.FC = () => {
       message.success('Post rescheduled successfully');
       fetchScheduledPosts();
       fetchStats();
-    } catch (error: any) {
+    } catch (error: unknown) {
       message.error(error.response?.data?.message || 'Failed to reschedule post');
     }
   };
@@ -146,13 +146,13 @@ const SchedulePage: React.FC = () => {
 
   const calendarCellRender = (value: Dayjs) => {
     const dateStr = value.format('YYYY-MM-DD');
-    const events = calendarData?.events?.filter((e: any) =>
+    const events = calendarData?.events?.filter((e: Post) =>
       dayjs(e.published_at).format('YYYY-MM-DD') === dateStr
     ) || [];
 
     return (
       <div style={{ height: '100%' }}>
-        {events.map((event: any) => (
+        {events.map((event: Post) => (
           <Badge
             key={event.id}
             status="processing"
@@ -188,12 +188,12 @@ const SchedulePage: React.FC = () => {
           <span>{dayjs(date).format('YYYY-MM-DD HH:mm')}</span>
         </Space>
       ),
-      sorter: (a: any, b: any) => dayjs(a.published_at).unix() - dayjs(b.published_at).unix(),
+      sorter: (a: Post, b: Post) => dayjs(a.published_at).unix() - dayjs(b.published_at).unix(),
     },
     {
       title: 'Time Until',
       key: 'time_until',
-      render: (_: any, record: any) => {
+      render: (_: unknown, record: Post) => {
         const now = dayjs();
         const scheduled = dayjs(record.published_at);
         const diff = scheduled.diff(now, 'hour');
@@ -217,14 +217,14 @@ const SchedulePage: React.FC = () => {
     {
       title: 'Status',
       key: 'status',
-      render: (_: any, record: any) => (
+      render: (_: unknown, record: Post) => (
         <Tag color="blue">{record.status?.toUpperCase()}</Tag>
       ),
     },
     {
       title: 'Actions',
       key: 'actions',
-      render: (_: any, record: any) => (
+      render: (_: unknown, record: Post) => (
         <Space>
           <Tooltip title="Reschedule">
             <Button

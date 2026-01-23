@@ -171,7 +171,7 @@ const UsersPage: React.FC = () => {
     {
       title: 'User',
       key: 'user',
-      render: (_: any, record: User) => (
+      render: (_: unknown, record: User) => (
         <Space>
           <Avatar
             src={record.avatar_url}
@@ -208,7 +208,7 @@ const UsersPage: React.FC = () => {
         { text: 'Contributor', value: 'contributor' },
         { text: 'Subscriber', value: 'subscriber' },
       ],
-      onFilter: (value: any, record: User) => record.role === value,
+      onFilter: (value: unknown, record: User) => record.role === value,
     },
     {
       title: 'Status',
@@ -226,7 +226,7 @@ const UsersPage: React.FC = () => {
         { text: 'Active', value: true },
         { text: 'Inactive', value: false },
       ],
-      onFilter: (value: any, record: User) => record.is_active === value,
+      onFilter: (value: unknown, record: User) => record.is_active === value,
     },
     {
       title: 'Last Login',
@@ -262,7 +262,7 @@ const UsersPage: React.FC = () => {
       title: 'Actions',
       key: 'actions',
       width: 180,
-      render: (_: any, record: User) => (
+      render: (_: unknown, record: User) => (
         <Space>
           <Tooltip title="View Details">
             <Button

@@ -161,7 +161,7 @@ const ActivityLogsPage: React.FC = () => {
       dataIndex: 'user',
       key: 'user',
       width: 150,
-      render: (user: any, record: ActivityLog) => (
+      render: (user: unknown, record: ActivityLog) => (
         <Space direction="vertical" size={0}>
           <Text strong>{user?.name || 'System'}</Text>
           {user?.email && (
@@ -192,7 +192,7 @@ const ActivityLogsPage: React.FC = () => {
         { text: 'Import', value: 'import' },
         { text: 'Backup', value: 'backup' },
       ],
-      onFilter: (value: any, record: ActivityLog) => record.action === value,
+      onFilter: (value: unknown, record: ActivityLog) => record.action === value,
     },
     {
       title: 'Description',
@@ -212,7 +212,7 @@ const ActivityLogsPage: React.FC = () => {
       title: 'Model',
       key: 'model',
       width: 150,
-      render: (_: any, record: ActivityLog) => (
+      render: (_: unknown, record: ActivityLog) => (
         <Space direction="vertical" size={0}>
           {record.model_type && (
             <Text style={{ fontSize: 12 }}>
@@ -238,7 +238,7 @@ const ActivityLogsPage: React.FC = () => {
       title: 'Actions',
       key: 'actions',
       width: 100,
-      render: (_: any, record: ActivityLog) => (
+      render: (_: unknown, record: ActivityLog) => (
         <Button
           type="link"
           size="small"

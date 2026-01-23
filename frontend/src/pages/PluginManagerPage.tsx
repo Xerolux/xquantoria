@@ -138,7 +138,7 @@ const PluginManagerPage: React.FC = () => {
     {
       title: 'Plugin',
       key: 'plugin',
-      render: (_: any, record: Plugin) => (
+      render: (_: unknown, record: Plugin) => (
         <Space direction="vertical" size={0}>
           <div style={{ fontWeight: 500 }}>{record.name}</div>
           <div style={{ fontSize: 12, color: '#999' }}>
@@ -169,7 +169,7 @@ const PluginManagerPage: React.FC = () => {
         { text: 'Active', value: true },
         { text: 'Inactive', value: false },
       ],
-      onFilter: (value: any, record: Plugin) => record.is_active === value,
+      onFilter: (value: unknown, record: Plugin) => record.is_active === value,
     },
     {
       title: 'Installed',
@@ -182,7 +182,7 @@ const PluginManagerPage: React.FC = () => {
       title: 'Actions',
       key: 'actions',
       width: 180,
-      render: (_: any, record: Plugin) => (
+      render: (_: unknown, record: Plugin) => (
         <Space size="small">
           <Button
             type="link"
