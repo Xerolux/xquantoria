@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useLazyQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { message } from 'antd';
 import {
   GET_PUBLIC_POSTS,
@@ -118,7 +118,7 @@ export function usePublicPostBySlug(slug, options = {}) {
  */
 export function useCreatePost() {
   const [createPost, { loading, error }] = useMutation(CREATE_POST, {
-    onCompleted: (data) => {
+    onCompleted: (_data) => {
       message.success('Post created successfully');
     },
     onError: (err) => {
@@ -137,7 +137,7 @@ export function useCreatePost() {
  */
 export function useUpdatePost() {
   const [updatePost, { loading, error }] = useMutation(UPDATE_POST, {
-    onCompleted: (data) => {
+    onCompleted: (_data) => {
       message.success('Post updated successfully');
     },
     onError: (err) => {
@@ -156,7 +156,7 @@ export function useUpdatePost() {
  */
 export function useDeletePost() {
   const [deletePost, { loading, error }] = useMutation(DELETE_POST, {
-    onCompleted: (data) => {
+    onCompleted: (_data) => {
       message.success('Post deleted successfully');
     },
     onError: (err) => {
@@ -175,7 +175,7 @@ export function useDeletePost() {
  */
 export function useSubmitForReview() {
   const [submitForReview, { loading, error }] = useMutation(SUBMIT_FOR_REVIEW, {
-    onCompleted: (data) => {
+    onCompleted: (_data) => {
       message.success('Post submitted for review');
     },
     onError: (err) => {
@@ -193,7 +193,7 @@ export function useSubmitForReview() {
  */
 export function useApprovePost() {
   const [approvePost, { loading, error }] = useMutation(APPROVE_POST, {
-    onCompleted: (data) => {
+    onCompleted: (_data) => {
       message.success('Post approved successfully');
     },
     onError: (err) => {
@@ -211,7 +211,7 @@ export function useApprovePost() {
  */
 export function useRequestChanges() {
   const [requestChanges, { loading, error }] = useMutation(REQUEST_CHANGES, {
-    onCompleted: (data) => {
+    onCompleted: (_data) => {
       message.success('Changes requested successfully');
     },
     onError: (err) => {

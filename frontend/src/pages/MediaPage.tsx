@@ -7,7 +7,6 @@ import {
   Modal,
   Form,
   Input,
-  Select,
   message,
   Popconfirm,
   Card,
@@ -16,16 +15,13 @@ import {
   Upload,
   Tooltip,
   Image,
-  Switch,
   Radio,
   Divider,
   Alert,
   Typography,
-  Spin,
   Progress,
 } from 'antd';
 import {
-  PlusOutlined,
   DeleteOutlined,
   UploadOutlined,
   FileImageOutlined,
@@ -59,7 +55,6 @@ const MediaPage: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [modalVisible, setModalVisible] = useState(false);
   const [previewModalVisible, setPreviewModalVisible] = useState(false);
   const [uploadModalVisible, setUploadModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -80,15 +75,13 @@ const MediaPage: React.FC = () => {
   // Image Processing States
   const [imageProcessingModalVisible, setImageProcessingModalVisible] = useState(false);
   const [processingMedia, setProcessingMedia] = useState<Media | null>(null);
-  const [processingAction, setProcessingAction] = useState<string | null>(null);
   const [processingLoading, setProcessingLoading] = useState(false);
-  const [cropParams, setCropParams] = useState({ x: 0, y: 0, width: 100, height: 100 });
   const [resizeParams, setResizeParams] = useState({ width: 800, height: 600 });
   const [rotationDegrees, setRotationDegrees] = useState(90);
 
   useEffect(() => {
     fetchMedia();
-  }, [pagination.current, pagination.pageSize, filters]);
+  }, [pagination.pageSize, filters]);
 
   const fetchMedia = async () => {
     setLoading(true);
@@ -113,46 +106,6 @@ const MediaPage: React.FC = () => {
       message.error('Failed to fetch media');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUpload = async (options: { file: File; onSuccess: (response: unknown) => void; onError: (error: Error) => void }) => {
-    const { file } = options;
-    setUploading(true);
-    setUploadProgress(0);
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    try {
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
-
-      await mediaService.upload(file, {
-        alt_text: '',
-        caption: '',
-      });
-
-      clearInterval(progressInterval);
-      setUploadProgress(100);
-
-      message.success('File uploaded successfully');
-      setFileList([]);
-      setUploadModalVisible(false);
-      fetchMedia();
-    } catch (error) {
-      message.error('Failed to upload file');
-    } finally {
-      setUploading(false);
-      setUploadProgress(0);
     }
   };
 
@@ -231,7 +184,6 @@ const MediaPage: React.FC = () => {
       return;
     }
     setProcessingMedia(mediaItem);
-    setProcessingAction(null);
     setCropParams({ x: 0, y: 0, width: 100, height: 100 });
     setResizeParams({ width: mediaItem.width || 800, height: mediaItem.height || 600 });
     setRotationDegrees(90);
@@ -275,27 +227,6 @@ const MediaPage: React.FC = () => {
       fetchMedia();
     } catch (error: unknown) {
       message.error(error.response?.data?.message || `Failed to ${action} image`);
-    } finally {
-      setProcessingLoading(false);
-    }
-  };
-
-  const handleCrop = async () => {
-    if (!processingMedia) return;
-    setProcessingLoading(true);
-    try {
-      await imageProcessingService.crop(
-        processingMedia.id,
-        cropParams.x,
-        cropParams.y,
-        cropParams.width,
-        cropParams.height
-      );
-      message.success('Image cropped successfully');
-      setImageProcessingModalVisible(false);
-      fetchMedia();
-    } catch (error: unknown) {
-      message.error(error.response?.data?.message || 'Failed to crop image');
     } finally {
       setProcessingLoading(false);
     }

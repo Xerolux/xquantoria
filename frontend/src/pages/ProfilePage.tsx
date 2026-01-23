@@ -39,7 +39,7 @@ import { twoFactorService, sessionService } from '../services/api';
 import type { UserSession } from '../types/api';
 import dayjs from 'dayjs';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 interface RecoveryCode {
   code: string;

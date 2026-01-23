@@ -6,8 +6,6 @@ import {
   Tag,
   Modal,
   Form,
-  Input,
-  Select,
   message,
   Popconfirm,
   Card,
@@ -17,11 +15,12 @@ import {
   Statistic,
   Tooltip,
   DatePicker,
+  Select,
+  Input,
 } from 'antd';
 import {
   PlusOutlined,
   DeleteOutlined,
-  EditOutlined,
   DownloadOutlined,
   CloudUploadOutlined,
   FileOutlined,
@@ -29,18 +28,17 @@ import {
   FileZipOutlined,
   FileTextOutlined,
   EyeOutlined,
-  LinkOutlined,
   CalendarOutlined,
+  LinkOutlined,
 } from '@ant-design/icons';
 import type { UploadProps } from 'antd';
-import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import { downloadService } from '../services/api';
 import type { Download, PaginatedResponse } from '../types';
 
+const { Option } = Select;
 const { TextArea } = Input;
 const { Dragger } = Upload;
-const { Option } = Select;
 
 const DownloadsPage: React.FC = () => {
   const [downloads, setDownloads] = useState<Download[]>([]);
@@ -49,7 +47,6 @@ const DownloadsPage: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [tokenModalVisible, setTokenModalVisible] = useState(false);
-  const [editingDownload, setEditingDownload] = useState<Download | null>(null);
   const [viewingDownload, setViewingDownload] = useState<Download | null>(null);
   const [generatedToken, setGeneratedToken] = useState<string>('');
   const [downloadUrl, setDownloadUrl] = useState<string>('');
@@ -63,7 +60,7 @@ const DownloadsPage: React.FC = () => {
 
   useEffect(() => {
     fetchDownloads();
-  }, [pagination.current, pagination.pageSize]);
+  }, [pagination.pageSize]);
 
   const fetchDownloads = async () => {
     setLoading(true);

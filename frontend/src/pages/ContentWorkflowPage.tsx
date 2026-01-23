@@ -15,7 +15,6 @@ import {
   message,
   Calendar,
   Badge,
-  Descriptions,
   Alert,
   Progress,
   List,
@@ -25,14 +24,12 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   ExclamationCircleOutlined,
-  EyeOutlined,
   UserAddOutlined,
-  SendOutlined,
   EditOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
 import { workflowService, postService, userService } from '../services/api';
-import type { WorkflowStats, EditorialCalendar, SEOScore, PostAssignment, Post } from '../types/api';
+import type { WorkflowStats, EditorialCalendar, SEOScore, Post } from '../types/api';
 import dayjs, { Dayjs } from 'dayjs';
 
 const { TextArea } = Input;
@@ -189,17 +186,6 @@ const ContentWorkflowPage: React.FC = () => {
       published: 'green',
     };
     return colors[status] || 'default';
-  };
-
-  const getSEOGuardColor = (grade: string) => {
-    const colors: Record<string, string> = {
-      A: 'success',
-      B: 'processing',
-      C: 'warning',
-      D: 'error',
-      F: 'error',
-    };
-    return colors[grade] || 'default';
   };
 
   const columns = [

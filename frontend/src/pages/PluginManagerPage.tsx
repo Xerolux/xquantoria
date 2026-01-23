@@ -7,13 +7,10 @@ import {
   message,
   Tag,
   Modal,
-  Input,
   Switch,
-  Progress,
   Row,
   Col,
   Typography,
-  Alert,
   List,
   Descriptions,
 } from 'antd';
@@ -23,8 +20,6 @@ import {
   AppstoreOutlined,
   PlusOutlined,
   DeleteOutlined,
-  CheckCircleOutlined,
-  WarningOutlined,
   ReloadOutlined,
   SettingOutlined,
   InfoCircleOutlined,
@@ -43,17 +38,9 @@ interface Plugin {
   config?: Record<string, any>;
 }
 
-interface PluginHook {
-  id: number;
-  name: string;
-  hook: string;
-  description: string;
-  priority: number;
-}
 
 const PluginManagerPage: React.FC = () => {
   const [plugins, setPlugins] = useState<Plugin[]>([]);
-  const [loading, setLoading] = useState(false);
   const [selectedPlugin, setSelectedPlugin] = useState<Plugin | null>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
 

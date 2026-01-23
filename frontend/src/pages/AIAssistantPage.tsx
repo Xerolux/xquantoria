@@ -14,18 +14,13 @@ import {
   Divider,
   List,
   Tabs,
-  Rate,
   Progress,
   Slider,
-  Switch,
-  Modal,
 } from 'antd';
 import {
   RobotOutlined,
   ThunderboltOutlined,
-  BulbOutlined,
   EditOutlined,
-  LinkOutlined,
   CheckCircleOutlined,
   TranslationOutlined,
   PictureOutlined,

@@ -13,7 +13,6 @@ import {
   GET_POST,
 } from '../graphql/queries';
 import {
-  CREATE_POST,
   UPDATE_POST,
   DELETE_POST,
   SUBMIT_FOR_REVIEW,
@@ -247,7 +246,7 @@ export function FilteredPostsExample() {
   const [status, setStatus] = useState<string | undefined>();
   const [search, setSearch] = useState('');
 
-  const { data, loading, error } = useQuery(GET_POSTS, {
+  const { data, loading } = useQuery(GET_POSTS, {
     variables: {
       first: 20,
       status,
@@ -293,7 +292,7 @@ export function FilteredPostsExample() {
  */
 export function PaginatedPostsExample() {
   const [page, setPage] = useState(1);
-  const { data, loading, error } = useQuery(GET_POSTS, {
+  const { data, loading } = useQuery(GET_POSTS, {
     variables: {
       first: 10,
       page,

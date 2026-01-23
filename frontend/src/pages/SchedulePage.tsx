@@ -15,7 +15,6 @@ import {
   Calendar,
   Badge,
   Typography,
-  Tooltip,
 } from 'antd';
 import {
   CalendarOutlined,
@@ -23,13 +22,12 @@ import {
   CheckCircleOutlined,
   EditOutlined,
   DeleteOutlined,
-  EyeOutlined,
 } from '@ant-design/icons';
-import { scheduleService, postService } from '../services/api';
+import { scheduleService } from '../services/api';
 import type { ScheduledPost } from '../types/api';
 import dayjs, { Dayjs } from 'dayjs';
 
-const { Text } = Typography;
+const { Text, Tooltip } = Typography;
 
 const SchedulePage: React.FC = () => {
   const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([]);
@@ -106,17 +104,6 @@ const SchedulePage: React.FC = () => {
       message.error(error.response?.data?.message || 'Failed to schedule post');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleReschedule = async (postId: number, newDate: string) => {
-    try {
-      await scheduleService.reschedulePost(postId, newDate);
-      message.success('Post rescheduled successfully');
-      fetchScheduledPosts();
-      fetchStats();
-    } catch (error: unknown) {
-      message.error(error.response?.data?.message || 'Failed to reschedule post');
     }
   };
 

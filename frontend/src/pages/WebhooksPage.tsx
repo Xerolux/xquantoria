@@ -16,10 +16,8 @@ import {
   Row,
   Col,
   Statistic,
-  Progress,
   Tabs,
   Tooltip,
-  Badge,
   Divider,
 } from 'antd';
 import {
@@ -32,16 +30,12 @@ import {
   CloseCircleOutlined,
   EyeOutlined,
   KeyOutlined,
-  ThunderboltOutlined,
-  CalendarOutlined,
-  BugOutlined,
 } from '@ant-design/icons';
 import { webhooksService } from '../services/api';
 import type { Webhook, WebhookLog, WebhookEvent } from '../types';
 import dayjs from 'dayjs';
 
-const { Title, Text, Paragraph } = Typography;
-const { TextArea } = Input;
+const { Title, Text, Paragraph, Badge } = Typography;
 const { Option } = Select;
 
 const WebhooksPage: React.FC = () => {
@@ -357,7 +351,7 @@ const WebhooksPage: React.FC = () => {
         style={{ marginBottom: 16 }}
       >
         <Space size={[8, 8]} wrap>
-          {categoryEvents.map(([eventName, eventInfo]: [string, any]) => (
+          {categoryEvents.map(([eventName, _eventInfo]: [string, any]) => (
             <Tag key={eventName} color="blue">
               {eventName}
             </Tag>
@@ -463,7 +457,7 @@ const WebhooksPage: React.FC = () => {
             >
               {Object.entries(events).map(([category, categoryEvents]) => (
                 <Select.OptGroup key={category} label={category}>
-                  {categoryEvents.map(([eventName, eventInfo]: [string, any]) => (
+                  {categoryEvents.map(([eventName, _eventInfo]: [string, any]) => (
                     <Option
                       key={eventName}
                       value={eventName}
@@ -471,7 +465,7 @@ const WebhooksPage: React.FC = () => {
                     >
                       {eventName}
                       <span style={{ color: '#8c8c8c', marginLeft: 8 }}>
-                        - {eventInfo.description}
+                        - {_eventInfo.description}
                       </span>
                     </Option>
                   ))}

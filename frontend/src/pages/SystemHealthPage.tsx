@@ -10,10 +10,9 @@ import {
   Space,
   Alert,
   Typography,
-  Descriptions,
   List,
-  Badge,
   Spin,
+  Descriptions,
 } from 'antd';
 import {
   ReloadOutlined,
@@ -31,7 +30,7 @@ import { systemHealthService } from '../services/api';
 import type { SystemHealth } from '../types';
 import dayjs from 'dayjs';
 
-const { Title, Text, Paragraph } = Typography;
+const { Title, Text } = Typography;
 
 const SystemHealthPage: React.FC = () => {
   const [health, setHealth] = useState<SystemHealth | null>(null);

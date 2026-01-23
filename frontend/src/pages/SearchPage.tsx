@@ -8,7 +8,6 @@ import {
   Button,
   Row,
   Col,
-  Statistic,
   Empty,
   Input,
   Select,
@@ -16,7 +15,6 @@ import {
   Checkbox,
   Modal,
   AutoComplete,
-  Slider,
   Divider,
 } from 'antd';
 import {

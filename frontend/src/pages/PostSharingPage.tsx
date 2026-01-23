@@ -8,14 +8,12 @@ import {
   Tag,
   Modal,
   Input,
-  Select,
   Checkbox,
   DatePicker,
   Row,
   Col,
   Statistic,
   Typography,
-  Tooltip,
   List,
   Alert,
   Divider,
@@ -25,24 +23,16 @@ import {
   FacebookOutlined,
   TwitterOutlined,
   LinkedinOutlined,
-  WhatsAppOutlined,
-  MailOutlined,
-  LinkOutlined,
-  CopyOutlined,
-  QrcodeOutlined,
   SendOutlined,
   ClockCircleOutlined,
   DeleteOutlined,
-  CheckCircleOutlined,
 } from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
 import { socialMediaService, postService } from '../services/api';
 import type { SocialShare, SocialMediaStats, Post } from '../types/api';
 import dayjs from 'dayjs';
 
 const { Text } = Typography;
 const { TextArea } = Input;
-const { Option } = Select;
 
 const PostSharingPage: React.FC = () => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -186,68 +176,7 @@ const PostSharingPage: React.FC = () => {
     }
   };
 
-  const columns: ColumnsType<SocialShare> = [
-    {
-      title: 'Platform',
-      dataIndex: 'platform',
-      key: 'platform',
-      render: (platform: string) => {
-        const icons: Record<string, React.ReactNode> = {
-          twitter: <TwitterOutlined style={{ color: '#1DA1F2' }} />,
-          facebook: <FacebookOutlined style={{ color: '#1877F2' }} />,
-          linkedin: <LinkedinOutlined style={{ color: '#0A66C2' }} />,
-        };
-        return (
-          <Space>
-            {icons[platform]}
-            <span style={{ textTransform: 'capitalize' }}>{platform}</span>
-          </Space>
-        );
-      },
-    },
-    {
-      title: 'URL',
-      dataIndex: 'url',
-      key: 'url',
-      ellipsis: true,
-      render: (url: string) => (
-        <Tooltip title={url}>
-          <a href={url} target="_blank" rel="noopener noreferrer">
-            {url.length > 40 ? url.substring(0, 40) + '...' : url}
-          </a>
-        </Tooltip>
-      ),
-    },
-    {
-      title: 'Shares',
-      dataIndex: 'share_count',
-      key: 'share_count',
-      render: (count: number) => <Tag color="blue">{count || 0}</Tag>,
-      sorter: (a, b) => (a.share_count || 0) - (b.share_count || 0),
-    },
-    {
-      title: 'Shared At',
-      dataIndex: 'shared_at',
-      key: 'shared_at',
-      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm'),
-      sorter: (a, b) => dayjs(a.shared_at).unix() - dayjs(b.shared_at).unix(),
-    },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_: unknown, record: SocialShare) => (
-        <Button
-          danger
-          size="small"
-          icon={<DeleteOutlined />}
-          onClick={() => handleDeleteShare(record.id)}
-        >
-          Delete
-        </Button>
-      ),
-    },
-  ];
-
+  
   const platforms = [
     { key: 'twitter', name: 'Twitter/X', icon: <TwitterOutlined style={{ color: '#1DA1F2' }} />, color: '#1DA1F2' },
     { key: 'facebook', name: 'Facebook', icon: <FacebookOutlined style={{ color: '#1877F2' }} />, color: '#1877F2' },
@@ -473,8 +402,10 @@ const PostSharingPage: React.FC = () => {
                 dataSource={shares}
                 renderItem={(item) => (
                   <List.Item
+                    key={item.id}
                     actions={[
                       <Button
+                        key="delete"
                         type="link"
                         danger
                         size="small"

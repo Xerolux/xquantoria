@@ -5,7 +5,6 @@ import {
   Tag,
   Button,
   Space,
-  Input,
   Select,
   DatePicker,
   Modal,
@@ -16,6 +15,7 @@ import {
   Typography,
   Alert,
   Drawer,
+  Input,
 } from 'antd';
 import {
   FileTextOutlined,
@@ -161,12 +161,12 @@ const ActivityLogsPage: React.FC = () => {
       dataIndex: 'user',
       key: 'user',
       width: 150,
-      render: (user: unknown, record: ActivityLog) => (
+      render: (_user: unknown, record: ActivityLog) => (
         <Space direction="vertical" size={0}>
-          <Text strong>{user?.name || 'System'}</Text>
-          {user?.email && (
+          <Text strong>{record.user?.name || 'System'}</Text>
+          {record.user?.email && (
             <Text type="secondary" style={{ fontSize: 12 }}>
-              {user.email}
+              {record.user.email}
             </Text>
           )}
         </Space>

@@ -11,7 +11,6 @@ import {
   Tag,
   Space,
   Modal,
-  Descriptions,
   Upload,
   Switch,
   DatePicker,
@@ -25,7 +24,7 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
 import { postService, categoryService, tagService, mediaService } from '../services/api';
-import type { Post, Category, Tag as TagType, Media } from '../types';
+import type { Post, Category, Tag as TagType } from '../types';
 import dayjs from 'dayjs';
 
 const { TextArea } = Input;
@@ -35,7 +34,6 @@ const PostEditorPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<TagType[]>([]);
@@ -52,7 +50,7 @@ const PostEditorPage: React.FC = () => {
     }
 
     // Auto-Save alle 30 Sekunden
-    let autoSaveInterval: number | undefined;
+    const autoSaveInterval: number | undefined = undefined;
     if (autoSaveEnabled) {
       autoSaveInterval = window.setInterval(() => {
         handleAutoSave();
@@ -243,7 +241,7 @@ const PostEditorPage: React.FC = () => {
                     content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
                     automatic_uploads: true,
                     file_picker_types: 'image',
-                    images_upload_handler: async (blobInfo: unknown, progress: unknown) => {
+                    images_upload_handler: async (blobInfo: unknown, _progress: unknown) => {
                       try {
                         const file = (blobInfo as { blob: () => File }).blob();
                         const result = await mediaService.upload(file, {

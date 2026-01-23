@@ -7,15 +7,13 @@ import {
   Tag,
   Button,
   Space,
-  Select,
   Modal,
   Form,
-  Input,
   message,
   Typography,
   Progress,
-  Avatar,
   Alert,
+  Select,
 } from 'antd';
 import {
   TeamOutlined,
@@ -41,7 +39,7 @@ interface Role {
 }
 
 const RoleHierarchyPage: React.FC = () => {
-  const [roles, setRoles] = useState<Role[]>([
+  const [roles] = useState<Role[]>([
     {
       key: 'super_admin',
       name: 'Super Admin',
@@ -119,7 +117,7 @@ const RoleHierarchyPage: React.FC = () => {
 
   const handleAssignManagerSubmit = async () => {
     try {
-      const values = await form.validateFields();
+      await form.validateFields();
       message.success(`Manager assigned to ${selectedRole?.name}`);
       setAssignModalVisible(false);
       form.resetFields();
@@ -190,8 +188,8 @@ const RoleHierarchyPage: React.FC = () => {
                 <Text strong>Permissions:</Text>
                 <div style={{ marginTop: 8 }}>
                   <Space wrap>
-                    {role.permissions.slice(0, 3).map((perm, i) => (
-                      <Tag key={i} color="blue">{perm}</Tag>
+                    {role.permissions.slice(0, 3).map((_perm, i) => (
+                      <Tag key={i} color="blue">{_perm}</Tag>
                     ))}
                     {role.permissions.length > 3 && (
                       <Tag>+{role.permissions.length - 3} more</Tag>

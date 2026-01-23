@@ -5,7 +5,6 @@ import {
   Space,
   Tag,
   Modal,
-  Input,
   Select,
   message,
   Popconfirm,
@@ -28,8 +27,7 @@ import {
 import { commentService } from '../services/api';
 import type { Comment, PaginatedResponse } from '../types';
 
-const { TextArea } = Input;
-const { Text, Title, Paragraph } = Typography;
+const { Paragraph } = Typography;
 
 const CommentsPage: React.FC = () => {
   const [comments, setComments] = useState<Comment[]>([]);

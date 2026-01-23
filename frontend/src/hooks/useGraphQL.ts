@@ -34,7 +34,7 @@ export function useGraphQLMutation(mutation, options = {}) {
         message.error(error.message);
       }
     },
-    onCompleted: (data) => {
+    onCompleted: (_data) => {
       if (options.successMessage && !options.onCompleted) {
         message.success(options.successMessage);
       }

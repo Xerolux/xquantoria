@@ -6,7 +6,6 @@ import {
   Input,
   InputNumber,
   Switch,
-  Select,
   Button,
   message,
   Row,
@@ -19,6 +18,7 @@ import {
   Tag,
   Tooltip,
   Spin,
+  Select,
 } from 'antd';
 import {
   SaveOutlined,
@@ -65,7 +65,7 @@ const SettingsPage: React.FC = () => {
 
       // Initialize form with current values
       const initialValues: Record<string, any> = {};
-      Object.entries(data.settings).forEach(([groupName, settingsList]) => {
+      Object.entries(data.settings).forEach((_groupName, settingsList) => {
         settingsList.forEach((setting) => {
           initialValues[setting.key] = setting.value;
         });
@@ -219,15 +219,6 @@ const SettingsPage: React.FC = () => {
   const renderGroup = (groupName: string) => {
     const groupSettings = settings[groupName];
     if (!groupSettings) return null;
-
-    const groupIcon = {
-      general: <SettingOutlined />,
-      seo: <GlobalOutlined />,
-      media: <PictureOutlined />,
-      email: <MailOutlined />,
-      security: <SecurityScanOutlined />,
-      performance: <ThunderboltOutlined />,
-    }[groupName] || <SettingOutlined />;
 
     return (
       <Row gutter={[16, 16]}>

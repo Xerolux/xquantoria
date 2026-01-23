@@ -127,7 +127,7 @@ describe('PostService', () => {
 
     mockedAxios.put.mockResolvedValue({ data: mockResponse });
 
-    const result = await postService.update(1, updatedPost);
+    await postService.update(1, updatedPost);
 
     expect(mockedAxios.put).toHaveBeenCalledWith('/posts/1', updatedPost);
   });

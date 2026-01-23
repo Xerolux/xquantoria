@@ -6,7 +6,6 @@ import {
   Tag,
   Modal,
   Input,
-  Select,
   message,
   Popconfirm,
   Card,
@@ -14,9 +13,7 @@ import {
   Col,
   Statistic,
   Tooltip,
-  Typography,
   Tabs,
-  DatePicker,
   Progress,
 } from 'antd';
 import {
@@ -28,16 +25,11 @@ import {
   UserAddOutlined,
   DownloadOutlined,
   EyeOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  StopOutlined,
 } from '@ant-design/icons';
 import { Editor } from '@tinymce/tinymce-react';
 import { newsletterService } from '../services/api';
 import type { Newsletter, NewsletterSubscriber, PaginatedResponse } from '../types';
 
-const { TextArea } = Input;
-const { Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
 
 const NewslettersPage: React.FC = () => {
@@ -57,23 +49,13 @@ const NewslettersPage: React.FC = () => {
     scheduled_at: null as any,
   });
 
-  // Subscriber Modal
-  const [subscriberModalVisible, setSubscriberModalVisible] = useState(false);
-  const [editingSubscriber, setEditingSubscriber] = useState<NewsletterSubscriber | null>(null);
-  const [subscriberForm, setSubscriberForm] = useState({
-    first_name: '',
-    last_name: '',
-    email: '',
-    status: 'active' as any,
-  });
-
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 20,
     total: 0,
   });
 
-  const [filters, setFilters] = useState({
+  const [filters] = useState({
     status: 'all',
   });
 
@@ -84,7 +66,7 @@ const NewslettersPage: React.FC = () => {
     } else {
       fetchSubscribers();
     }
-  }, [activeTab, pagination.current, pagination.pageSize, filters]);
+  }, [activeTab, pagination.pageSize]);
 
   const fetchNewsletters = async () => {
     setLoading(true);

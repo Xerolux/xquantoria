@@ -2,7 +2,6 @@
 
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching/cache';
 import { clientsClaim } from 'workbox-core';
-import { registerRoute } from 'workbox-routing';
 import { NetworkFirst, StaleWhileRevalidate } from 'workbox-strategies';
 
 declare const self: ServiceWorkerGlobalScope;

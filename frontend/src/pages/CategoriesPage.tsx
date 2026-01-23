@@ -110,22 +110,10 @@ const CategoriesPage: React.FC = () => {
     }
   };
 
-  const getCategoryName = (category: Category): string => {
-    const prefix = category.parent_id ? '↳ ' : '';
-    return prefix + category.name;
-  };
-
   const getParentCategoryName = (parentId: number | undefined): string => {
     if (!parentId) return '-';
     const parent = categories.find((c) => c.id === parentId);
     return parent ? parent.name : '-';
-  };
-
-  // Build hierarchical tree structure
-  const renderTree = (parentId: number | null = null): Category[] => {
-    return categories
-      .filter((c) => (parentId === null ? !c.parent_id : c.parent_id === parentId))
-      .sort((a, b) => a.name.localeCompare(b.name));
   };
 
   const flattenedCategories: (Category & { level: number })[] = [];
