@@ -25,6 +25,12 @@ import {
   ShareAltOutlined,
   SafetyOutlined,
   CrownOutlined,
+  ShoppingCartOutlined,
+  BgColorsOutlined,
+  FormOutlined,
+  DatabaseOutlined,
+  SafetyCertificateOutlined,
+  CreditCardOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
@@ -66,6 +72,12 @@ const MainLayout: React.FC = () => {
     { key: '/post-sharing', icon: <ShareAltOutlined />, label: 'Post Sharing' },
     { key: '/plugin-manager', icon: <SafetyOutlined />, label: 'Plugin Manager' },
     { key: '/role-hierarchy', icon: <CrownOutlined />, label: 'Role Hierarchy' },
+    { key: '/shop', icon: <ShoppingCartOutlined />, label: 'Shop' },
+    { key: '/payments', icon: <CreditCardOutlined />, label: 'Payments' },
+    { key: '/themes', icon: <BgColorsOutlined />, label: 'Themes' },
+    { key: '/forms', icon: <FormOutlined />, label: 'Form Builder' },
+    { key: '/import-export', icon: <DatabaseOutlined />, label: 'Import / Export' },
+    { key: '/legal', icon: <SafetyCertificateOutlined />, label: 'Legal Generator' },
   ];
 
   const userMenuItems = [

@@ -1,0 +1,46 @@
+.block-settings-panel {
+  height: 100%;
+}
+
+.block-settings-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.block-advanced-settings {
+  padding: 12px 0;
+}
+
+.block-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-field label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #595959;
+}
+
+.settings-field.inline {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-row {
+  display: flex;
+  gap: 12px;
+}
+
+.settings-row .settings-field {
+  flex: 1;
+}

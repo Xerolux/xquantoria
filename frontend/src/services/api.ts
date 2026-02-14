@@ -1189,6 +1189,597 @@ const webhooksService = {
   },
 };
 
+const publicService = {
+  async homepage() {
+    const { data } = await api.get('/public');
+    return data;
+  },
+
+  async posts(params?: { page?: number; per_page?: number }) {
+    const { data } = await api.get('/public/posts', { params });
+    return data;
+  },
+
+  async post(slug: string) {
+    const { data } = await api.get(`/public/posts/${slug}`);
+    return data;
+  },
+
+  async category(slug: string, params?: { page?: number; per_page?: number }) {
+    const { data } = await api.get(`/public/categories/${slug}`, { params });
+    return data;
+  },
+
+  async tag(slug: string, params?: { page?: number; per_page?: number }) {
+    const { data } = await api.get(`/public/tags/${slug}`, { params });
+    return data;
+  },
+
+  async page(slug: string) {
+    const { data } = await api.get(`/public/pages/${slug}`);
+    return data;
+  },
+
+  async search(query: string, params?: { page?: number; per_page?: number }) {
+    const { data } = await api.get('/public/search', { params: { q: query, ...params } });
+    return data;
+  },
+
+  async feed() {
+    const response = await api.get('/public/feed', { responseType: 'text' });
+    return response.data;
+  },
+
+  async categories() {
+    const { data } = await api.get('/public/categories');
+    return data;
+  },
+
+  async tags() {
+    const { data } = await api.get('/public/tags');
+    return data;
+  },
+};
+
+const pluginService = {
+  async getAll(params?: Record<string, unknown>) {
+    const { data } = await api.get('/plugins', { params });
+    return data;
+  },
+
+  async get(id: number) {
+    const { data } = await api.get(`/plugins/${id}`);
+    return data;
+  },
+
+  async upload(formData: FormData) {
+    const { data } = await api.post('/plugins/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  async installFromMarketplace(marketplaceId: string) {
+    const { data } = await api.post('/plugins/install-marketplace', {
+      marketplace_id: marketplaceId,
+    });
+    return data;
+  },
+
+  async activate(id: number) {
+    const { data } = await api.post(`/plugins/${id}/activate`);
+    return data;
+  },
+
+  async deactivate(id: number) {
+    const { data } = await api.post(`/plugins/${id}/deactivate`);
+    return data;
+  },
+
+  async update(id: number, formData?: FormData) {
+    const { data } = await api.post(`/plugins/${id}/update`, formData, {
+      headers: formData ? { 'Content-Type': 'multipart/form-data' } : undefined,
+    });
+    return data;
+  },
+
+  async uninstall(id: number, options?: { delete_data?: boolean }) {
+    const { data } = await api.delete(`/plugins/${id}`, { data: options });
+    return data;
+  },
+
+  async updateConfig(id: number, config: Record<string, unknown>) {
+    const { data } = await api.put(`/plugins/${id}/config`, { config });
+    return data;
+  },
+
+  async getSettings(id: number) {
+    const { data } = await api.get(`/plugins/${id}/settings`);
+    return data;
+  },
+
+  async updateSettings(id: number, settings: Record<string, unknown>) {
+    const { data } = await api.put(`/plugins/${id}/settings`, settings);
+    return data;
+  },
+
+  async toggleAutoUpdate(id: number) {
+    const { data } = await api.post(`/plugins/${id}/toggle-auto-update`);
+    return data;
+  },
+
+  async getStats() {
+    const { data } = await api.get('/plugins/stats');
+    return data;
+  },
+
+  async getPerformance() {
+    const { data } = await api.get('/plugins/performance');
+    return data;
+  },
+
+  async getHooks() {
+    const { data } = await api.get('/plugins/hooks');
+    return data;
+  },
+
+  async getHookStats() {
+    const { data } = await api.get('/plugins/hooks/stats');
+    return data;
+  },
+
+  async checkUpdates() {
+    const { data } = await api.post('/plugins/check-updates');
+    return data;
+  },
+
+  async runAutoUpdate() {
+    const { data } = await api.post('/plugins/auto-update');
+    return data;
+  },
+
+  async reorder(order: number[]) {
+    const { data } = await api.post('/plugins/reorder', { order });
+    return data;
+  },
+
+  async bulkAction(action: 'activate' | 'deactivate' | 'uninstall', ids: number[]) {
+    const { data } = await api.post('/plugins/bulk', { action, ids });
+    return data;
+  },
+
+  async exportConfig(id: number) {
+    const { data } = await api.get(`/plugins/${id}/export-config`);
+    return data;
+  },
+
+  async importConfig(id: number, config: Record<string, unknown>, settings?: Record<string, unknown>) {
+    const { data } = await api.post(`/plugins/${id}/import-config`, { config, settings });
+    return data;
+  },
+
+  async marketplaceSearch(params?: { search?: string; category?: string; page?: number }) {
+    const { data } = await api.get('/plugins/marketplace/search', { params });
+    return data;
+  },
+
+  async marketplaceGet(id: string) {
+    const { data } = await api.get(`/plugins/marketplace/${id}`);
+    return data;
+  },
+
+  async marketplaceCategories() {
+    const { data } = await api.get('/plugins/marketplace/categories');
+    return data;
+  },
+
+  async marketplaceFeatured() {
+    const { data } = await api.get('/plugins/marketplace/featured');
+    return data;
+  },
+
+  async marketplacePopular() {
+    const { data } = await api.get('/plugins/marketplace/popular');
+    return data;
+  },
+
+  async marketplaceNew() {
+    const { data } = await api.get('/plugins/marketplace/new');
+    return data;
+  },
+};
+
+const shopService = {
+  async getProducts(params?: Record<string, unknown>) {
+    const { data } = await api.get('/shop/products', { params });
+    return data;
+  },
+
+  async getProduct(slug: string) {
+    const { data } = await api.get(`/shop/products/${slug}`);
+    return data;
+  },
+
+  async getCategories() {
+    const { data } = await api.get('/shop/categories');
+    return data;
+  },
+
+  async getCategory(slug: string, params?: Record<string, unknown>) {
+    const { data } = await api.get(`/shop/categories/${slug}`, { params });
+    return data;
+  },
+
+  async getCart() {
+    const { data } = await api.get('/shop/cart');
+    return data;
+  },
+
+  async addToCart(productId: number, quantity: number = 1, attributes?: Record<string, unknown>) {
+    const { data } = await api.post('/shop/cart/add', { product_id: productId, quantity, attributes });
+    return data;
+  },
+
+  async updateCartItem(key: string, quantity: number) {
+    const { data } = await api.put('/shop/cart/update', { key, quantity });
+    return data;
+  },
+
+  async removeFromCart(key: string) {
+    const { data } = await api.delete('/shop/cart/remove', { data: { key } });
+    return data;
+  },
+
+  async clearCart() {
+    const { data } = await api.delete('/shop/cart/clear');
+    return data;
+  },
+
+  async applyCoupon(code: string) {
+    const { data } = await api.post('/shop/coupon/apply', { code });
+    return data;
+  },
+
+  async checkout(checkoutData: Record<string, unknown>) {
+    const { data } = await api.post('/shop/checkout', checkoutData);
+    return data;
+  },
+
+  async getOrders(params?: Record<string, unknown>) {
+    const { data } = await api.get('/shop/orders', { params });
+    return data;
+  },
+
+  async getOrder(id: number) {
+    const { data } = await api.get(`/shop/orders/${id}`);
+    return data;
+  },
+
+  async updateOrderStatus(id: number, status: string) {
+    const { data } = await api.put(`/shop/orders/${id}/status`, { status });
+    return data;
+  },
+};
+
+const themeService = {
+  async getAll() {
+    const { data } = await api.get('/themes');
+    return data;
+  },
+
+  async get(id: number) {
+    const { data } = await api.get(`/themes/${id}`);
+    return data;
+  },
+
+  async getActive() {
+    const { data } = await api.get('/themes/active');
+    return data;
+  },
+
+  async create(themeData: Record<string, unknown>) {
+    const { data } = await api.post('/themes', themeData);
+    return data;
+  },
+
+  async update(id: number, themeData: Record<string, unknown>) {
+    const { data } = await api.put(`/themes/${id}`, themeData);
+    return data;
+  },
+
+  async delete(id: number) {
+    const { data } = await api.delete(`/themes/${id}`);
+    return data;
+  },
+
+  async activate(id: number) {
+    const { data } = await api.post(`/themes/${id}/activate`);
+    return data;
+  },
+
+  async duplicate(id: number) {
+    const { data } = await api.post(`/themes/${id}/duplicate`);
+    return data;
+  },
+
+  async getSettings(id: number) {
+    const { data } = await api.get(`/themes/${id}/settings`);
+    return data;
+  },
+
+  async updateSetting(id: number, key: string, value: unknown) {
+    const { data } = await api.post(`/themes/${id}/settings`, { key, value });
+    return data;
+  },
+
+  async resetSettings(id: number) {
+    const { data } = await api.delete(`/themes/${id}/settings`);
+    return data;
+  },
+
+  async getTemplates(id: number) {
+    const { data } = await api.get(`/themes/${id}/templates`);
+    return data;
+  },
+
+  async createTemplate(id: number, templateData: Record<string, unknown>) {
+    const { data } = await api.post(`/themes/${id}/templates`, templateData);
+    return data;
+  },
+
+  async updateTemplate(themeId: number, templateId: number, templateData: Record<string, unknown>) {
+    const { data } = await api.put(`/themes/${themeId}/templates/${templateId}`, templateData);
+    return data;
+  },
+
+  async deleteTemplate(themeId: number, templateId: number) {
+    const { data } = await api.delete(`/themes/${themeId}/templates/${templateId}`);
+    return data;
+  },
+
+  async export(id: number) {
+    const { data } = await api.get(`/themes/${id}/export`);
+    return data;
+  },
+
+  async import(themeData: string) {
+    const { data } = await api.post('/themes/import', { theme_data: themeData });
+    return data;
+  },
+};
+
+const formService = {
+  async getAll() {
+    const { data } = await api.get('/forms');
+    return data;
+  },
+
+  async get(id: number) {
+    const { data } = await api.get(`/forms/${id}`);
+    return data;
+  },
+
+  async create(formData: Record<string, unknown>) {
+    const { data } = await api.post('/forms', formData);
+    return data;
+  },
+
+  async update(id: number, formData: Record<string, unknown>) {
+    const { data } = await api.put(`/forms/${id}`, formData);
+    return data;
+  },
+
+  async delete(id: number) {
+    const { data } = await api.delete(`/forms/${id}`);
+    return data;
+  },
+
+  async duplicate(id: number) {
+    const { data } = await api.post(`/forms/${id}/duplicate`);
+    return data;
+  },
+
+  async getSubmissions(formId: number, params?: Record<string, unknown>) {
+    const { data } = await api.get(`/forms/${formId}/submissions`, { params });
+    return data;
+  },
+
+  async getSubmission(formId: number, submissionId: number) {
+    const { data } = await api.get(`/forms/${formId}/submissions/${submissionId}`);
+    return data;
+  },
+
+  async markSubmissionRead(formId: number, submissionId: number) {
+    const { data } = await api.post(`/forms/${formId}/submissions/${submissionId}/read`);
+    return data;
+  },
+
+  async markSubmissionSpam(formId: number, submissionId: number) {
+    const { data } = await api.post(`/forms/${formId}/submissions/${submissionId}/spam`);
+    return data;
+  },
+
+  async deleteSubmission(formId: number, submissionId: number) {
+    const { data } = await api.delete(`/forms/${formId}/submissions/${submissionId}`);
+    return data;
+  },
+
+  async exportSubmissions(formId: number, format: string = 'csv') {
+    const { data } = await api.get(`/forms/${formId}/export/${format}`);
+    return data;
+  },
+};
+
+const importExportService = {
+  async exportPosts(params?: Record<string, unknown>) {
+    const { data } = await api.get('/import-export/export/posts', { params });
+    return data;
+  },
+
+  async exportCategories() {
+    const { data } = await api.get('/import-export/export/categories');
+    return data;
+  },
+
+  async exportTags() {
+    const { data } = await api.get('/import-export/export/tags');
+    return data;
+  },
+
+  async exportUsers() {
+    const { data } = await api.get('/import-export/export/users');
+    return data;
+  },
+
+  async exportAll() {
+    const { data } = await api.get('/import-export/export/all');
+    return data;
+  },
+
+  async importWordPress(file: File) {
+    const formData = new FormData();
+    formData.append('xml_file', file);
+    const { data } = await api.post('/import-export/import/wordpress', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  async importJson(importData: Record<string, unknown>) {
+    const { data } = await api.post('/import-export/import/json', { data: importData });
+    return data;
+  },
+};
+
+const legalService = {
+  async getDocuments(params?: Record<string, unknown>) {
+    const { data } = await api.get('/legal-documents', { params });
+    return data;
+  },
+
+  async getTypes() {
+    const { data } = await api.get('/legal-documents/types');
+    return data;
+  },
+
+  async getFormFields(type: string) {
+    const { data } = await api.get(`/legal-documents/${type}/form-fields`);
+    return data;
+  },
+
+  async preview(type: string, formData: Record<string, unknown>) {
+    const { data } = await api.post(`/legal-documents/${type}/preview`, formData);
+    return data;
+  },
+
+  async generate(type: string, formData: Record<string, unknown>) {
+    const { data } = await api.post(`/legal-documents/${type}/generate`, formData);
+    return data;
+  },
+
+  async getDocument(id: number) {
+    const { data } = await api.get(`/legal-documents/${id}`);
+    return data;
+  },
+
+  async updateDocument(id: number, docData: Record<string, unknown>) {
+    const { data } = await api.put(`/legal-documents/${id}`, docData);
+    return data;
+  },
+
+  async deleteDocument(id: number) {
+    const { data } = await api.delete(`/legal-documents/${id}`);
+    return data;
+  },
+
+  async publishDocument(id: number) {
+    const { data } = await api.post(`/legal-documents/${id}/publish`);
+    return data;
+  },
+
+  async unpublishDocument(id: number) {
+    const { data } = await api.post(`/legal-documents/${id}/unpublish`);
+    return data;
+  },
+
+  async duplicateDocument(id: number) {
+    const { data } = await api.post(`/legal-documents/${id}/duplicate`);
+    return data;
+  },
+
+  async exportDocument(id: number, format: string = 'html') {
+    const { data } = await api.get(`/legal-documents/${id}/export/${format}`);
+    return data;
+  },
+};
+
+const paymentService = {
+  async getConfig() {
+    const { data } = await api.get('/payments/config');
+    return data;
+  },
+
+  async createStripeIntent(orderId: number, options?: { return_url?: string; payment_method_types?: string[] }) {
+    const { data } = await api.post('/payments/stripe/create-intent', {
+      order_id: orderId,
+      ...options,
+    });
+    return data;
+  },
+
+  async confirmStripePayment(paymentIntentId: string) {
+    const { data } = await api.post('/payments/stripe/confirm', {
+      payment_intent_id: paymentIntentId,
+    });
+    return data;
+  },
+
+  async createPayPalOrder(orderId: number, options?: { return_url?: string; cancel_url?: string }) {
+    const { data } = await api.post('/payments/paypal/create-order', {
+      order_id: orderId,
+      ...options,
+    });
+    return data;
+  },
+
+  async capturePayPalOrder(paypalOrderId: string) {
+    const { data } = await api.post('/payments/paypal/capture', {
+      paypal_order_id: paypalOrderId,
+    });
+    return data;
+  },
+
+  async getTransactions(params?: { status?: string; gateway?: string; order_id?: number; date_from?: string; date_to?: string; per_page?: number }) {
+    const { data } = await api.get('/payments/transactions', { params });
+    return data;
+  },
+
+  async getTransaction(id: string) {
+    const { data } = await api.get(`/payments/transactions/${id}`);
+    return data;
+  },
+
+  async getStats() {
+    const { data } = await api.get('/payments/stats');
+    return data;
+  },
+
+  async getRefunds(params?: { status?: string; order_id?: number; per_page?: number }) {
+    const { data } = await api.get('/payments/refunds', { params });
+    return data;
+  },
+
+  async createRefund(transactionId: number, amount: number, reason?: string, reasonText?: string) {
+    const { data } = await api.post('/payments/refund', {
+      transaction_id: transactionId,
+      amount,
+      reason,
+      reason_text: reasonText,
+    });
+    return data;
+  },
+};
+
 export default api;
 export {
   authService,
@@ -1219,4 +1810,12 @@ export {
   postRevisionService,
   imageProcessingService,
   webhooksService,
+  pluginService,
+  publicService,
+  shopService,
+  themeService,
+  formService,
+  importExportService,
+  legalService,
+  paymentService,
 };

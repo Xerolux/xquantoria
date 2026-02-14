@@ -1,0 +1,95 @@
+.block-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+}
+
+.block-editor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.block-editor-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.block-editor-canvas {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.block-editor-sidebar {
+  width: 320px;
+  border-left: 1px solid #f0f0f0;
+  background: #fafafa;
+  overflow-y: auto;
+}
+
+.block-editor-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.block-count {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.block-wrapper {
+  position: relative;
+  margin-bottom: 8px;
+  padding: 16px;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.block-wrapper:hover {
+  border-color: #e6e6e6;
+}
+
+.block-wrapper.selected {
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+.block-wrapper.dragging {
+  opacity: 0.5;
+  background: #f5f5f5;
+}
+
+.block-wrapper.locked {
+  background: #fafafa;
+}
+
+.block-wrapper.hidden {
+  opacity: 0.5;
+}
+
+.block-content-wrapper {
+  min-height: 20px;
+}
+
+.block-locked-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 12px;
+}

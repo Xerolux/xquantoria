@@ -12,6 +12,12 @@ const EmailVerificationPage = lazy(() => import('./pages/EmailVerificationPage')
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 
+// Public Pages
+const PublicHomePage = lazy(() => import('./pages/public/HomePage'));
+const BlogListPage = lazy(() => import('./pages/public/BlogPage').then(m => ({ default: m.default })));
+const PostDetailPage = lazy(() => import('./pages/public/BlogPage').then(m => ({ default: m.PostDetailPage })));
+const StaticPage = lazy(() => import('./pages/public/StaticPage'));
+
 // Admin Pages
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const PostsPage = lazy(() => import('./pages/PostsPage'));
@@ -33,6 +39,13 @@ const AIAssistantPage = lazy(() => import('./pages/AIAssistantPage'));
 const PostSharingPage = lazy(() => import('./pages/PostSharingPage'));
 const PluginManagerPage = lazy(() => import('./pages/PluginManagerPage'));
 const RoleHierarchyPage = lazy(() => import('./pages/RoleHierarchyPage'));
+const ShopPage = lazy(() => import('./pages/ShopPage'));
+const ThemeCustomizerPage = lazy(() => import('./pages/ThemeCustomizerPage'));
+const FormBuilderPage = lazy(() => import('./pages/FormBuilderPage'));
+const ImportExportPage = lazy(() => import('./pages/ImportExportPage'));
+const LegalGeneratorPage = lazy(() => import('./pages/LegalGeneratorPage'));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
+const PaymentsPage = lazy(() => import('./pages/PaymentsPage'));
 
 // Components
 const MainLayout = lazy(() => import('./components/Layout/MainLayout'));
@@ -78,8 +91,17 @@ function App() {
         />
         <Suspense fallback={<PageLoader />}>
           <Routes>
-            {/* Public Home Page */}
-            <Route path="/" element={<HomePage />} />
+            {/* Public Website Routes */}
+            <Route path="/" element={<PublicHomePage />} />
+            <Route path="/blog" element={<BlogListPage />} />
+            <Route path="/blog/:slug" element={<PostDetailPage />} />
+            <Route path="/category/:category" element={<BlogListPage />} />
+            <Route path="/tag/:tag" element={<BlogListPage />} />
+            <Route path="/page/:slug" element={<StaticPage />} />
+            <Route path="/search" element={<BlogListPage />} />
+
+            {/* Admin Home (redirects to dashboard) */}
+            <Route path="/home" element={<HomePage />} />
 
             {/* Admin Routes with Layout and Auth */}
             <Route
@@ -266,6 +288,62 @@ function App() {
                 element={
                   <Suspense fallback={<PageLoader />}>
                     <RoleHierarchyPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="shop"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <ShopPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="themes"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <ThemeCustomizerPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="forms"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <FormBuilderPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="import-export"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <ImportExportPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="legal"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <LegalGeneratorPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="payments"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PaymentsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="checkout"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <CheckoutPage />
                   </Suspense>
                 }
               />

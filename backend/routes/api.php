@@ -34,10 +34,41 @@ use App\Http\Controllers\Api\V1\SocialMediaController;
 use App\Http\Controllers\Api\V1\SeoController;
 use App\Http\Controllers\Api\V1\TranslationController;
 use App\Http\Controllers\Api\V1\WebhookController;
+use App\Http\Controllers\Api\V1\PublicController;
+use App\Http\Controllers\Api\V1\CollaborationController;
+use App\Http\Controllers\Api\V1\LegalDocumentController;
+use App\Http\Controllers\Api\V1\ShopController;
+use App\Http\Controllers\Api\V1\ThemeController;
+use App\Http\Controllers\Api\V1\ImportExportController;
+use App\Http\Controllers\Api\V1\FormBuilderController;
+use App\Http\Controllers\Api\V1\PaymentController;
+use App\Http\Controllers\Api\V1\OAuthController;
+use App\Http\Controllers\Api\V1\PushNotificationController;
+use App\Http\Controllers\Api\V1\ABTestController;
+use App\Http\Controllers\Api\V1\AuditLogController;
+use App\Http\Controllers\Api\V1\MobileAppController;
 use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\SitemapController;
 
 Route::prefix('v1')->group(function () {
+    // Public Website API (no auth required)
+    Route::prefix('public')->group(function () {
+        Route::get('/', [PublicController::class, 'homepage']);
+        Route::get('/posts', [PublicController::class, 'posts']);
+        Route::get('/posts/{slug}', [PublicController::class, 'post']);
+        Route::get('/categories', [PublicController::class, 'categories']);
+        Route::get('/categories/{slug}', [PublicController::class, 'category']);
+        Route::get('/tags', [PublicController::class, 'tags']);
+        Route::get('/tags/{slug}', [PublicController::class, 'tag']);
+        Route::get('/pages/{slug}', [PublicController::class, 'page']);
+        Route::get('/menu', [PublicController::class, 'menu']);
+        Route::get('/search', [PublicController::class, 'search']);
+        Route::get('/archive', [PublicController::class, 'archive']);
+        Route::get('/authors/{id}', [PublicController::class, 'author']);
+        Route::post('/subscribe', [PublicController::class, 'subscribe']);
+        Route::get('/feed', [PublicController::class, 'feed']);
+    });
+
     // Public Health Check (kein Rate Limit)
     Route::get('/health', function () {
         return response()->json(['status' => 'ok', 'timestamp' => now()]);
@@ -136,6 +167,112 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('downloads', DownloadController::class);
 
         Route::apiResource('ads', AdController::class);
+
+        // Legal Document Generator
+        Route::prefix('legal-documents')->group(function () {
+            Route::get('/', [LegalDocumentController::class, 'index']);
+            Route::get('/types', [LegalDocumentController::class, 'types']);
+            Route::get('/{type}/form-fields', [LegalDocumentController::class, 'formFields']);
+            Route::post('/{type}/preview', [LegalDocumentController::class, 'preview']);
+            Route::post('/{type}/generate', [LegalDocumentController::class, 'generate']);
+            Route::get('/{id}', [LegalDocumentController::class, 'show']);
+            Route::put('/{id}', [LegalDocumentController::class, 'update']);
+            Route::delete('/{id}', [LegalDocumentController::class, 'destroy']);
+            Route::post('/{id}/publish', [LegalDocumentController::class, 'publish']);
+            Route::post('/{id}/unpublish', [LegalDocumentController::class, 'unpublish']);
+            Route::post('/{id}/duplicate', [LegalDocumentController::class, 'duplicate']);
+            Route::get('/{id}/export/{format?}', [LegalDocumentController::class, 'export']);
+        });
+
+        // E-Commerce / Shop
+        Route::prefix('shop')->group(function () {
+            Route::get('/products', [ShopController::class, 'products']);
+            Route::get('/products/{slug}', [ShopController::class, 'product']);
+            Route::get('/categories', [ShopController::class, 'categories']);
+            Route::get('/categories/{slug}', [ShopController::class, 'category']);
+            Route::get('/cart', [ShopController::class, 'getCart']);
+            Route::post('/cart/add', [ShopController::class, 'addToCart']);
+            Route::put('/cart/update', [ShopController::class, 'updateCartItem']);
+            Route::delete('/cart/remove', [ShopController::class, 'removeFromCart']);
+            Route::delete('/cart/clear', [ShopController::class, 'clearCart']);
+            Route::post('/coupon/apply', [ShopController::class, 'applyCoupon']);
+            Route::post('/checkout', [ShopController::class, 'checkout']);
+            Route::get('/orders', [ShopController::class, 'orders']);
+            Route::get('/orders/{id}', [ShopController::class, 'order']);
+            Route::put('/orders/{id}/status', [ShopController::class, 'updateOrderStatus']);
+        });
+
+        // Payment System
+        Route::prefix('payments')->group(function () {
+            Route::get('/config', [PaymentController::class, 'getConfig']);
+            Route::post('/stripe/create-intent', [PaymentController::class, 'createStripeIntent']);
+            Route::post('/stripe/confirm', [PaymentController::class, 'confirmStripePayment']);
+            Route::post('/paypal/create-order', [PaymentController::class, 'createPayPalOrder']);
+            Route::post('/paypal/capture', [PaymentController::class, 'capturePayPalOrder']);
+            Route::get('/transactions', [PaymentController::class, 'getTransactions']);
+            Route::get('/transactions/{id}', [PaymentController::class, 'getTransaction']);
+            Route::get('/stats', [PaymentController::class, 'getStats']);
+            Route::get('/refunds', [PaymentController::class, 'getRefunds']);
+            
+            // Admin only - Refunds
+            Route::middleware('role:admin,super_admin')->group(function () {
+                Route::post('/refund', [PaymentController::class, 'createRefund']);
+            });
+        });
+
+        // Payment Webhooks (public, no auth)
+        Route::post('/webhooks/stripe', [PaymentController::class, 'stripeWebhook'])
+            ->withoutMiddleware(['auth:sanctum', 'throttle:100,1']);
+        Route::post('/webhooks/paypal', [PaymentController::class, 'paypalWebhook'])
+            ->withoutMiddleware(['auth:sanctum', 'throttle:100,1']);
+
+        // Theme System
+        Route::prefix('themes')->group(function () {
+            Route::get('/', [ThemeController::class, 'index']);
+            Route::post('/', [ThemeController::class, 'store']);
+            Route::get('/active', [ThemeController::class, 'getActive']);
+            Route::post('/import', [ThemeController::class, 'import']);
+            Route::get('/{id}', [ThemeController::class, 'show']);
+            Route::put('/{id}', [ThemeController::class, 'update']);
+            Route::delete('/{id}', [ThemeController::class, 'destroy']);
+            Route::post('/{id}/activate', [ThemeController::class, 'activate']);
+            Route::post('/{id}/duplicate', [ThemeController::class, 'duplicate']);
+            Route::get('/{id}/settings', [ThemeController::class, 'getSettings']);
+            Route::post('/{id}/settings', [ThemeController::class, 'updateSetting']);
+            Route::delete('/{id}/settings', [ThemeController::class, 'resetSettings']);
+            Route::get('/{id}/templates', [ThemeController::class, 'templates']);
+            Route::post('/{id}/templates', [ThemeController::class, 'storeTemplate']);
+            Route::put('/{id}/templates/{templateId}', [ThemeController::class, 'updateTemplate']);
+            Route::delete('/{id}/templates/{templateId}', [ThemeController::class, 'destroyTemplate']);
+            Route::get('/{id}/export', [ThemeController::class, 'export']);
+        });
+
+        // Form Builder
+        Route::prefix('forms')->group(function () {
+            Route::get('/', [FormBuilderController::class, 'index']);
+            Route::post('/', [FormBuilderController::class, 'store']);
+            Route::get('/{id}', [FormBuilderController::class, 'show']);
+            Route::put('/{id}', [FormBuilderController::class, 'update']);
+            Route::delete('/{id}', [FormBuilderController::class, 'destroy']);
+            Route::post('/{id}/duplicate', [FormBuilderController::class, 'duplicate']);
+            Route::get('/{id}/submissions', [FormBuilderController::class, 'submissions']);
+            Route::get('/{id}/submissions/{submissionId}', [FormBuilderController::class, 'getSubmission']);
+            Route::post('/{id}/submissions/{submissionId}/read', [FormBuilderController::class, 'markSubmissionRead']);
+            Route::post('/{id}/submissions/{submissionId}/spam', [FormBuilderController::class, 'markSubmissionSpam']);
+            Route::delete('/{id}/submissions/{submissionId}', [FormBuilderController::class, 'deleteSubmission']);
+            Route::get('/{id}/export/{format?}', [FormBuilderController::class, 'exportSubmissions']);
+        });
+
+        // Import/Export
+        Route::prefix('import-export')->group(function () {
+            Route::get('/export/posts', [ImportExportController::class, 'exportPosts']);
+            Route::get('/export/categories', [ImportExportController::class, 'exportCategories']);
+            Route::get('/export/tags', [ImportExportController::class, 'exportTags']);
+            Route::get('/export/users', [ImportExportController::class, 'exportUsers']);
+            Route::get('/export/all', [ImportExportController::class, 'exportAll']);
+            Route::post('/import/wordpress', [ImportExportController::class, 'importWordPress']);
+            Route::post('/import/json', [ImportExportController::class, 'importJson']);
+        });
 
         Route::post('/auth/refresh', [AuthController::class, 'refresh']);
         Route::get('/auth/me', [AuthController::class, 'me']);
@@ -349,22 +486,42 @@ Route::prefix('v1')->group(function () {
             Route::delete('/shares/{share}', [PostShareController::class, 'destroy']);
         });
 
-        // Plugin Management - Admin/Super Admin only
         Route::prefix('plugins')->middleware('role:admin,super_admin')->group(function () {
             Route::get('/', [PluginController::class, 'index']);
             Route::get('/stats', [PluginController::class, 'getStats']);
+            Route::get('/performance', [PluginController::class, 'getPerformance']);
             Route::get('/hooks', [PluginController::class, 'getHooks']);
-            Route::get('/hooks/available', [PluginController::class, 'getAvailableHooks']);
-            // Plugin installation and uninstallation - Super Admin only
+            Route::get('/hooks/stats', [PluginController::class, 'getHookStats']);
+            Route::post('/reorder', [PluginController::class, 'reorder']);
+            Route::post('/bulk', [PluginController::class, 'bulkAction']);
+            Route::post('/check-updates', [PluginController::class, 'checkUpdates']);
+            Route::post('/auto-update', [PluginController::class, 'runAutoUpdate']);
+
             Route::middleware('role:super_admin')->group(function () {
-                Route::post('/', [PluginController::class, 'install']);
-                Route::post('/hooks', [PluginController::class, 'registerHook']);
+                Route::post('/upload', [PluginController::class, 'upload']);
+                Route::post('/install-marketplace', [PluginController::class, 'installFromMarketplace']);
                 Route::delete('/{plugin}', [PluginController::class, 'uninstall']);
             });
+
             Route::get('/{plugin}', [PluginController::class, 'show']);
-            Route::put('/{plugin}/config', [PluginController::class, 'updateConfig']);
             Route::post('/{plugin}/activate', [PluginController::class, 'activate']);
             Route::post('/{plugin}/deactivate', [PluginController::class, 'deactivate']);
+            Route::post('/{plugin}/update', [PluginController::class, 'update']);
+            Route::put('/{plugin}/config', [PluginController::class, 'updateConfig']);
+            Route::get('/{plugin}/settings', [PluginController::class, 'getSettings']);
+            Route::put('/{plugin}/settings', [PluginController::class, 'updateSettings']);
+            Route::post('/{plugin}/toggle-auto-update', [PluginController::class, 'toggleAutoUpdate']);
+            Route::get('/{plugin}/export-config', [PluginController::class, 'exportConfig']);
+            Route::post('/{plugin}/import-config', [PluginController::class, 'importConfig']);
+
+            Route::prefix('marketplace')->group(function () {
+                Route::get('/search', [PluginController::class, 'marketplaceSearch']);
+                Route::get('/categories', [PluginController::class, 'marketplaceCategories']);
+                Route::get('/featured', [PluginController::class, 'marketplaceFeatured']);
+                Route::get('/popular', [PluginController::class, 'marketplacePopular']);
+                Route::get('/new', [PluginController::class, 'marketplaceNew']);
+                Route::get('/{id}', [PluginController::class, 'marketplaceGet']);
+            });
         });
 
         // Social Media Management - Author and above
@@ -403,6 +560,96 @@ Route::prefix('v1')->group(function () {
             Route::get('/{webhook}/stats', [WebhookController::class, 'stats']);
             Route::get('/{webhook}/logs', [WebhookController::class, 'logs']);
             Route::get('/{webhook}/logs/{log}', [WebhookController::class, 'log']);
+        });
+
+        // Collaboration - Real-time editing
+        Route::prefix('collaboration')->group(function () {
+            Route::post('/{documentId}/join', [CollaborationController::class, 'join']);
+            Route::post('/{documentId}/leave', [CollaborationController::class, 'leave']);
+            Route::post('/{documentId}/cursor', [CollaborationController::class, 'cursor']);
+            Route::post('/{documentId}/block', [CollaborationController::class, 'block']);
+            Route::post('/{documentId}/selection', [CollaborationController::class, 'selection']);
+            Route::post('/{documentId}/sync', [CollaborationController::class, 'sync']);
+            Route::post('/{documentId}/heartbeat', [CollaborationController::class, 'heartbeat']);
+            Route::get('/{documentId}/users', [CollaborationController::class, 'users']);
+            Route::get('/{documentId}/state', [CollaborationController::class, 'state']);
+        });
+
+        // OAuth - Social Login
+        Route::prefix('oauth')->group(function () {
+            Route::get('/{provider}/redirect', [OAuthController::class, 'redirectToProvider']);
+            Route::get('/{provider}/callback', [OAuthController::class, 'handleProviderCallback']);
+            Route::post('/{provider}/mobile', [OAuthController::class, 'handleMobileAuth']);
+            Route::post('/{provider}/link', [OAuthController::class, 'linkProvider']);
+            Route::delete('/{provider}/unlink', [OAuthController::class, 'unlinkProvider']);
+            Route::get('/providers', [OAuthController::class, 'getLinkedProviders']);
+        });
+
+        // Push Notifications
+        Route::prefix('push-notifications')->group(function () {
+            Route::get('/vapid-key', [PushNotificationController::class, 'getVapidPublicKey']);
+            Route::post('/subscribe', [PushNotificationController::class, 'subscribe']);
+            Route::post('/unsubscribe', [PushNotificationController::class, 'unsubscribe']);
+            Route::get('/subscriptions', [PushNotificationController::class, 'getSubscriptions']);
+            Route::post('/subscriptions/{id}/toggle', [PushNotificationController::class, 'toggleSubscription']);
+            Route::get('/history', [PushNotificationController::class, 'getNotificationHistory']);
+            Route::post('/history/{id}/read', [PushNotificationController::class, 'markAsRead']);
+            Route::post('/history/read-all', [PushNotificationController::class, 'markAllAsRead']);
+        });
+
+        // A/B Testing
+        Route::prefix('ab-tests')->middleware('role:admin,super_admin')->group(function () {
+            Route::get('/', [ABTestController::class, 'index']);
+            Route::post('/', [ABTestController::class, 'store']);
+            Route::get('/{id}', [ABTestController::class, 'show']);
+            Route::put('/{id}', [ABTestController::class, 'update']);
+            Route::delete('/{id}', [ABTestController::class, 'destroy']);
+            Route::post('/{id}/start', [ABTestController::class, 'start']);
+            Route::post('/{id}/pause', [ABTestController::class, 'pause']);
+            Route::post('/{id}/complete', [ABTestController::class, 'complete']);
+            Route::get('/{id}/results', [ABTestController::class, 'getResults']);
+        });
+
+        // A/B Testing - Public
+        Route::prefix('ab')->group(function () {
+            Route::get('/{testName}/variant', [ABTestController::class, 'getVariant']);
+            Route::post('/{testName}/convert', [ABTestController::class, 'trackConversion']);
+        });
+
+        // Audit Log Export
+        Route::prefix('audit-log')->middleware('role:admin,super_admin')->group(function () {
+            Route::get('/', [AuditLogController::class, 'index']);
+            Route::get('/{id}', [AuditLogController::class, 'show']);
+            Route::get('/export/csv', [AuditLogController::class, 'exportCsv']);
+            Route::get('/export/pdf', [AuditLogController::class, 'exportPdf']);
+            Route::get('/actions', [AuditLogController::class, 'getActions']);
+            Route::get('/model-types', [AuditLogController::class, 'getModelTypes']);
+            Route::get('/stats', [AuditLogController::class, 'getStats']);
+            Route::post('/clean', [AuditLogController::class, 'cleanOld']);
+        });
+    });
+
+    // Mobile App API (public endpoints)
+    Route::prefix('mobile')->group(function () {
+        Route::get('/config', [MobileAppController::class, 'getConfig']);
+        Route::get('/feed', [MobileAppController::class, 'getHomeFeed']);
+        Route::get('/posts/{slug}', [MobileAppController::class, 'getPost']);
+        Route::get('/categories/{slug}/posts', [MobileAppController::class, 'getCategoryPosts']);
+        Route::get('/tags/{slug}/posts', [MobileAppController::class, 'getTagPosts']);
+        Route::get('/search', [MobileAppController::class, 'search']);
+        Route::get('/products', [MobileAppController::class, 'getShopProducts']);
+        Route::get('/products/{slug}', [MobileAppController::class, 'getProduct']);
+    });
+
+    // Mobile App API (authenticated)
+    Route::middleware(['auth:sanctum', 'throttle:100,1'])->group(function () {
+        Route::prefix('mobile')->group(function () {
+            Route::get('/orders', [MobileAppController::class, 'getOrders']);
+            Route::get('/orders/{id}', [MobileAppController::class, 'getOrder']);
+            Route::get('/profile', [MobileAppController::class, 'getUserProfile']);
+            Route::put('/profile', [MobileAppController::class, 'updateUserProfile']);
+            Route::post('/device/register', [MobileAppController::class, 'registerDevice']);
+            Route::delete('/device/unregister', [MobileAppController::class, 'unregisterDevice']);
         });
     });
 

@@ -1,0 +1,172 @@
+.collaboration-ui {
+  position: relative;
+}
+
+.presence-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: #fafafa;
+  border-radius: 16px;
+  border: 1px solid #f0f0f0;
+}
+
+.cursor-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.remote-cursor {
+  position: absolute;
+  pointer-events: none;
+  transition: all 0.1s ease-out;
+}
+
+.cursor-svg {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.cursor-label {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.collaboration-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  background: #fafafa;
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+}
+
+.conflict-resolver {
+  margin-bottom: 16px;
+}
+
+.user-selection {
+  position: absolute;
+  background: var(--user-color, #1890ff);
+  opacity: 0.2;
+  pointer-events: none;
+  border-radius: 2px;
+}
+
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.typing-indicator .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #8c8c8c;
+  animation: typing 1.4s infinite;
+}
+
+.typing-indicator .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-indicator .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+.block-editing-indicator {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid var(--user-color, #1890ff);
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.block-editing-indicator::before {
+  content: attr(data-user);
+  position: absolute;
+  top: -20px;
+  left: 0;
+  font-size: 10px;
+  background: var(--user-color, #1890ff);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.activity-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 8px 16px;
+  background: #1f1f1f;
+  color: white;
+  border-radius: 8px;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+  z-index: 1001;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.collaboration-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.collaboration-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.collaboration-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}

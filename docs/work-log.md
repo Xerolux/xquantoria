@@ -2,6 +2,727 @@
 
 Dieses Dokument dokumentiert den aktuellen Arbeitsstand für die Entwicklung des Blog/CMS mit Laravel 11 und React 18.
 
+## 🚀 Phase 30-35: OAuth, Push, A/B Testing, Mobile API, Security, i18n (NEU!)
+
+### Phase 30: OAuth Social Login ✅
+
+**Backend:**
+- `OAuthController.php` - Google, GitHub, Facebook, Twitter, LinkedIn
+- `SocialAccount.php` - Model für verknüpfte Accounts
+- Migration: `social_accounts`, `push_subscriptions`, `ab_tests`, etc.
+
+**Features:**
+- Redirect to Provider
+- Callback Handler
+- Mobile Auth (Token-based)
+- Account Linking/Unlinking
+- Auto-Create Users
+
+### Phase 31: Push Notifications ✅
+
+**Backend:**
+- `PushNotificationController.php` - WebPush API
+- `config/webpush.php` - VAPID Konfiguration
+
+**Features:**
+- VAPID Public Key
+- Subscribe/Unsubscribe
+- Send to User/All
+- New Post Notifications
+- Notification History
+
+### Phase 32: A/B Testing ✅
+
+**Backend:**
+- `ABTestController.php` - Full A/B Testing API
+- Tables: `ab_tests`, `ab_test_impressions`, `ab_test_conversions`
+
+**Features:**
+- Multiple Variants
+- Traffic Allocation
+- Statistical Significance
+- Conversion Tracking
+- Start/Pause/Complete
+
+### Phase 33: Mobile App API ✅
+
+**Backend:**
+- `MobileAppController.php` - Optimized for React Native
+
+**Endpoints:**
+- `/mobile/config` - App Config
+- `/mobile/feed` - Home Feed
+- `/mobile/posts/{slug}` - Post Details
+- `/mobile/products` - Shop Products
+- `/mobile/orders` - User Orders
+- `/mobile/profile` - User Profile
+- Device Registration
+
+### Phase 34: Audit Log Export ✅
+
+**Backend:**
+- `AuditLogController.php` - Export & Management
+
+**Features:**
+- CSV Export
+- PDF Export
+- Statistics
+- Filter by User/Action/Date
+- Clean Old Logs
+
+### Phase 35: Security Enhancements ✅
+
+**Backend:**
+- `ContentSecurityPolicy.php` - CSP Middleware
+- `config/security.php` - Security Settings
+
+**Features:**
+- CSP Headers
+- CORS Configuration
+- Rate Limiting
+- HSTS Support
+- X-Frame-Options
+- Permissions Policy
+
+### Phase 36: Frontend Enhancements ✅
+
+**Frontend:**
+- `ThemeContext.tsx` - Dark/Light Mode
+- `i18n/index.ts` - Multi-Language (DE/EN)
+- `VideoThumbnailService.php` - Video Thumbnails
+
+### Phase 37: Docker Scheduler ✅
+
+**Files:**
+- `docker/supervisor/supervisord.conf` - Process Manager
+
+**Processes:**
+- PHP-FPM
+- Nginx
+- Laravel Scheduler
+- Queue Workers (2x)
+
+---
+
+## 🚀 Phase 24-29: Testing, Email, Docker, API Docs, Performance, CI/CD
+
+### Phase 24: Testing Suite ✅
+
+**Feature Tests:**
+- `PostApiTest.php` - Posts CRUD, permissions, search
+- `CategoryTagMediaApiTest.php` - Categories, Tags, Media
+- `AuthShopPaymentUserApiTest.php` - Auth, Shop, Payments, Users
+
+**Unit Tests:**
+- `ModelsAndServicesTest.php` - Model methods, services
+
+**Coverage:**
+- Authentication (login, register, logout)
+- Authorization (roles, permissions)
+- CRUD operations for all models
+- API response validation
+- Error handling
+
+### Phase 25: Email Templates ✅
+
+**Templates:**
+- `emails/orders/confirmation.blade.php` - Order confirmation
+- `emails/orders/shipping.blade.php` - Shipping notification
+- `emails/orders/refund.blade.php` - Refund confirmation
+
+**Features:**
+- Responsive HTML design
+- Order details with items table
+- Tracking number display
+- Timeline visualization
+- Brand customization
+
+**Mailables:**
+- `OrderConfirmation.php` - Order confirmation email
+
+### Phase 26: Docker Production Setup ✅
+
+**Files:**
+- `docker-compose.prod.yml` - Production Docker Compose
+- `docker/nginx/nginx.conf` - Nginx reverse proxy config
+
+**Services:**
+- Backend (PHP-FPM with OPcache)
+- Frontend (Static file serving)
+- PostgreSQL 15
+- Redis 7
+- Meilisearch
+- Queue Workers
+- Scheduler
+- Nginx Reverse Proxy
+
+**Features:**
+- SSL/TLS termination
+- Rate limiting
+- Gzip compression
+- Security headers
+- Health checks
+- Resource limits
+- Horizontal scaling support
+
+### Phase 27: OpenAPI Documentation ✅
+
+**File:**
+- `docs/openapi.yaml` - Full API documentation
+
+**Includes:**
+- Authentication endpoints
+- Posts, Categories, Tags CRUD
+- Media management
+- Shop & Products
+- Payments (Stripe, PayPal)
+- User management
+- Error responses
+- Schema definitions
+- Security schemes (Bearer Auth)
+
+### Phase 28: Performance Optimizations ✅
+
+**Service:**
+- `PerformanceService.php` - Performance monitoring & optimization
+
+**Features:**
+- Slow query detection & logging
+- Cache warming (settings, categories, tags, pages)
+- Query result caching
+- Database statistics
+- Redis cache statistics
+- OPcache monitoring
+- Table optimization
+- Hit rate calculation
+
+**Config:**
+- `config/performance.php` - Performance settings
+
+### Phase 29: CI/CD Pipeline ✅
+
+**File:**
+- `.github/workflows/ci-cd.yml` - GitHub Actions workflow
+
+**Jobs:**
+1. **Backend Tests** - PHPUnit with PostgreSQL, Redis
+2. **Frontend Tests** - Lint, typecheck, build
+3. **Security Analysis** - Composer audit, Trivy scan
+4. **Code Quality** - PHPStan analysis
+5. **Build Docker** - Multi-arch image building
+6. **Deploy Staging** - Auto-deploy on develop branch
+7. **Deploy Production** - Auto-deploy on releases
+
+**Features:**
+- Matrix testing
+- Dependency caching
+- Code coverage upload
+- Docker layer caching
+- SSH deployment
+- Slack notifications
+- Health checks
+
+---
+
+## 🚀 Phase 23: Payment Integration (Stripe + PayPal)
+
+### Neue Implementierungen (Phase 23)
+
+#### 1. Payment Database Schema ✅
+**Migration:**
+- `2025_01_23_000001_create_payment_tables.php`
+
+**Tables:**
+- `payment_transactions` - Full transaction tracking
+- `payment_refunds` - Refund management
+- `payment_webhooks` - Webhook event logging
+- `product_downloads` - Digital product downloads
+
+**Shop Updates:**
+- Added `payment_method`, `payment_gateway`, `payment_fee`, `paid_at` to `shop_orders`
+- Added `is_digital`, `download_file`, `download_limit`, `download_expiry_days` to `shop_products`
+
+#### 2. Stripe Integration ✅
+**Service:**
+- `StripeService.php` - Full Stripe API integration
+
+**Features:**
+- Payment Intent creation
+- Payment confirmation
+- Full/partial refunds
+- Webhook handling
+- Customer management
+- Multiple payment methods (Card, SEPA, Sofort, Giropay)
+- Fee calculation
+- Dispute handling
+
+#### 3. PayPal Integration ✅
+**Service:**
+- `PayPalService.php` - Full PayPal API integration
+
+**Features:**
+- Order creation (PayPal Checkout)
+- Payment capture
+- Full/partial refunds
+- Webhook handling
+- OAuth authentication
+- Sandbox/Live mode support
+
+#### 4. Payment Models ✅
+**Models:**
+- `PaymentTransaction.php` - Transaction model with relationships
+- `PaymentRefund.php` - Refund model
+- `PaymentWebhook.php` - Webhook event model
+
+#### 5. Payment Controller ✅
+**Controller:**
+- `PaymentController.php` - Unified payment API
+
+**API Endpoints:**
+- `GET /payments/config` - Get payment configuration
+- `POST /payments/stripe/create-intent` - Create Stripe payment intent
+- `POST /payments/stripe/confirm` - Confirm Stripe payment
+- `POST /payments/paypal/create-order` - Create PayPal order
+- `POST /payments/paypal/capture` - Capture PayPal payment
+- `GET /payments/transactions` - List transactions
+- `GET /payments/transactions/{id}` - Get transaction details
+- `GET /payments/stats` - Payment statistics
+- `GET /payments/refunds` - List refunds
+- `POST /payments/refund` - Create refund (Admin)
+- `POST /webhooks/stripe` - Stripe webhook handler
+- `POST /webhooks/paypal` - PayPal webhook handler
+
+#### 6. Payment Configuration ✅
+**Config:**
+- `config/payment.php`
+
+**Settings:**
+- Stripe (enabled, keys, webhook secret, test mode, fees)
+- PayPal (enabled, client ID, secret, webhook ID, test mode)
+- Currency, tax rate
+- Webhook retry settings
+- Notification settings
+
+#### 7. Frontend Checkout Page ✅
+**Component:**
+- `CheckoutPage.tsx` - Full checkout flow
+
+**Features:**
+- 4-step checkout process (Cart Review, Payment Method, Payment, Confirmation)
+- Stripe Elements integration (CardElement)
+- PayPal button integration
+- Billing details form
+- Order summary sidebar
+- Real-time payment status
+- Test mode indicators
+
+#### 8. Frontend Payments Admin Page ✅
+**Component:**
+- `PaymentsPage.tsx` - Payment management dashboard
+
+**Features:**
+- Transaction list with filtering
+- Refund processing
+- Transaction details view
+- Payment statistics (Revenue, Fees, Net, Refunds)
+- Gateway filtering (Stripe/PayPal)
+- Status filtering
+- Search functionality
+
+#### 9. API Service Updates ✅
+**Service:**
+- `paymentService` in `api.ts`
+
+**Methods:**
+- `getConfig()` - Get payment configuration
+- `createStripeIntent()` - Create Stripe payment intent
+- `confirmStripePayment()` - Confirm Stripe payment
+- `createPayPalOrder()` - Create PayPal order
+- `capturePayPalOrder()` - Capture PayPal payment
+- `getTransactions()` - List transactions
+- `getTransaction()` - Get transaction details
+- `getStats()` - Payment statistics
+- `getRefunds()` - List refunds
+- `createRefund()` - Process refund
+
+#### 10. Navigation Updates ✅
+**MainLayout:**
+- Added Payments menu item with CreditCardOutlined icon
+
+**Routes:**
+- `/admin/payments` - Payments management
+- `/admin/checkout` - Checkout page
+
+---
+
+## 🚀 Phase 22: E-Commerce, Themes, Import/Export, Form Builder
+
+### Neue Implementierungen (Phase 22)
+
+#### 1. E-Commerce System ✅
+**Backend Models:**
+- `ShopProduct.php` - Produkte mit Varianten, Preisen, Lagerbestand
+- `ShopOrder.php` - Bestellungen mit Status-Management
+- `ShopOrderItem.php` - Bestellpositionen
+- `ShopProductCategory.php` - Produktkategorien (hierarchisch)
+- `ShopProductTag.php` - Produkttags
+- `ShopReview.php` - Produktbewertungen
+- `ShopCoupon.php` - Gutscheine (Prozent/Festbetrag)
+- `ShopCart.php` - Warenkorb (Session/User)
+
+**Frontend:**
+- `ShopPage.tsx` - Produkte, Warenkorb, Checkout in einem
+
+**Migration:**
+- `2025_01_22_000001_create_shop_tables.php` - 13 Tabellen
+
+**API Endpoints (20+):**
+- `GET /shop/products` - Produktliste mit Filter
+- `GET /shop/products/{slug}` - Produktdetails
+- `GET /shop/categories` - Kategorien
+- `GET /shop/cart` - Warenkorb
+- `POST /shop/cart/add` - Zum Warenkorb
+- `PUT /shop/cart/update` - Menge ändern
+- `DELETE /shop/cart/remove` - Entfernen
+- `POST /shop/coupon/apply` - Gutschein anwenden
+- `POST /shop/checkout` - Bestellung abschließen
+- `GET /shop/orders` - Bestellübersicht
+
+#### 2. Theme System ✅
+**Backend Models:**
+- `Theme.php` - Themes mit Colors, Fonts, Layouts
+- `ThemeSetting.php` - Theme-Einstellungen
+- `ThemeModification.php` - User-Modifikationen
+- `ThemeTemplate.php` - Custom Templates
+
+**Frontend:**
+- `ThemeCustomizerPage.tsx` - Farben, Schriftarten, CSS
+
+**Migration:**
+- `2025_01_22_000002_create_themes_tables.php`
+
+**Features:**
+- Child-Themes (Vererbung)
+- CSS-Variablen (Colors, Fonts)
+- Custom CSS pro Theme
+- Template-Editor
+- Import/Export von Themes
+- Live-CSS-Generierung
+
+#### 3. Form Builder ✅
+**Backend Models:**
+- `Form.php` - Formulare mit Feldern
+- `FormSubmission.php` - Eingaben
+
+**Frontend:**
+- `FormBuilderPage.tsx` - Drag & Drop Formular-Builder
+
+**Migration:**
+- `2025_01_22_000003_create_forms_tables.php`
+
+**Features:**
+- 11 Feldtypen (Text, Email, Select, etc.)
+- Validierung (Required, Email)
+- Spam-Schutz
+- E-Mail-Benachrichtigung
+- CSV Export
+- Unread-Tracking
+
+#### 4. Import/Export ✅
+**Frontend:**
+- `ImportExportPage.tsx`
+
+**Features:**
+- WordPress XML Importer (Posts, Categories, Tags)
+- JSON Import/Export
+- CSV Export
+- XML Export
+- Vollständiger System-Export
+
+#### 5. Meilisearch Integration ✅
+**Config:**
+- `config/meilisearch.php`
+
+**Service:**
+- `MeilisearchService.php`
+
+**Features:**
+- Full-Text Search
+- Filter & Sort
+- Index Sync
+- Multi-Index Support
+
+#### 6. API Services ✅
+**Neue Services in api.ts:**
+- `shopService` - 15+ Methoden
+- `themeService` - 17+ Methoden
+- `formService` - 12+ Methoden
+- `importExportService` - 7+ Methoden
+- `legalService` - 12+ Methoden
+
+#### 7. Sidebar Erweitert ✅
+**Neue Menüpunkte:**
+- Shop (ShoppingCartOutlined)
+- Themes (BgColorsOutlined)
+- Form Builder (FormOutlined)
+- Import/Export (DatabaseOutlined)
+- Legal Generator (SafetyCertificateOutlined)
+
+---
+
+## 🚀 Phase 21: Live Collaboration
+
+### Neue Implementierungen (Phase 21)
+
+#### 1. Real-time Collaboration System ✅
+**Backend Events:**
+- `UserJoined.php` - User joins document
+- `UserLeft.php` - User leaves document
+- `CursorMoved.php` - Cursor position updates
+- `BlockUpdated.php` - Block changes
+- `DocumentSynced.php` - Full document sync
+- `SelectionChanged.php` - Text/block selection
+
+**Backend Service:**
+- `CollaborationService.php` - Full collaboration logic
+  - joinDocument, leaveDocument
+  - updateCursor, updateBlock, updateSelection
+  - syncDocument, heartbeat
+  - getActiveUsers, getDocumentState
+  - checkConflict
+  - User color assignment
+  - Version tracking
+
+**Backend Controller:**
+- `CollaborationController.php` - 9 REST endpoints
+
+**API Routes:**
+- `POST /collaboration/{documentId}/join`
+- `POST /collaboration/{documentId}/leave`
+- `POST /collaboration/{documentId}/cursor`
+- `POST /collaboration/{documentId}/block`
+- `POST /collaboration/{documentId}/selection`
+- `POST /collaboration/{documentId}/sync`
+- `POST /collaboration/{documentId}/heartbeat`
+- `GET /collaboration/{documentId}/users`
+- `GET /collaboration/{documentId}/state`
+
+#### 2. Broadcasting Configuration ✅
+**Config:**
+- `broadcasting.php` - Pusher, Reverb, Soketi, Ably support
+
+**Channel Routes:**
+- `channels.php` - Presence channel authorization
+  - `document.{documentId}` - Document collaboration
+  - `post.{postId}` - Post editing
+  - `page.{pageId}` - Page editing
+  - `media.{mediaId}` - Media editing
+  - `global` - Admin global channel
+
+#### 3. Frontend Collaboration Hook ✅
+**Hook:**
+- `useCollaboration.ts` - React hook with:
+  - Connection management
+  - Cursor tracking (throttled)
+  - Block updates with conflict detection
+  - Heartbeat
+  - Auto-cleanup on unmount
+
+#### 4. Collaboration UI Components ✅
+- `PresenceIndicator.tsx` - Shows active editors with avatars
+- `CollaborationStatus.tsx` - Connection status indicator
+- `CursorOverlay.tsx` - Remote cursor display
+- `ConflictResolver.tsx` - Conflict resolution UI
+
+#### 5. Block Editor Integration ✅
+- `BlockEditor.tsx` updated with:
+  - Collaboration props (`documentId`, `enableCollaboration`)
+  - Real-time cursor tracking
+  - Presence indicators in toolbar
+  - Conflict detection & resolution
+  - Cursor overlay for remote users
+
+---
+
+## 🚀 Phase 19: Public Website Frontend
+
+### Neue Implementierungen (Phase 19)
+
+#### 1. Public Website Frontend ✅
+**Frontend Components:**
+- `HomePage.tsx` - Blog Homepage with Featured/Latest Posts
+- `BlogPage.tsx` - Blog List + Post Detail Views
+- `StaticPage.tsx` - Static Pages (About, Contact, etc.)
+
+**Frontend Services:**
+- `publicService` in `api.ts` - 10+ API methods for public endpoints
+
+**Public Routes:**
+- `/` - Homepage
+- `/blog` - Post listing
+- `/blog/:slug` - Single post
+- `/category/:category` - Category posts
+- `/tag/:tag` - Tag posts
+- `/page/:slug` - Static pages
+- `/search` - Search results
+
+**Features:**
+- SEO-optimized with meta tags
+- Responsive design
+- Pagination support
+- Related posts
+- Previous/Next navigation
+- RSS feed support
+- Newsletter subscription
+- Social media links
+- Category/Tag filtering
+- Full-text search
+
+#### 2. Public API Endpoints ✅
+**Backend:**
+- `PublicController.php` - Full public API
+
+**Endpoints:**
+- `GET /public` - Homepage data
+- `GET /public/posts` - Post listing with filters
+- `GET /public/posts/{slug}` - Single post
+- `GET /public/categories` - Category list
+- `GET /public/categories/{slug}` - Category posts
+- `GET /public/tags` - Tag list
+- `GET /public/tags/{slug}` - Tag posts
+- `GET /public/pages/{slug}` - Static page
+- `GET /public/search` - Full-text search
+- `GET /public/feed` - RSS feed
+- `GET /public/archive` - Monthly archive
+- `GET /public/authors/{id}` - Author page
+- `POST /public/subscribe` - Newsletter subscription
+
+---
+
+## 🚀 Phase 18: Plugin-System, WAF, CDN & AI Integration
+
+### Neue Implementierungen (Phase 18)
+
+#### 1. Plugin-System (Professional) ✅
+**Backend Services:**
+- `PluginManager.php` - WordPress-ähnliches Hook/Filter System
+- `PluginInstaller.php` - Upload, Marketplace, Dependencies, Migrations
+- `PluginMarketplace.php` - External Marketplace API
+- `PluginScheduler.php` - Auto-Updates, Performance Metrics
+- `BasePlugin.php` - Abstract Plugin Class für Entwickler
+
+**Models:**
+- `Plugin.php` - Erweitert mit Dependencies, Permissions, Status
+- `PluginHook.php` - Actions & Filters mit Performance Tracking
+- `PluginSetting.php` - Plugin-spezifische Settings
+- `PluginPermission.php` - Permission System
+- `PluginMigration.php` - Plugin Migrations
+
+**Features:**
+- 25+ API Endpoints für Plugin Management
+- ZIP Upload mit Validierung
+- Marketplace Integration (Suche, Kategorien, Featured)
+- Dependency Management
+- Auto-Update System
+- Hook Performance Monitoring
+- Plugin Configuration UI
+
+#### 2. WAF (Web Application Firewall) ✅
+**Middleware:**
+- `WebApplicationFirewall.php` - Enterprise WAF
+
+**Detection Patterns:**
+- SQL Injection (20+ Patterns)
+- XSS (25+ Patterns)
+- Path Traversal
+- Command Injection
+- File Inclusion
+- Malicious User Agents (Scanner Detection)
+- Request Size/Length Validation
+
+**Features:**
+- Auto-Ban bei wiederholten Verstößen
+- Deep URL/HTML Decoding
+- Configurable Rules
+- Security Headers
+- Logging & Monitoring
+
+#### 3. IP Reputation & CrowdSec ✅
+**Services:**
+- `IpReputationService.php` - Multi-Source IP Check
+- `CrowdSecService.php` - CrowdSec Integration
+
+**IP Reputation Checks:**
+- Tor Exit Node Detection
+- Proxy/VPN Detection (IPQualityScore)
+- Spam List Check (Spamhaus, SpamCop, SORBS)
+- AbuseIPDB Integration
+- GeoIP Risk Assessment
+- Local History Check
+
+**CrowdSec Features:**
+- IP Decision Check
+- Attack Reporting
+- Alert Management
+- Metrics Dashboard
+
+#### 4. CDN & Performance ✅
+**Services:**
+- `CloudflareService.php` - Full Cloudflare API
+- `VarnishService.php` - Varnish Cache Control
+- `CDNManager.php` - Unified CDN Management
+
+**Cloudflare Features:**
+- Cache Purge (All, URL, Tags, Prefixes)
+- Analytics Dashboard
+- Page Rules Management
+- Development Mode
+- DNS Management
+- SSL Settings
+- Firewall Rules
+- Workers Management
+
+**Varnish Features:**
+- PURGE/BAN Requests
+- Path-based Purge
+- Regex Purge
+- Health Checks
+- Stats Endpoint
+
+**CDN Manager:**
+- Multi-Provider Support
+- Automatic Purge on Content Changes
+- Cache Warmup
+- Unified API
+
+#### 5. AI Service (Multi-Provider) ✅
+**Services:**
+- `AIService.php` - Unified AI Interface
+
+**Supported Providers:**
+- OpenAI (GPT-4, GPT-3.5)
+- Anthropic Claude (Opus, Sonnet, Haiku)
+- Ollama (Local: Llama2, Mistral, etc.)
+
+**AI Features:**
+- Article Generation
+- SEO Optimization & Scoring
+- Summary Generation
+- Tag Extraction
+- Headline Suggestions
+- Translation (Multi-Language)
+- Proofreading & Grammar
+- Sentiment Analysis
+- Related Content Suggestions
+
+**Configuration:**
+- `config/ai.php` - AI Provider Config
+- `config/cdn.php` - CDN Config
+- `config/waf.php` - WAF & Security Config
+- `config/plugins.php` - Plugin System Config
+
+---
+
 ## 🎉🎉🎉 PROJEKT ABGESCHLOSSEN - 100% COMPLETE! 🎉🎉🎉
 
 **Finaler Status:** Das Blog/CMS ist nun vollständige fertiggestellt mit allen wichtigen Features!
