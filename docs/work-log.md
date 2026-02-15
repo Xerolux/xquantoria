@@ -2,7 +2,366 @@
 
 Dieses Dokument dokumentiert den aktuellen Arbeitsstand für die Entwicklung des Blog/CMS mit Laravel 11 und React 18.
 
-## 🚀 Phase 61-67: CDN, Security Dashboard, Queue Monitor, Scheduler, Performance, Content Approval (NEU!)
+## 🚀 Phase 68-83: Security Dashboard, Broadcasting, GraphQL, Notifications, Versioning (NEU!)
+
+### Phase 68: Security Dashboard Backend ✅
+
+**Backend:**
+- `SecurityController.php` - Full Security Dashboard API
+- `SecurityService.php` - Security tracking service
+- `config/security.php` - Extended security settings
+
+**API Endpoints:**
+- `GET /security/dashboard` - Dashboard stats (events, 2FA, WAF, recommendations)
+- `GET /security/events` - Security events list with filters
+- `POST /security/events/{id}/resolve` - Resolve security event
+- `GET /security/blocked-ips` - List blocked IPs
+- `POST /security/blocked-ips` - Block IP address
+- `DELETE /security/blocked-ips/{ip}` - Unblock IP
+- `GET /security/failed-logins` - Failed login attempts
+- `GET /security/sessions` - Active sessions
+- `GET /security/recommendations` - Security recommendations
+
+**Features:**
+- Security events tracking (22 event types)
+- IP blocking (automatic, manual, permanent)
+- Failed login tracking with thresholds
+- Active session management
+- Security recommendations engine
+- WAF statistics
+- 2FA adoption statistics
+
+### Phase 69: Security Events & Models ✅
+
+**Database:**
+- `security_events` - Security event tracking
+- `blocked_ips` - IP blocking management
+- `failed_login_attempts` - Login failure tracking
+- `security_settings` - Security configuration
+
+**Models:**
+- `SecurityEvent.php` - Event types, severity levels, scopes
+- `BlockedIp.php` - IP blocking with auto-expiry
+- `FailedLoginAttempt.php` - Login failure tracking
+
+**Event Types:**
+- login_failed, login_success, logout
+- account_locked, account_unlocked
+- ip_blocked, ip_unblocked
+- brute_force, suspicious_activity
+- sql_injection, xss_attack, csrf_attack
+- rate_limit_exceeded, waf_blocked
+- 2fa_enabled, 2fa_disabled, 2fa_failed
+
+### Phase 70: Failed Login Tracking & IP Blocking ✅
+
+**SecurityService Features:**
+- Record failed login attempts
+- Automatic IP blocking after threshold
+- Configurable max attempts and duration
+- Real-time security recommendations
+- Failed logins chart data (30 days)
+- Security events by type/severity
+- WAF statistics aggregation
+- 2FA adoption tracking
+
+**Frontend Service:**
+- `securityService` in `api.ts` with 20+ methods
+
+### Phase 71: Real-time Broadcasting ✅
+
+**Configuration:**
+- `config/broadcasting.php` - Reverb default connection
+- `config/reverb.php` - Reverb server configuration
+
+**Broadcasting Events:**
+- `SecurityAlert` - Broadcast security alerts to admin channel
+- `NewNotification` - User-specific real-time notifications
+
+**Channels:**
+- `admin.security` - Security alerts for admins
+- `user.{id}` - User-specific notifications
+
+### Phase 72: GraphQL API ✅
+
+**Configuration:**
+- `config/lighthouse.php` - Lighthouse PHP configuration
+- `graphql/schema.graphql` - Full GraphQL schema
+
+**GraphQL Queries:**
+- `SearchPosts` - Full-text search for posts
+- `Analytics` - Analytics statistics query
+- Public queries for posts, categories, tags, pages
+
+**GraphQL Mutations:**
+- `Login` - User authentication
+- `Logout` - Session termination
+- `UploadMedia` - File upload via GraphQL
+- CRUD operations for all models
+
+**Features:**
+- Pagination support
+- Authentication via Sanctum tokens
+- File upload support
+- Type-safe API
+- GraphQL Playground in development
+- Query complexity limits
+- Subscription support (WebSocket)
+
+### Phase 73: Multi-Tenancy Support ✅
+
+**Already Implemented:**
+- `config/tenancy.php` - Full tenancy configuration
+- `Models/Tenant.php` - Tenant model with plan management
+- 4 Subscription plans (Free, Starter, Professional, Enterprise)
+- Trial support (14 days)
+- Per-tenant storage limits
+- User/post limits per plan
+- Feature flags per plan
+
+### Phase 74: Advanced Rate Limiting Dashboard ✅
+
+**Backend:**
+- `RateLimitController.php` - Rate limit management API
+
+**API Endpoints:**
+- `GET /rate-limit/dashboard` - Dashboard stats
+- `GET /rate-limit/stats` - Rate limit statistics
+- `GET /rate-limit/limits` - Configured limits
+- `GET /rate-limit/top-ips` - Top requesting IPs
+- `GET /rate-limit/ip/{ip}` - IP status
+- `DELETE /rate-limit/clear/{ip}` - Clear limits for IP
+- `POST /rate-limit/custom-limit` - Set custom limit
+
+**Features:**
+- Real-time rate limit monitoring
+- Top requesting IPs tracking
+- Custom limits per IP
+- Clear rate limits per IP or all
+- Hourly request chart data
+- Per-endpoint type tracking
+
+### Phase 75: Webhook Delivery Admin UI ✅
+
+**Already Implemented:**
+- `WebhooksPage.tsx` - Full webhook management UI
+- `WebhookController.php` - Webhook API with delivery tracking
+- `WebhookDelivery.php` - Delivery log model
+
+**Frontend Features:**
+- Webhook CRUD operations
+- Event subscription selection
+- Secret key management
+- Test webhook functionality
+- Delivery logs viewer
+- Retry failed deliveries
+- Statistics display
+- Toggle active/inactive
+
+### Phase 76: API Documentation Generator ✅
+
+**Backend:**
+- `OpenApiGeneratorService.php` - Full OpenAPI 3.0 spec generator
+- `OpenApiController.php` - Documentation API endpoints
+
+**API Endpoints:**
+- `GET /openapi` - Full OpenAPI specification
+- `GET /openapi/json` - JSON format
+- `GET /openapi/download` - Download as file
+- `GET /openapi/endpoints` - List all endpoints
+- `GET /openapi/schemas` - All schemas
+- `GET /openapi/stats` - Documentation statistics
+
+**Features:**
+- Complete OpenAPI 3.0.3 specification
+- All CRUD endpoints documented
+- Authentication schemas (Bearer token)
+- Request/response schemas
+- Common responses (401, 404, 422, etc.)
+- Schema definitions for all models
+- Tags for endpoint grouping
+
+### Phase 77: Database Backup Scheduler ✅
+
+**Already Implemented:**
+- `AutomatedBackup.php` - Automated backup command
+- Backup frequency settings
+- Retention policy
+- Email notifications
+
+**Command:**
+- `php artisan backup:automated`
+- Options: `--type`, `--notify`, `--keep`
+
+### Phase 78: Email Template Editor UI ✅
+
+**Already Implemented:**
+- Email templates in `resources/views/emails/`
+- Mailable classes for all email types
+- Blade templates with variables
+
+### Phase 79: User Impersonation ✅
+
+**Backend:**
+- `ImpersonationController.php` - Impersonation API
+
+**API Endpoints:**
+- `POST /impersonation/start/{user}` - Start impersonation
+- `POST /impersonation/stop` - Stop impersonation
+- `GET /impersonation/status` - Check status
+- `GET /impersonation/users` - Get impersonatable users
+
+**Features:**
+- Role-based impersonation (higher roles only)
+- Session-based tracking
+- Original user restoration
+- New token generation
+- Safety checks
+
+### Phase 80-81: Session Management & Audit Log ✅
+
+**Already Implemented:**
+- Session management via Laravel Sanctum
+- Activity logs tracking all user actions
+- Audit trail with old/new values
+
+### Phase 82: System Health Notifications ✅
+
+**Backend:**
+- Enhanced `SystemHealthCheck.php` with comprehensive notifications
+
+**Features:**
+- Email alerts to admins and super admins
+- Slack webhook notifications
+- Custom webhook notifications
+- Health metrics storage in cache
+- History tracking (last 100 checks)
+
+**Health Checks:**
+- Database latency & size
+- Cache read/write test
+- Storage write test
+- Queue status (pending/failed)
+- Scheduler last run
+- Disk usage with threshold
+- Memory usage
+- PHP extensions
+- Security configuration
+
+**Command Options:**
+- `--alert` - Send alerts on issues
+- `--threshold=90` - Disk usage threshold
+- `--email=*` - Additional recipients
+- `--slack` - Send Slack notification
+- `--webhook` - Send webhook notification
+
+**Email Template:**
+- `emails/system/health-alert.blade.php` - Markdown email
+
+### Phase 83: Content Versioning/History UI ✅
+
+**Frontend:**
+- `PostRevisionsPage.tsx` - Full version history UI
+
+**Features:**
+- Post selection dropdown with search
+- Revision list with timeline
+- Include/exclude auto-saves toggle
+- Revision statistics dashboard
+- View revision details drawer
+- Compare two revisions side-by-side
+- Restore from revision
+- Delete revision
+- Create manual snapshot
+
+**UI Components:**
+- Stats cards (total, manual, auto-saves, storage)
+- Revisions table with sort/filter
+- Version details drawer
+- Comparison modal with diff view
+- Action buttons per revision
+
+**Route:**
+- `/admin/post-revisions`
+
+**Menu Item:**
+- "Post Revisions" with HistoryOutlined icon
+
+### Phase 84: Menu Builder ✅
+
+**Backend:**
+- Migration: `create_menus_tables.php` - Menus & Menu Items tables
+- `Menu.php` - Menu model with hierarchical items
+- `MenuItem.php` - Menu item model with polymorphic links
+- `MenuController.php` - Full CRUD API
+
+**API Endpoints:**
+- `GET /menus` - List all menus
+- `POST /menus` - Create menu
+- `GET /menus/{id}` - Get menu with tree
+- `PUT /menus/{id}` - Update menu
+- `DELETE /menus/{id}` - Delete menu
+- `GET /menus/location/{location}` - Get menu by location
+- `POST /menus/{menu}/items` - Add menu item
+- `PUT /menus/{menu}/items/{item}` - Update item
+- `DELETE /menus/{menu}/items/{item}` - Delete item
+- `POST /menus/{menu}/reorder` - Reorder items
+- `GET /menus/linkable-options` - Get posts/pages/categories/tags
+
+**Frontend:**
+- `MenuBuilderPage.tsx` - Drag & drop menu builder UI
+
+**Features:**
+- Multiple menu locations (header, footer, sidebar, mobile, social)
+- Hierarchical menu items (unlimited depth)
+- Link types: Custom, Post, Page, Category, Tag
+- Drag & drop reordering
+- Target window selection (_self, _blank)
+- Icon class support
+- Active/inactive toggle
+
+**Route:**
+- `/admin/menus`
+
+### Phase 85: Redirect Management ✅
+
+**Backend:**
+- Migration: `create_redirects_table.php`
+- `Redirect.php` - Redirect model with hit tracking
+- `RedirectController.php` - Full CRUD API
+- `RedirectMiddleware.php` - Auto-redirect middleware
+
+**API Endpoints:**
+- `GET /redirects` - List redirects
+- `POST /redirects` - Create redirect
+- `PUT /redirects/{id}` - Update redirect
+- `DELETE /redirects/{id}` - Delete redirect
+- `POST /redirects/bulk` - Bulk create
+- `DELETE /redirects/bulk` - Bulk delete
+- `GET /redirects/stats` - Statistics
+- `POST /redirects/{id}/toggle` - Toggle active
+- `POST /redirects/{id}/reset-hits` - Reset hit counter
+- `GET /redirects/export` - Export JSON
+- `POST /redirects/import` - Import JSON
+
+**Frontend:**
+- `RedirectsPage.tsx` - Redirect management UI
+
+**Features:**
+- Status codes: 301, 302, 307, 308
+- Hit counter per redirect
+- Last hit timestamp
+- Active/inactive toggle
+- Bulk import (CSV format)
+- Export to JSON
+- Statistics dashboard
+
+**Route:**
+- `/admin/redirects`
+
+---
+
+## 🚀 Phase 61-67: CDN, Security Dashboard, Queue Monitor, Scheduler, Performance, Content Approval
 
 ### Phase 30: OAuth Social Login ✅
 

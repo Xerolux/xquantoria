@@ -54,6 +54,12 @@ use App\Http\Controllers\Api\V1\QueueMonitorController;
 use App\Http\Controllers\Api\V1\SchedulerController;
 use App\Http\Controllers\Api\V1\PerformanceController;
 use App\Http\Controllers\Api\V1\ContentApprovalController;
+use App\Http\Controllers\Api\V1\SecurityController;
+use App\Http\Controllers\Api\V1\RateLimitController;
+use App\Http\Controllers\Api\V1\OpenApiController;
+use App\Http\Controllers\Api\V1\ImpersonationController;
+use App\Http\Controllers\Api\V1\MenuController;
+use App\Http\Controllers\Api\V1\RedirectController;
 use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\SitemapController;
 
@@ -703,6 +709,95 @@ Route::prefix('v1')->group(function () {
             Route::post('/comments/{id}/approve', [ContentApprovalController::class, 'approveComment']);
             Route::post('/comments/{id}/reject', [ContentApprovalController::class, 'rejectComment']);
             Route::get('/history', [ContentApprovalController::class, 'history']);
+        });
+
+        // Security Dashboard - Admin only
+        Route::prefix('security')->middleware('role:admin,super_admin')->group(function () {
+            Route::get('/dashboard', [SecurityController::class, 'dashboard']);
+            Route::get('/stats', [SecurityController::class, 'stats']);
+            Route::get('/two-factor-stats', [SecurityController::class, 'twoFactorStats']);
+            Route::get('/waf-stats', [SecurityController::class, 'wafStats']);
+            Route::get('/recommendations', [SecurityController::class, 'recommendations']);
+
+            Route::get('/events', [SecurityController::class, 'events']);
+            Route::get('/events/types', [SecurityController::class, 'eventTypes']);
+            Route::get('/events/{id}', [SecurityController::class, 'event']);
+            Route::post('/events/{id}/resolve', [SecurityController::class, 'resolveEvent']);
+            Route::post('/events/resolve-all', [SecurityController::class, 'resolveAllEvents']);
+            Route::get('/events/export', [SecurityController::class, 'exportEvents']);
+
+            Route::get('/blocked-ips', [SecurityController::class, 'blockedIps']);
+            Route::get('/blocked-ips/types', [SecurityController::class, 'blockTypes']);
+            Route::post('/blocked-ips', [SecurityController::class, 'blockIp']);
+            Route::get('/check-ip/{ip}', [SecurityController::class, 'checkIp']);
+            Route::delete('/blocked-ips/{ip}', [SecurityController::class, 'unblockIp']);
+            Route::delete('/blocked-ips/id/{id}', [SecurityController::class, 'deleteBlockedIp']);
+
+            Route::get('/failed-logins', [SecurityController::class, 'failedLogins']);
+            Route::get('/failed-logins/reasons', [SecurityController::class, 'failureReasons']);
+
+            Route::get('/sessions', [SecurityController::class, 'activeSessions']);
+            Route::delete('/sessions/{sessionId}', [SecurityController::class, 'terminateSession']);
+            Route::delete('/sessions', [SecurityController::class, 'terminateAllSessions']);
+
+            Route::post('/clean-old-records', [SecurityController::class, 'cleanOldRecords']);
+        });
+
+        // Rate Limiting Dashboard - Admin only
+        Route::prefix('rate-limit')->middleware('role:admin,super_admin')->group(function () {
+            Route::get('/dashboard', [RateLimitController::class, 'dashboard']);
+            Route::get('/stats', [RateLimitController::class, 'stats']);
+            Route::get('/limits', [RateLimitController::class, 'limits']);
+            Route::get('/top-ips', [RateLimitController::class, 'topIps']);
+            Route::get('/rate-limited', [RateLimitController::class, 'rateLimited']);
+            Route::get('/ip/{ip}', [RateLimitController::class, 'getIpStatus']);
+            Route::delete('/clear/{ip}', [RateLimitController::class, 'clearForIp']);
+            Route::delete('/clear-all', [RateLimitController::class, 'clearAll']);
+            Route::post('/custom-limit', [RateLimitController::class, 'setCustomLimit']);
+            Route::delete('/custom-limit/{ip}/{type}', [RateLimitController::class, 'removeCustomLimit']);
+            Route::get('/custom-limits', [RateLimitController::class, 'getCustomLimits']);
+        });
+
+        // OpenAPI Documentation
+        Route::prefix('openapi')->group(function () {
+            Route::get('/', [OpenApiController::class, 'index']);
+            Route::get('/json', [OpenApiController::class, 'json']);
+            Route::get('/download', [OpenApiController::class, 'download']);
+            Route::get('/endpoints', [OpenApiController::class, 'endpoints']);
+            Route::get('/schemas', [OpenApiController::class, 'schemas']);
+            Route::get('/stats', [OpenApiController::class, 'stats']);
+        });
+
+        // User Impersonation - Admin only
+        Route::prefix('impersonation')->middleware('role:admin,super_admin')->group(function () {
+            Route::post('/start/{user}', [ImpersonationController::class, 'start']);
+            Route::post('/stop', [ImpersonationController::class, 'stop']);
+            Route::get('/status', [ImpersonationController::class, 'status']);
+            Route::get('/users', [ImpersonationController::class, 'getImpersonatableUsers']);
+        });
+
+        // Menu Builder
+        Route::apiResource('menus', MenuController::class);
+        Route::prefix('menus/{menu}')->group(function () {
+            Route::get('/tree', [MenuController::class, 'show']);
+            Route::post('/items', [MenuController::class, 'addItem']);
+            Route::put('/items/{item}', [MenuController::class, 'updateItem']);
+            Route::delete('/items/{item}', [MenuController::class, 'deleteItem']);
+            Route::post('/reorder', [MenuController::class, 'reorderItems']);
+        });
+        Route::get('/menus/location/{location}', [MenuController::class, 'getByLocation']);
+        Route::get('/menus/linkable-options', [MenuController::class, 'getLinkableOptions']);
+
+        // Redirect Management
+        Route::apiResource('redirects', RedirectController::class);
+        Route::prefix('redirects')->group(function () {
+            Route::post('/bulk', [RedirectController::class, 'bulkStore']);
+            Route::delete('/bulk', [RedirectController::class, 'bulkDelete']);
+            Route::get('/stats', [RedirectController::class, 'stats']);
+            Route::post('/{id}/toggle', [RedirectController::class, 'toggle']);
+            Route::post('/{id}/reset-hits', [RedirectController::class, 'resetHits']);
+            Route::get('/export', [RedirectController::class, 'export']);
+            Route::post('/import', [RedirectController::class, 'import']);
         });
     });
 

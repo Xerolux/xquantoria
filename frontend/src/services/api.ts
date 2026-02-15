@@ -1985,6 +1985,200 @@ const contentApprovalService = {
   },
 };
 
+const securityService = {
+  getDashboard() {
+    return api.get('/security/dashboard');
+  },
+
+  getStats() {
+    return api.get('/security/stats');
+  },
+
+  getTwoFactorStats() {
+    return api.get('/security/two-factor-stats');
+  },
+
+  getWafStats() {
+    return api.get('/security/waf-stats');
+  },
+
+  getRecommendations() {
+    return api.get('/security/recommendations');
+  },
+
+  getEvents(params?: Record<string, unknown>) {
+    return api.get('/security/events', { params });
+  },
+
+  getEventTypes() {
+    return api.get('/security/events/types');
+  },
+
+  getEvent(id: number) {
+    return api.get(`/security/events/${id}`);
+  },
+
+  resolveEvent(id: number) {
+    return api.post(`/security/events/${id}/resolve`);
+  },
+
+  resolveAllEvents(severity?: string) {
+    return api.post('/security/events/resolve-all', { severity });
+  },
+
+  exportEvents(params?: Record<string, unknown>) {
+    return api.get('/security/events/export', { params });
+  },
+
+  getBlockedIps(params?: Record<string, unknown>) {
+    return api.get('/security/blocked-ips', { params });
+  },
+
+  getBlockTypes() {
+    return api.get('/security/blocked-ips/types');
+  },
+
+  blockIp(data: { ip_address: string; reason: string; duration_minutes?: number; is_permanent?: boolean }) {
+    return api.post('/security/blocked-ips', data);
+  },
+
+  checkIp(ip: string) {
+    return api.get(`/security/check-ip/${ip}`);
+  },
+
+  unblockIp(ip: string) {
+    return api.delete(`/security/blocked-ips/${ip}`);
+  },
+
+  deleteBlockedIp(id: number) {
+    return api.delete(`/security/blocked-ips/id/${id}`);
+  },
+
+  getFailedLogins(params?: Record<string, unknown>) {
+    return api.get('/security/failed-logins', { params });
+  },
+
+  getFailureReasons() {
+    return api.get('/security/failed-logins/reasons');
+  },
+
+  getActiveSessions() {
+    return api.get('/security/sessions');
+  },
+
+  terminateSession(sessionId: string) {
+    return api.delete(`/security/sessions/${sessionId}`);
+  },
+
+  terminateAllSessions() {
+    return api.delete('/security/sessions');
+  },
+
+  cleanOldRecords(days: number = 90) {
+    return api.post('/security/clean-old-records', { days });
+  },
+};
+
+const menuService = {
+  getAll(params?: Record<string, unknown>) {
+    return api.get('/menus', { params });
+  },
+
+  get(id: number) {
+    return api.get(`/menus/${id}`);
+  },
+
+  create(data: Record<string, unknown>) {
+    return api.post('/menus', data);
+  },
+
+  update(id: number, data: Record<string, unknown>) {
+    return api.put(`/menus/${id}`, data);
+  },
+
+  delete(id: number) {
+    return api.delete(`/menus/${id}`);
+  },
+
+  getByLocation(location: string) {
+    return api.get(`/menus/location/${location}`);
+  },
+
+  getTree(id: number) {
+    return api.get(`/menus/${id}`);
+  },
+
+  addItem(menuId: number, data: Record<string, unknown>) {
+    return api.post(`/menus/${menuId}/items`, data);
+  },
+
+  updateItem(menuId: number, itemId: number, data: Record<string, unknown>) {
+    return api.put(`/menus/${menuId}/items/${itemId}`, data);
+  },
+
+  deleteItem(menuId: number, itemId: number) {
+    return api.delete(`/menus/${menuId}/items/${itemId}`);
+  },
+
+  reorder(menuId: number, items: Array<{ id: number; order: number; parent_id: number | null }>) {
+    return api.post(`/menus/${menuId}/reorder`, { items });
+  },
+
+  getLinkableOptions(type: string, search?: string) {
+    return api.get('/menus/linkable-options', { params: { type, search } });
+  },
+};
+
+const redirectService = {
+  getAll(params?: Record<string, unknown>) {
+    return api.get('/redirects', { params });
+  },
+
+  get(id: number) {
+    return api.get(`/redirects/${id}`);
+  },
+
+  create(data: Record<string, unknown>) {
+    return api.post('/redirects', data);
+  },
+
+  update(id: number, data: Record<string, unknown>) {
+    return api.put(`/redirects/${id}`, data);
+  },
+
+  delete(id: number) {
+    return api.delete(`/redirects/${id}`);
+  },
+
+  bulkCreate(redirects: Array<Record<string, unknown>>) {
+    return api.post('/redirects/bulk', { redirects });
+  },
+
+  bulkDelete(ids: number[]) {
+    return api.delete('/redirects/bulk', { data: { ids } });
+  },
+
+  getStats() {
+    return api.get('/redirects/stats');
+  },
+
+  toggle(id: number) {
+    return api.post(`/redirects/${id}/toggle`);
+  },
+
+  resetHits(id: number) {
+    return api.post(`/redirects/${id}/reset-hits`);
+  },
+
+  export() {
+    return api.get('/redirects/export');
+  },
+
+  import(redirects: Array<Record<string, unknown>>) {
+    return api.post('/redirects/import', { redirects });
+  },
+};
+
 export default api;
 export {
   authService,
@@ -2030,4 +2224,7 @@ export {
   schedulerService,
   performanceService,
   contentApprovalService,
+  securityService,
+  menuService,
+  redirectService,
 };

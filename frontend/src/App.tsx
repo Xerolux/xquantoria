@@ -59,6 +59,9 @@ const QueueMonitorPage = lazy(() => import('./pages/QueueMonitorPage'));
 const SchedulerPage = lazy(() => import('./pages/SchedulerPage'));
 const PerformancePage = lazy(() => import('./pages/PerformancePage'));
 const ContentApprovalPage = lazy(() => import('./pages/ContentApprovalPage'));
+const PostRevisionsPage = lazy(() => import('./pages/PostRevisionsPage'));
+const MenuBuilderPage = lazy(() => import('./pages/MenuBuilderPage'));
+const RedirectsPage = lazy(() => import('./pages/RedirectsPage'));
 
 // Components
 const MainLayout = lazy(() => import('./components/Layout/MainLayout'));
@@ -453,6 +456,30 @@ function App() {
                 element={
                   <Suspense fallback={<PageLoader />}>
                     <ContentApprovalPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="post-revisions"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PostRevisionsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="menus"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <MenuBuilderPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="redirects"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <RedirectsPage />
                   </Suspense>
                 }
               />

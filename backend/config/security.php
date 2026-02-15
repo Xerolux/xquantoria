@@ -48,4 +48,59 @@ return [
         'upload_max_attempts' => env('RATE_LIMIT_UPLOAD', 20),
         'upload_decay_minutes' => env('RATE_LIMIT_UPLOAD_DECAY', 1),
     ],
+
+    'failed_login' => [
+        'enabled' => env('SECURITY_FAILED_LOGIN_TRACKING', true),
+        'max_attempts' => env('SECURITY_MAX_LOGIN_ATTEMPTS', 5),
+        'decay_minutes' => env('SECURITY_LOGIN_DECAY_MINUTES', 60),
+    ],
+
+    'max_failed_attempts' => env('SECURITY_MAX_FAILED_ATTEMPTS', 5),
+    'block_duration_minutes' => env('SECURITY_BLOCK_DURATION_MINUTES', 60),
+    'failed_attempts_window_minutes' => env('SECURITY_FAILED_ATTEMPTS_WINDOW', 60),
+
+    'ip_blocking' => [
+        'enabled' => env('SECURITY_IP_BLOCKING_ENABLED', true),
+        'auto_block' => env('SECURITY_AUTO_BLOCK_ENABLED', true),
+        'auto_block_threshold' => env('SECURITY_AUTO_BLOCK_THRESHOLD', 10),
+        'default_duration' => env('SECURITY_DEFAULT_BLOCK_DURATION', 60),
+    ],
+
+    'two_factor' => [
+        'required_for_admin' => env('SECURITY_2FA_REQUIRED_ADMIN', false),
+        'required_for_all' => env('SECURITY_2FA_REQUIRED_ALL', false),
+        'remember_duration' => env('SECURITY_2FA_REMEMBER_MINUTES', 1440),
+    ],
+
+    'password' => [
+        'min_length' => env('SECURITY_PASSWORD_MIN_LENGTH', 8),
+        'require_uppercase' => env('SECURITY_PASSWORD_REQUIRE_UPPERCASE', true),
+        'require_lowercase' => env('SECURITY_PASSWORD_REQUIRE_LOWERCASE', true),
+        'require_numbers' => env('SECURITY_PASSWORD_REQUIRE_NUMBERS', true),
+        'require_symbols' => env('SECURITY_PASSWORD_REQUIRE_SYMBOLS', false),
+        'max_age_days' => env('SECURITY_PASSWORD_MAX_AGE_DAYS', 90),
+        'prevent_reuse_count' => env('SECURITY_PASSWORD_PREVENT_REUSE', 5),
+    ],
+
+    'session' => [
+        'lifetime' => env('SESSION_LIFETIME', 120),
+        'single_device' => env('SECURITY_SINGLE_DEVICE_SESSION', false),
+        'track_ip' => env('SECURITY_SESSION_TRACK_IP', true),
+        'track_user_agent' => env('SECURITY_SESSION_TRACK_UA', true),
+    ],
+
+    'audit' => [
+        'enabled' => env('SECURITY_AUDIT_ENABLED', true),
+        'retention_days' => env('SECURITY_AUDIT_RETENTION_DAYS', 90),
+        'log_successful_logins' => env('SECURITY_LOG_SUCCESSFUL_LOGINS', true),
+        'log_failed_logins' => env('SECURITY_LOG_FAILED_LOGINS', true),
+        'log_permission_changes' => env('SECURITY_LOG_PERMISSION_CHANGES', true),
+        'log_password_changes' => env('SECURITY_LOG_PASSWORD_CHANGES', true),
+    ],
+
+    'notifications' => [
+        'email_on_blocked_ip' => env('SECURITY_NOTIFY_BLOCKED_IP', false),
+        'email_on_brute_force' => env('SECURITY_NOTIFY_BRUTE_FORCE', true),
+        'email_on_critical_event' => env('SECURITY_NOTIFY_CRITICAL', true),
+    ],
 ];

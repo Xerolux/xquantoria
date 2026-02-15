@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'default' => env('BROADCAST_CONNECTION', 'pusher'),
+    'default' => env('BROADCAST_CONNECTION', 'reverb'),
 
     'connections' => [
         'pusher' => [

@@ -42,6 +42,9 @@ import {
   DashboardOutlined,
   SyncOutlined,
   ClockCircleOutlined,
+  HistoryOutlined,
+  AppstoreOutlined,
+  SwapOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
@@ -121,6 +124,9 @@ const MainLayout: React.FC = () => {
     { key: '/scheduler', icon: <ClockCircleOutlined />, label: 'Scheduler' },
     { key: '/performance', icon: <DashboardOutlined />, label: 'Performance' },
     { key: '/content-approval', icon: <CheckCircleOutlined />, label: 'Content Approval' },
+    { key: '/post-revisions', icon: <HistoryOutlined />, label: 'Post Revisions' },
+    { key: '/menus', icon: <AppstoreOutlined />, label: 'Menu Builder' },
+    { key: '/redirects', icon: <SwapOutlined />, label: 'Redirects' },
     { key: '/profile', icon: <UserOutlined />, label: 'Profile' },
   ];
 
