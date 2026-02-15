@@ -3,6 +3,7 @@ import { Form, Input, Button, Card, Typography, message, Divider, Checkbox, Aler
 import { LockOutlined, MailOutlined, DashboardOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import OAuthButtons from '../components/OAuthButtons';
 
 const { Title, Text } = Typography;
 
@@ -146,8 +147,10 @@ const LoginPage: React.FC = () => {
           description="Die &quot;Angemeldet bleiben&quot; Funktion speichert ein sicheres Token für 30 Tage. Verwende dies nur auf vertrauenswürdigen Geräten."
           type="info"
           showIcon
-          style={{ fontSize: 12 }}
+          style={{ fontSize: 12, marginBottom: 16 }}
         />
+
+        <OAuthButtons mode="login" />
       </Card>
     </div>
   );

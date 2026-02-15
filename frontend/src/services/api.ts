@@ -1780,6 +1780,211 @@ const paymentService = {
   },
 };
 
+const dashboardService = {
+  async getStats() {
+    const { data } = await api.get('/dashboard/stats');
+    return data;
+  },
+};
+
+const notificationService = {
+  async getAll(params?: { limit?: number }) {
+    const { data } = await api.get('/notifications', { params });
+    return data;
+  },
+
+  async getUnreadCount() {
+    const { data } = await api.get('/notifications/unread-count');
+    return data;
+  },
+
+  async markAsRead(id: number) {
+    const { data } = await api.post(`/notifications/${id}/read`);
+    return data;
+  },
+
+  async markAllAsRead() {
+    const { data } = await api.post('/notifications/read-all');
+    return data;
+  },
+
+  async delete(id: number) {
+    const { data } = await api.delete(`/notifications/${id}`);
+    return data;
+  },
+};
+
+const elasticsearchService = {
+  async search(params: { q: string; index?: string; size?: number; from?: number; filters?: Record<string, unknown> }) {
+    const { data } = await api.get('/elasticsearch/search', { params });
+    return data;
+  },
+
+  async suggest(params: { q: string; index?: string; size?: number }) {
+    const { data } = await api.get('/elasticsearch/suggest', { params });
+    return data;
+  },
+
+  async getStatus() {
+    const { data } = await api.get('/elasticsearch/status');
+    return data;
+  },
+
+  async indexDocument(index: string, id: string | number, docData: Record<string, unknown>) {
+    const { data } = await api.post('/elasticsearch/index', { index, id, data: docData });
+    return data;
+  },
+
+  async bulkIndex(index: string, documents: Record<string, unknown>) {
+    const { data } = await api.post('/elasticsearch/bulk', { index, documents });
+    return data;
+  },
+
+  async deleteDocument(index: string, id: string | number) {
+    const { data } = await api.delete('/elasticsearch/document', { data: { index, id } });
+    return data;
+  },
+
+  async syncIndex(index: string) {
+    const { data } = await api.post('/elasticsearch/sync', { index });
+    return data;
+  },
+
+  async createIndices() {
+    const { data } = await api.post('/elasticsearch/indices');
+    return data;
+  },
+
+  async deleteIndices() {
+    const { data } = await api.delete('/elasticsearch/indices');
+    return data;
+  },
+};
+
+const queueMonitorService = {
+  getIndex() {
+    return api.get('/queue-monitor');
+  },
+
+  getQueue(queue: string) {
+    return api.get(`/queue-monitor/${queue}`);
+  },
+
+  retryFailedJob(id: number) {
+    return api.post(`/queue-monitor/failed/${id}/retry`);
+  },
+
+  forgetFailedJob(id: number) {
+    return api.delete(`/queue-monitor/failed/${id}`);
+  },
+
+  flushFailedJobs() {
+    return api.delete('/queue-monitor/failed');
+  },
+
+  clearQueue(queue: string) {
+    return api.delete(`/queue-monitor/${queue}/clear`);
+  },
+
+  pauseQueue(queue: string) {
+    return api.post(`/queue-monitor/${queue}/pause`);
+  },
+
+  resumeQueue(queue: string) {
+    return api.post(`/queue-monitor/${queue}/resume`);
+  },
+};
+
+const schedulerService = {
+  getIndex() {
+    return api.get('/scheduler');
+  },
+
+  runScheduler(force = false) {
+    return api.post('/scheduler/run', { force });
+  },
+
+  runTask(task: string) {
+    return api.post(`/scheduler/tasks/${task}/run`);
+  },
+
+  enable() {
+    return api.post('/scheduler/enable');
+  },
+
+  disable() {
+    return api.post('/scheduler/disable');
+  },
+
+  clearHistory() {
+    return api.delete('/scheduler/history');
+  },
+};
+
+const performanceService = {
+  getIndex() {
+    return api.get('/performance');
+  },
+
+  getDatabase() {
+    return api.get('/performance/database');
+  },
+
+  getCache() {
+    return api.get('/performance/cache');
+  },
+
+  clearCache(type = 'all') {
+    return api.post('/performance/cache/clear', { type });
+  },
+
+  optimize() {
+    return api.post('/performance/optimize');
+  },
+
+  getOpcache() {
+    return api.get('/performance/opcache');
+  },
+
+  resetOpcache() {
+    return api.post('/performance/opcache/reset');
+  },
+};
+
+const contentApprovalService = {
+  getPending(params?: Record<string, unknown>) {
+    return api.get('/content-approval/pending', { params });
+  },
+
+  getStats() {
+    return api.get('/content-approval/stats');
+  },
+
+  approvePost(id: number, feedback?: string) {
+    return api.post(`/content-approval/posts/${id}/approve`, { feedback });
+  },
+
+  rejectPost(id: number, reason: string) {
+    return api.post(`/content-approval/posts/${id}/reject`, { reason });
+  },
+
+  requestChanges(id: number, feedback: string) {
+    return api.post(`/content-approval/posts/${id}/request-changes`, { feedback });
+  },
+
+  approveComment(id: number) {
+    return api.post(`/content-approval/comments/${id}/approve`);
+  },
+
+  rejectComment(id: number, reason?: string) {
+    return api.post(`/content-approval/comments/${id}/reject`, { reason });
+  },
+
+  getHistory(params?: Record<string, unknown>) {
+    return api.get('/content-approval/history', { params });
+  },
+};
+
 export default api;
 export {
   authService,
@@ -1818,4 +2023,11 @@ export {
   importExportService,
   legalService,
   paymentService,
+  dashboardService,
+  notificationService,
+  elasticsearchService,
+  queueMonitorService,
+  schedulerService,
+  performanceService,
+  contentApprovalService,
 };

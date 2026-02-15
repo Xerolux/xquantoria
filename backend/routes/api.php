@@ -47,6 +47,13 @@ use App\Http\Controllers\Api\V1\PushNotificationController;
 use App\Http\Controllers\Api\V1\ABTestController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\MobileAppController;
+use App\Http\Controllers\Api\V1\DashboardController;
+use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\ElasticsearchController;
+use App\Http\Controllers\Api\V1\QueueMonitorController;
+use App\Http\Controllers\Api\V1\SchedulerController;
+use App\Http\Controllers\Api\V1\PerformanceController;
+use App\Http\Controllers\Api\V1\ContentApprovalController;
 use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\SitemapController;
 
@@ -597,6 +604,31 @@ Route::prefix('v1')->group(function () {
             Route::post('/history/read-all', [PushNotificationController::class, 'markAllAsRead']);
         });
 
+        // Dashboard Stats
+        Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+
+        // Notifications
+        Route::prefix('notifications')->group(function () {
+            Route::get('/', [NotificationController::class, 'index']);
+            Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+            Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
+            Route::post('/read-all', [NotificationController::class, 'markAllAsRead']);
+            Route::delete('/{id}', [NotificationController::class, 'destroy']);
+        });
+
+        // Elasticsearch
+        Route::prefix('elasticsearch')->group(function () {
+            Route::get('/search', [ElasticsearchController::class, 'search']);
+            Route::get('/suggest', [ElasticsearchController::class, 'suggest']);
+            Route::get('/status', [ElasticsearchController::class, 'status']);
+            Route::post('/index', [ElasticsearchController::class, 'indexDocument']);
+            Route::post('/bulk', [ElasticsearchController::class, 'bulkIndex']);
+            Route::delete('/document', [ElasticsearchController::class, 'deleteDocument']);
+            Route::post('/sync', [ElasticsearchController::class, 'syncIndex']);
+            Route::post('/indices', [ElasticsearchController::class, 'createIndices']);
+            Route::delete('/indices', [ElasticsearchController::class, 'deleteIndices']);
+        });
+
         // A/B Testing
         Route::prefix('ab-tests')->middleware('role:admin,super_admin')->group(function () {
             Route::get('/', [ABTestController::class, 'index']);
@@ -626,6 +658,51 @@ Route::prefix('v1')->group(function () {
             Route::get('/model-types', [AuditLogController::class, 'getModelTypes']);
             Route::get('/stats', [AuditLogController::class, 'getStats']);
             Route::post('/clean', [AuditLogController::class, 'cleanOld']);
+        });
+
+        // Queue Monitor - Admin only
+        Route::prefix('queue-monitor')->middleware('role:admin,super_admin')->group(function () {
+            Route::get('/', [QueueMonitorController::class, 'index']);
+            Route::get('/{queue}', [QueueMonitorController::class, 'show']);
+            Route::post('/failed/{id}/retry', [QueueMonitorController::class, 'retry']);
+            Route::delete('/failed/{id}', [QueueMonitorController::class, 'forget']);
+            Route::delete('/failed', [QueueMonitorController::class, 'flush']);
+            Route::delete('/{queue}/clear', [QueueMonitorController::class, 'clear']);
+            Route::post('/{queue}/pause', [QueueMonitorController::class, 'pause']);
+            Route::post('/{queue}/resume', [QueueMonitorController::class, 'resume']);
+        });
+
+        // Scheduler - Admin only
+        Route::prefix('scheduler')->middleware('role:admin,super_admin')->group(function () {
+            Route::get('/', [SchedulerController::class, 'index']);
+            Route::post('/run', [SchedulerController::class, 'run']);
+            Route::post('/tasks/{task}/run', [SchedulerController::class, 'runTask']);
+            Route::post('/enable', [SchedulerController::class, 'enable']);
+            Route::post('/disable', [SchedulerController::class, 'disable']);
+            Route::delete('/history', [SchedulerController::class, 'clearHistory']);
+        });
+
+        // Performance - Admin only
+        Route::prefix('performance')->middleware('role:admin,super_admin')->group(function () {
+            Route::get('/', [PerformanceController::class, 'index']);
+            Route::get('/database', [PerformanceController::class, 'database']);
+            Route::get('/cache', [PerformanceController::class, 'cache']);
+            Route::post('/cache/clear', [PerformanceController::class, 'clearCache']);
+            Route::post('/optimize', [PerformanceController::class, 'optimize']);
+            Route::get('/opcache', [PerformanceController::class, 'opcache']);
+            Route::post('/opcache/reset', [PerformanceController::class, 'resetOpcache']);
+        });
+
+        // Content Approval Workflow
+        Route::prefix('content-approval')->middleware('role:admin,super_admin,editor')->group(function () {
+            Route::get('/pending', [ContentApprovalController::class, 'pending']);
+            Route::get('/stats', [ContentApprovalController::class, 'stats']);
+            Route::post('/posts/{id}/approve', [ContentApprovalController::class, 'approve']);
+            Route::post('/posts/{id}/reject', [ContentApprovalController::class, 'reject']);
+            Route::post('/posts/{id}/request-changes', [ContentApprovalController::class, 'requestChanges']);
+            Route::post('/comments/{id}/approve', [ContentApprovalController::class, 'approveComment']);
+            Route::post('/comments/{id}/reject', [ContentApprovalController::class, 'rejectComment']);
+            Route::get('/history', [ContentApprovalController::class, 'history']);
         });
     });
 

@@ -13,6 +13,7 @@ interface AuthState {
   logout: () => void;
   updateUser: (user: User) => void;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
+  loginWithToken: (token: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -45,6 +46,17 @@ export const useAuthStore = create<AuthState>()(
 
         const { user, token } = response.data;
         localStorage.setItem('auth_token', token);
+        set({ user, token, isAuthenticated: true });
+      },
+
+      loginWithToken: async (token: string) => {
+        localStorage.setItem('auth_token', token);
+        
+        const response = await axios.get(`${API_BASE_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const user = response.data;
         set({ user, token, isAuthenticated: true });
       },
     }),

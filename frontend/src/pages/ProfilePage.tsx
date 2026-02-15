@@ -17,6 +17,8 @@ import {
   Progress,
   Table,
   Tooltip,
+  Popconfirm,
+  Avatar,
 } from 'antd';
 import {
   SafetyOutlined,
@@ -33,13 +35,34 @@ import {
   LaptopOutlined,
   TabletOutlined,
   ClockCircleOutlined,
+  LinkOutlined,
+  DisconnectOutlined,
+  GoogleOutlined,
+  GithubOutlined,
+  FacebookOutlined,
+  TwitterOutlined,
+  LinkedinOutlined,
+  AppleOutlined,
 } from '@ant-design/icons';
 import { useAuthStore } from '../store/authStore';
 import { twoFactorService, sessionService } from '../services/api';
+import OAuthButtons from '../components/OAuthButtons';
+import axios from 'axios';
 import type { UserSession } from '../types/api';
 import dayjs from 'dayjs';
 
 const { Text } = Typography;
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+
+interface SocialAccount {
+  provider: string;
+  provider_id: string;
+  name: string;
+  email: string;
+  avatar: string | null;
+  linked_at: string;
+}
 
 interface RecoveryCode {
   code: string;
@@ -75,10 +98,72 @@ const ProfilePage: React.FC = () => {
   const [recoveryCodesModalVisible, setRecoveryCodesModalVisible] = useState(false);
   const [displayRecoveryCodes, setDisplayRecoveryCodes] = useState<RecoveryCode[]>([]);
 
+  // Social Accounts
+  const [socialAccounts, setSocialAccounts] = useState<SocialAccount[]>([]);
+  const [socialLoading, setSocialLoading] = useState<string | null>(null);
+
   useEffect(() => {
     fetchTwoFactorStatus();
     fetchSessions();
+    fetchSocialAccounts();
   }, []);
+
+  const fetchSocialAccounts = async () => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/oauth/providers`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
+      });
+      setSocialAccounts(data.providers || []);
+    } catch (error) {
+      console.error('Failed to fetch social accounts');
+    }
+  };
+
+  const handleUnlinkProvider = async (provider: string) => {
+    setSocialLoading(provider);
+    try {
+      await axios.delete(`${API_BASE_URL}/oauth/${provider}/unlink`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
+      });
+      message.success(`${provider} erfolgreich getrennt`);
+      fetchSocialAccounts();
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      message.error(err.response?.data?.message || 'Fehler beim Trennen');
+    } finally {
+      setSocialLoading(null);
+    }
+  };
+
+  const getProviderIcon = (provider: string) => {
+    const icons: Record<string, React.ReactNode> = {
+      google: <GoogleOutlined />,
+      github: <GithubOutlined />,
+      facebook: <FacebookOutlined />,
+      twitter: <TwitterOutlined />,
+      linkedin: <LinkedinOutlined />,
+      apple: <AppleOutlined />,
+    };
+    return icons[provider] || <LinkOutlined />;
+  };
+
+  const getProviderColor = (provider: string) => {
+    const colors: Record<string, string> = {
+      google: '#DB4437',
+      github: '#333333',
+      facebook: '#1877F2',
+      twitter: '#1DA1F2',
+      linkedin: '#0A66C2',
+      apple: '#000000',
+    };
+    return colors[provider] || '#1890ff';
+  };
+
+  const isProviderLinked = (provider: string) => {
+    return socialAccounts.some((acc) => acc.provider === provider);
+  };
+
+  const providers = ['google', 'github', 'facebook', 'twitter', 'linkedin', 'apple'];
 
   const fetchTwoFactorStatus = async () => {
     try {
@@ -454,6 +539,125 @@ const ProfilePage: React.FC = () => {
                 }
               />
             </Table>
+          </Card>
+        </Col>
+      </Row>
+
+      <Divider />
+
+      <Row gutter={16}>
+        <Col span={24}>
+          <Card
+            title={
+              <Space>
+                <LinkOutlined />
+                <span>Verknüpfte Accounts</span>
+              </Space>
+            }
+          >
+            <Space direction="vertical" style={{ width: '100%' }} size="middle">
+              <Alert
+                type="info"
+                message="Verknüpfe deine Social Media Accounts"
+                description="Verknüpfe externe Accounts für schnelleres Einloggen. Du kannst dich dann mit einem Klick anmelden."
+                showIcon
+              />
+
+              <List
+                itemLayout="horizontal"
+                dataSource={providers}
+                renderItem={(provider) => {
+                  const linked = socialAccounts.find((acc) => acc.provider === provider);
+
+                  return (
+                    <List.Item
+                      actions={[
+                        linked ? (
+                          <Popconfirm
+                            key="unlink"
+                            title={`${provider} wirklich trennen?`}
+                            description="Du kannst dich danach nicht mehr mit diesem Account einloggen."
+                            onConfirm={() => handleUnlinkProvider(provider)}
+                            okText="Trennen"
+                            cancelText="Abbrechen"
+                          >
+                            <Button
+                              danger
+                              size="small"
+                              icon={<DisconnectOutlined />}
+                              loading={socialLoading === provider}
+                            >
+                              Trennen
+                            </Button>
+                          </Popconfirm>
+                        ) : (
+                          <Button
+                            key="link"
+                            type="primary"
+                            size="small"
+                            icon={<LinkOutlined />}
+                            loading={socialLoading === provider}
+                            style={{ backgroundColor: getProviderColor(provider), borderColor: getProviderColor(provider) }}
+                            onClick={() => {
+                              setSocialLoading(provider);
+                              axios.get(`${API_BASE_URL}/oauth/${provider}/redirect`, {
+                                headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` },
+                              }).then(({ data }) => {
+                                const popup = window.open(data.redirect_url, `oauth-${provider}`, 'width=600,height=700');
+                                const handleMessage = (event: MessageEvent) => {
+                                  if (event.origin !== window.location.origin) return;
+                                  if (event.data?.type === 'oauth-callback') {
+                                    window.removeEventListener('message', handleMessage);
+                                    popup?.close();
+                                    setSocialLoading(null);
+                                    if (event.data.success) {
+                                      message.success(`${provider} erfolgreich verknüpft`);
+                                      fetchSocialAccounts();
+                                    }
+                                  }
+                                };
+                                window.addEventListener('message', handleMessage);
+                              }).catch(() => {
+                                setSocialLoading(null);
+                                message.error('Verknüpfung fehlgeschlagen');
+                              });
+                            }}
+                          >
+                            Verknüpfen
+                          </Button>
+                        ),
+                      ]}
+                    >
+                      <List.Item.Meta
+                        avatar={
+                          <Avatar
+                            style={{ backgroundColor: getProviderColor(provider) }}
+                            icon={getProviderIcon(provider)}
+                          >
+                            {linked?.avatar && <img src={linked.avatar} alt={provider} />}
+                          </Avatar>
+                        }
+                        title={
+                          <Space>
+                            <span style={{ textTransform: 'capitalize' }}>{provider}</span>
+                            {linked && <Tag color="success">Verknüpft</Tag>}
+                          </Space>
+                        }
+                        description={
+                          linked ? (
+                            <span>
+                              {linked.name} ({linked.email})
+                            </span>
+                          ) : (
+                            <span style={{ color: '#999' }}>Nicht verknüpft</span>
+                          )
+                        }
+                      />
+                    </List.Item>
+                  );
+                }}
+              />
+            </Space>
           </Card>
         </Col>
       </Row>

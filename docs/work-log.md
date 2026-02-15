@@ -2,7 +2,7 @@
 
 Dieses Dokument dokumentiert den aktuellen Arbeitsstand für die Entwicklung des Blog/CMS mit Laravel 11 und React 18.
 
-## 🚀 Phase 30-35: OAuth, Push, A/B Testing, Mobile API, Security, i18n (NEU!)
+## 🚀 Phase 61-67: CDN, Security Dashboard, Queue Monitor, Scheduler, Performance, Content Approval (NEU!)
 
 ### Phase 30: OAuth Social Login ✅
 
@@ -101,6 +101,530 @@ Dieses Dokument dokumentiert den aktuellen Arbeitsstand für die Entwicklung des
 - Nginx
 - Laravel Scheduler
 - Queue Workers (2x)
+
+### Phase 38: Frontend OAuth Buttons ✅
+
+**Frontend:**
+- `components/OAuthButtons.tsx` - Social Login Buttons
+
+**Features:**
+- 6 OAuth Provider (Google, GitHub, Facebook, Twitter, LinkedIn, Apple)
+- Popup-basierter OAuth Flow
+- Loading States pro Provider
+- Account Linking Support
+- Error Handling mit Callbacks
+- Token-basierte Authentifizierung
+- Auto-Redirect nach Login
+
+**Integration:**
+- LoginPage.tsx Integration
+- ProfilePage.tsx Account Linking
+
+### Phase 39: Frontend Push Settings UI ✅
+
+**Frontend:**
+- `pages/PushSettingsPage.tsx` - Push Notification Management
+
+**Features:**
+- WebPush API Integration
+- VAPID Key Handling
+- Subscribe/Unsubscribe
+- Device Management (List, Toggle, Delete)
+- Notification History
+- Read/Unread Status
+- Browser Support Detection
+- Statistics Dashboard
+- Device Icons (Mobile/Desktop)
+
+**Statistics:**
+- Total Subscriptions
+- Enabled Subscriptions
+- Unread Notifications
+- Total Notifications
+
+### Phase 40: Error Boundaries ✅
+
+**Frontend:**
+- `components/ErrorBoundaries.tsx` - Multiple Error Boundaries
+
+**Error Boundaries:**
+- `ErrorBoundary` - Base Error Boundary
+- `AsyncErrorBoundary` - Async/Loading Errors
+- `NetworkErrorBoundary` - Network/Offline Errors
+- `QueryErrorBoundary` - API Query Errors
+- `RouteErrorBoundary` - Route Errors
+- `ComponentErrorBoundary` - Component Errors
+
+**Features:**
+- Dev Mode Error Details (Stack, Component Stack)
+- Production Error Logging
+- Retry/Reload Buttons
+- Offline Detection
+- HTTP Status Code Handling (401, 404, 500)
+- Custom Fallback Support
+- Error Callbacks
+
+### Phase 41: Elasticsearch Service ✅
+
+**Backend:**
+- `Services/ElasticsearchService.php` - Full Elasticsearch Integration
+- `config/elasticsearch.php` - Configuration
+
+**Features:**
+- CRUD Operations (Index, Get, Update, Delete)
+- Bulk Indexing
+- Advanced Search (Multi-Match, Bool, Range, Term)
+- Multi-Search
+- Aggregations
+- Suggestions (Autocomplete)
+- Index Management (Create, Delete, Mapping)
+- Health & Stats Monitoring
+- Reindex Support
+- Query Builder Helpers
+
+**Predefined Indices:**
+- Posts (title, content, excerpt, categories, tags)
+- Products (name, description, price, category)
+- Media (filename, alt_text, mime_type)
+- Users (name, email, role)
+
+**Configuration:**
+- Multi-Host Support
+- SSL/TLS
+- Basic Auth / API Key
+- Index Prefix
+- Custom Analyzers
+
+### Phase 42: OAuth Callback Page ✅
+
+**Frontend:**
+- `pages/OAuthCallbackPage.tsx` - OAuth Popup Callback Handler
+
+**Features:**
+- Provider-spezifische Callbacks
+- Popup-to-Window Kommunikation (postMessage)
+- Token Storage
+- Error Handling
+- Auto-Close nach Success/Error
+- Fallback für Non-Popup Flow
+
+### Phase 43: Elasticsearch Controller ✅
+
+**Backend:**
+- `Controllers/Api/V1/ElasticsearchController.php` - Search API
+
+**Endpoints:**
+- `GET /elasticsearch/search` - Unified Search
+- `GET /elasticsearch/suggest` - Autocomplete
+- `POST /elasticsearch/index` - Index Document
+- `POST /elasticsearch/bulk` - Bulk Index
+- `DELETE /elasticsearch/document` - Delete Document
+- `POST /elasticsearch/sync` - Sync Index from DB
+- `GET /elasticsearch/status` - Health & Stats
+- `POST /elasticsearch/indices` - Create Indices
+- `DELETE /elasticsearch/indices` - Delete Indices
+
+**Features:**
+- Multi-Index Search (Posts, Products, Media, Users)
+- Fuzzy Search
+- Highlighting
+- Filters & Sorting
+- Pagination
+- Index Syncing from Database
+- Bulk Operations
+
+### Phase 44: Profile Page OAuth Linking ✅
+
+**Frontend:**
+- `pages/ProfilePage.tsx` - Extended with OAuth Linking
+
+**Features:**
+- List Linked Social Accounts
+- Link/Unlink Providers
+- Provider Icons & Colors
+- Avatar Display
+- Status Badges
+- Confirmation Dialogs
+
+**Providers:**
+- Google, GitHub, Facebook, Twitter, LinkedIn, Apple
+
+### Phase 45: Routes & Navigation Update ✅
+
+**Frontend:**
+- `App.tsx` - New Routes added
+
+**New Routes:**
+- `/admin/profile` - User Profile
+- `/admin/push-settings` - Push Notifications
+- `/oauth/:provider/callback` - OAuth Callback
+
+**Integration:**
+- PushSettingsPage lazy loaded
+- ProfilePage lazy loaded
+- OAuthCallbackPage standalone
+
+### Phase 46: Elasticsearch Search Frontend ✅
+
+**Frontend:**
+- `pages/ElasticsearchSearchPage.tsx` - Full Elasticsearch Search UI
+
+**Features:**
+- Multi-Index Search (All, Posts, Products, Media, Users)
+- Debounced Search (300ms)
+- Highlighted Results
+- Category Tabs
+- Pagination
+- Score Display
+- Result Cards with Metadata
+
+### Phase 47: Webhook Migration & Model ✅
+
+**Backend:**
+- `migrations/..._create_webhooks_tables.php` - Webhooks + Deliveries
+- `Models/Webhook.php` - Webhook Model (exists, extended)
+- `Models/WebhookDelivery.php` - Delivery Model
+
+**Features:**
+- Encrypted Secrets
+- Event-based Triggering
+- Delivery Tracking
+- Retry System with Exponential Backoff
+- Success/Failure Stats
+
+### Phase 48: Notification Bell Component ✅
+
+**Frontend:**
+- `components/NotificationBell.tsx` - Real-time Notifications
+
+**Features:**
+- Badge Count
+- Popover List
+- Mark as Read
+- Mark All as Read
+- Delete Notifications
+- Type Icons (Info, Success, Warning, Error)
+- Polling (60s)
+- Action URLs
+
+### Phase 49: Keyboard Shortcuts System ✅
+
+**Frontend:**
+- `hooks/useKeyboardShortcuts.ts` - Shortcuts Hook
+- `hooks/useAdminShortcuts.ts` - Admin Shortcuts
+- `components/KeyboardShortcutsModal.tsx` - Help Modal
+
+**Shortcuts:**
+- ⌘K - Schnellsuche
+- ⌘⇧G - Dashboard
+- ⌘⇧P - Neuer Post
+- ⌘⇧M - Medien
+- ⌘⇧U - Benutzer
+- ⌘⇧S - Einstellungen
+- ⌘S - Speichern
+- ⌘/ - Shortcuts anzeigen
+
+### Phase 50: API Rate Limiter ✅
+
+**Backend:**
+- `Middleware/ApiRateLimiter.php` - Rate Limiting Middleware
+
+**Features:**
+- Configurable Limits per Type
+- Rate Limit Headers (X-RateLimit-*)
+- 429 Response with Retry-After
+- User/IP-based Limits
+- Types: api (60), auth (5), upload (10), search (30), webhook (100)
+
+### Phase 51: File Upload Progress ✅
+
+**Frontend:**
+- `components/FileUploadProgress.tsx` - Upload with Progress
+
+**Features:**
+- Drag & Drop Zone
+- Progress Bars per File
+- File Type Icons
+- Status Tags (Uploading, Done, Failed)
+- Retry Failed
+- Clear Completed
+- Max Size Validation
+- Image Preview Modal
+
+### Phase 52: Dashboard Stats Widget ✅
+
+**Frontend:**
+- `components/DashboardStatsWidget.tsx` - Stats Overview
+
+**Features:**
+- 4 Main Cards (Posts, Revenue, Users, Products)
+- Change Indicators (%)
+- Progress Bars
+- Comments & Newsletter Stats
+- Popular Content List
+- Recent Activity Feed
+- Auto-refresh (60s)
+
+### Phase 53: MainLayout Integration ✅
+
+**Frontend:**
+- `components/Layout/MainLayout.tsx` - Enhanced with new features
+
+**New Features:**
+- NotificationBell in Header
+- KeyboardShortcutsModal
+- 10 New Menu Items (Elasticsearch, Push Settings, Profile, etc.)
+- useAdminShortcuts Hook Integration
+- Custom Events for QuickSearch & Shortcuts
+
+### Phase 54: Backend Controllers ✅
+
+**Backend:**
+- `Controllers/Api/V1/DashboardController.php` - Dashboard Stats API
+- `Controllers/Api/V1/NotificationController.php` - Notifications API
+
+**Dashboard Stats:**
+- Posts (Total, Published, Draft, Scheduled, Change %)
+- Products (Total, Active, Low Stock, Change %)
+- Users (Total, Active, New This Month, Change %)
+- Orders (Total, Pending, Completed, Revenue, Revenue Change %)
+- Comments (Total, Pending, Approved, Spam)
+- Newsletter (Total, Active, This Month)
+- Recent Activity Feed
+- Popular Content List
+
+**Notifications API:**
+- GET /notifications - List with unread count
+- POST /notifications/{id}/read - Mark as read
+- POST /notifications/read-all - Mark all as read
+- DELETE /notifications/{id} - Delete notification
+- GET /notifications/unread-count - Count only
+
+### Phase 55: API Routes & Services ✅
+
+**Backend Routes (api.php):**
+- Dashboard Stats Endpoint
+- Notifications Endpoints
+- Elasticsearch Endpoints (Search, Suggest, Status, Sync, etc.)
+
+**Frontend Services (api.ts):**
+- `dashboardService` - getStats()
+- `notificationService` - getAll, markAsRead, markAllAsRead, delete, getUnreadCount
+- `elasticsearchService` - search, suggest, getStatus, indexDocument, bulkIndex, deleteDocument, syncIndex, createIndices, deleteIndices
+
+### Phase 56: App Routes Update ✅
+
+**Frontend:**
+- `App.tsx` - New lazy-loaded routes
+
+**New Routes:**
+- `/admin/elasticsearch` - Elasticsearch Search Page
+- `/admin/webhooks` - Webhooks Management
+
+### Phase 57: Console Commands ✅
+
+**Backend:**
+- `Console/Commands/AutomatedBackup.php` - Automated Backups
+- `Console/Commands/GenerateSitemap.php` - Sitemap Generator
+- `Console/Commands/SendWeeklyReport.php` - Weekly Reports
+- `Console/Commands/SystemHealthCheck.php` - Health Monitoring
+
+**Commands:**
+- `php artisan backup:automated` - Create automated backup
+- `php artisan sitemap:generate` - Generate XML sitemaps
+- `php artisan report:weekly` - Send weekly report
+- `php artisan system:health-check` - Run health checks
+
+**Features:**
+- Email notifications on backup completion
+- Sitemap compression (gzip)
+- Disk usage monitoring
+- Multi-sitemap with index
+- Image sitemaps
+
+### Phase 58: Frontend Admin Pages ✅
+
+**Frontend:**
+- `pages/AnalyticsDashboardPage.tsx` - Analytics Overview
+- `pages/SystemLogsPage.tsx` - Log Viewer
+- `pages/ApiDocsPage.tsx` - API Documentation
+
+**Analytics Dashboard:**
+- Traffic Overview (Views, Visitors, Bounce Rate)
+- Line Charts for Traffic Trends
+- Pie Charts for Traffic Sources
+- Top Pages & Posts Tables
+- Device & Country Stats
+- Date Range Picker
+
+**System Logs:**
+- Log File Selector
+- Level Filter (Emergency, Error, Warning, etc.)
+- Search Functionality
+- Log Details Modal
+- Download & Clear Actions
+- Real-time Refresh
+
+**API Documentation:**
+- Endpoint Groups (Auth, Posts, Media, etc.)
+- Method Tags (GET, POST, PUT, DELETE)
+- Parameter Tables
+- Response Examples
+- Authentication Info
+
+### Phase 59: App Routes Update ✅
+
+**Frontend:**
+- `App.tsx` - New routes added
+
+**New Routes:**
+- `/admin/analytics` - Analytics Dashboard
+- `/admin/system-logs` - System Logs
+- `/admin/api-docs` - API Documentation
+
+### Phase 60: Email Templates Mailables ✅
+
+**Backend:**
+- `Mail/PostPublishedMail.php` - Post Notification
+- `Mail/WelcomeMail.php` - User Welcome
+- `Mail/PasswordResetMail.php` - Password Reset
+- `Mail/BackupCompletedMail.php` - Backup Success
+- `Mail/BackupFailedMail.php` - Backup Failure Alert
+- `Mail/NewCommentMail.php` - Comment Notification
+- `Mail/TwoFactorEnabledMail.php` - 2FA Activation
+- `Mail/WeeklyReportMail.php` - Weekly Summary
+
+**Email Views:**
+- `emails/posts/published.blade.php`
+- `emails/auth/welcome.blade.php`
+- `emails/auth/password-reset.blade.php`
+- `emails/auth/two-factor-enabled.blade.php`
+- `emails/system/backup-completed.blade.php`
+- `emails/system/backup-failed.blade.php`
+- `emails/comments/new.blade.php`
+- `emails/reports/weekly.blade.php`
+
+**Features:**
+- Queueable Mailables
+- Markdown Templates
+- Unsubscribe Links
+- Action Buttons
+- Priority Levels
+
+### Phase 61: CDN Service ✅
+
+**Backend:**
+- `Services/CDNService.php` - Multi-Provider CDN Service
+
+**Providers:**
+- Cloudflare (API Token, Zone ID)
+- AWS CloudFront
+- DigitalOcean Spaces
+- Bunny CDN
+
+**Features:**
+- Cache Purge (All, URL, Tags)
+- URL Signing (Secure URLs)
+- Asset Optimization
+- Auto-Purge on Content Changes
+- Cache Warmup
+
+### Phase 62: Security Dashboard ✅
+
+**Frontend:**
+- `pages/SecurityDashboardPage.tsx` - Security Overview Dashboard
+
+**Features:**
+- Failed Login Attempts Chart
+- Active Sessions List
+- Blocked IPs Management
+- 2FA Statistics
+- Security Recommendations
+- Recent Security Events
+- WAF Statistics
+
+### Phase 63: Queue Monitor System ✅
+
+**Backend:**
+- `Controllers/QueueMonitorController.php` - Queue Management API
+
+**Features:**
+- Queue Status Overview (Pending, Delayed, Reserved)
+- Failed Jobs Management (Retry, Forget, Flush)
+- Queue Actions (Pause, Resume, Clear)
+- Active Workers Display
+- Real-time Stats
+
+**Frontend:**
+- `pages/QueueMonitorPage.tsx` - Queue Monitoring UI
+
+### Phase 64: Scheduler Status ✅
+
+**Backend:**
+- `Controllers/SchedulerController.php` - Scheduler Management API
+
+**Features:**
+- Scheduled Tasks List (with Cron expressions)
+- Scheduler Enable/Disable
+- Manual Task Execution
+- Execution History
+- Success Rate Statistics
+- Health Status Check
+
+**Frontend:**
+- `pages/SchedulerPage.tsx` - Scheduler Management UI
+
+### Phase 65: Performance Dashboard ✅
+
+**Backend:**
+- `Controllers/PerformanceController.php` - Performance Monitoring API
+
+**Features:**
+- Database Statistics (Size, Tables, Indexes)
+- Cache Statistics (Hit Rate, Keys, Memory)
+- PHP Statistics (Memory, OPcache)
+- Queue Statistics
+- Slow Queries Log
+- Performance Recommendations
+
+**Actions:**
+- Cache Clear (App, Config, Routes, Views)
+- Application Optimize
+- OPcache Reset
+
+**Frontend:**
+- `pages/PerformancePage.tsx` - Performance Overview UI
+
+### Phase 66: Content Approval Workflow ✅
+
+**Backend:**
+- `Controllers/ContentApprovalController.php` - Content Approval API
+
+**Features:**
+- Pending Posts/Comments Dashboard
+- Approve/Reject Workflow
+- Request Changes with Feedback
+- Approval History
+- Statistics (Pending, Approved, Rejected, Avg Time)
+
+**Frontend:**
+- `pages/ContentApprovalPage.tsx` - Content Approval UI
+
+### Phase 67: System Management Routes ✅
+
+**Frontend Routes:**
+- `/admin/security` - Security Dashboard
+- `/admin/queue` - Queue Monitor
+- `/admin/scheduler` - Scheduler Status
+- `/admin/performance` - Performance Dashboard
+- `/admin/content-approval` - Content Approval
+
+**Menu Items:**
+- Security Dashboard
+- Queue Monitor
+- Scheduler
+- Performance
+- Content Approval
 
 ---
 

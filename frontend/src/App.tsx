@@ -46,6 +46,19 @@ const ImportExportPage = lazy(() => import('./pages/ImportExportPage'));
 const LegalGeneratorPage = lazy(() => import('./pages/LegalGeneratorPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const PaymentsPage = lazy(() => import('./pages/PaymentsPage'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
+const PushSettingsPage = lazy(() => import('./pages/PushSettingsPage'));
+const OAuthCallbackPage = lazy(() => import('./pages/OAuthCallbackPage'));
+const ElasticsearchSearchPage = lazy(() => import('./pages/ElasticsearchSearchPage'));
+const WebhooksPage = lazy(() => import('./pages/WebhooksPage'));
+const AnalyticsDashboardPage = lazy(() => import('./pages/AnalyticsDashboardPage'));
+const SystemLogsPage = lazy(() => import('./pages/SystemLogsPage'));
+const ApiDocsPage = lazy(() => import('./pages/ApiDocsPage'));
+const SecurityDashboardPage = lazy(() => import('./pages/SecurityDashboardPage'));
+const QueueMonitorPage = lazy(() => import('./pages/QueueMonitorPage'));
+const SchedulerPage = lazy(() => import('./pages/SchedulerPage'));
+const PerformancePage = lazy(() => import('./pages/PerformancePage'));
+const ContentApprovalPage = lazy(() => import('./pages/ContentApprovalPage'));
 
 // Components
 const MainLayout = lazy(() => import('./components/Layout/MainLayout'));
@@ -347,9 +360,113 @@ function App() {
                   </Suspense>
                 }
               />
+              <Route
+                path="profile"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <ProfilePage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="push-settings"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PushSettingsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="elasticsearch"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <ElasticsearchSearchPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="webhooks"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <WebhooksPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="analytics"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <AnalyticsDashboardPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="system-logs"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <SystemLogsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="api-docs"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <ApiDocsPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="security"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <SecurityDashboardPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="queue"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <QueueMonitorPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="scheduler"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <SchedulerPage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="performance"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <PerformancePage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="content-approval"
+                element={
+                  <Suspense fallback={<PageLoader />}>
+                    <ContentApprovalPage />
+                  </Suspense>
+                }
+              />
             </Route>
 
             {/* Standalone Auth Pages */}
+            <Route
+              path="/oauth/:provider/callback"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <OAuthCallbackPage />
+                </Suspense>
+              }
+            />
             <Route
               path="/login"
               element={

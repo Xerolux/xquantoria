@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Row, Col, Statistic, Table, Tag } from 'antd';
+import { Card, Row, Col, Statistic, Table, Tag, Divider, Typography, Space, Skeleton } from 'antd';
 import {
   FileTextOutlined,
   EyeOutlined,
   CheckCircleOutlined,
+  RiseOutlined,
+  FallOutlined,
+  ShoppingCartOutlined,
+  UserOutlined,
+  DollarOutlined,
 } from '@ant-design/icons';
-import { postService } from '../services/api';
+import { postService, dashboardService } from '../services/api';
 import type { Post } from '../types';
 import { useAuthStore } from '../store/authStore';
+import DashboardStatsWidget from '../components/DashboardStatsWidget';
+
+const { Title, Text } = Typography;
 
 const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState({
@@ -18,6 +26,7 @@ const DashboardPage: React.FC = () => {
   });
   const [recentPosts, setRecentPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFullStats, setShowFullStats] = useState(false);
   const user = useAuthStore((state) => state.user);
 
   useEffect(() => {
@@ -83,58 +92,65 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div>
-      <h1>Dashboard</h1>
-      <p>Welcome back, {user?.display_name || user?.name}!</p>
+      <Title level={2}>Dashboard</Title>
+      <Text type="secondary">Welcome back, {user?.display_name || user?.name}!</Text>
 
-      <Row gutter={16} style={{ marginTop: 24 }}>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="Total Posts"
-              value={stats.totalPosts}
-              prefix={<FileTextOutlined />}
-              loading={loading}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="Published"
-              value={stats.publishedPosts}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#3f8600' }}
-              loading={loading}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="Drafts"
-              value={stats.draftPosts}
-              prefix={<FileTextOutlined />}
-              valueStyle={{ color: '#cf1322' }}
-              loading={loading}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="Total Views"
-              value={stats.totalViews}
-              prefix={<EyeOutlined />}
-              loading={loading}
-            />
-          </Card>
-        </Col>
-      </Row>
+      <Divider />
 
-      <Card
-        title="Recent Posts"
-        style={{ marginTop: 24 }}
-      >
+      {showFullStats ? (
+        <DashboardStatsWidget />
+      ) : (
+        <>
+          <Row gutter={16} style={{ marginTop: 24 }}>
+            <Col span={6}>
+              <Card>
+                <Statistic
+                  title="Total Posts"
+                  value={stats.totalPosts}
+                  prefix={<FileTextOutlined />}
+                  loading={loading}
+                />
+              </Card>
+            </Col>
+            <Col span={6}>
+              <Card>
+                <Statistic
+                  title="Published"
+                  value={stats.publishedPosts}
+                  prefix={<CheckCircleOutlined />}
+                  valueStyle={{ color: '#3f8600' }}
+                  loading={loading}
+                />
+              </Card>
+            </Col>
+            <Col span={6}>
+              <Card>
+                <Statistic
+                  title="Drafts"
+                  value={stats.draftPosts}
+                  prefix={<FileTextOutlined />}
+                  valueStyle={{ color: '#cf1322' }}
+                  loading={loading}
+                />
+              </Card>
+            </Col>
+            <Col span={6}>
+              <Card>
+                <Statistic
+                  title="Total Views"
+                  value={stats.totalViews}
+                  prefix={<EyeOutlined />}
+                  loading={loading}
+                />
+              </Card>
+            </Col>
+          </Row>
+        </>
+      )}
+
+      <Divider />
+
+      <Card title="Recent Posts">
         <Table
           columns={columns}
           dataSource={recentPosts}
