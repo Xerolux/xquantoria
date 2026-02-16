@@ -594,3 +594,95 @@ export interface WebhookStats {
   last_successful_delivery?: string;
   last_failed_delivery?: string;
 }
+
+// Newsletter Campaign Types
+export interface NewsletterCampaign {
+  id: number;
+  subject: string;
+  preheader?: string;
+  content: string;
+  template_id?: number;
+  status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
+  scheduled_at?: string;
+  sent_at?: string;
+  total_recipients: number;
+  sent_count: number;
+  opened_count: number;
+  clicked_count: number;
+  bounced_count: number;
+  unsubscribed_count: number;
+  created_by?: number;
+  created_at: string;
+  updated_at: string;
+  template?: NewsletterTemplate;
+}
+
+export interface NewsletterTemplate {
+  id: number;
+  name: string;
+  subject: string;
+  content: string;
+  variables: string[];
+  is_default: boolean;
+  created_by?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NewsletterStats {
+  total_subscribers: number;
+  active_subscribers: number;
+  total_campaigns: number;
+  avg_open_rate: number;
+  avg_click_rate: number;
+}
+
+// Cookie Consent Types
+export interface CookiePreferences {
+  necessary: boolean;
+  functional: boolean;
+  analytics: boolean;
+  marketing: boolean;
+}
+
+// Theme Types
+export interface ThemeConfig {
+  primaryColor: string;
+  borderRadius: number;
+  mode: 'light' | 'dark';
+  fontFamily?: string;
+}
+
+// SEO Types
+export interface SEOAnalysis {
+  score: number;
+  title: { status: string; message: string };
+  metaDescription: { status: string; message: string };
+  contentLength: { status: string; message: string; value: number };
+  headings: { status: string; message: string; value: number };
+  links: { status: string; message: string; value: number };
+  images: { status: string; message: string; value: number };
+  keywordDensity: { status: string; message: string; value: number };
+  readability: { status: string; message: string; value: number };
+}
+
+// RSS Feed Types
+export interface RSSFeedItem {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  published_at: string;
+  author: { name: string; display_name: string };
+  categories: Array<{ id: number; name: string; slug: string }>;
+  link: string;
+}
+
+export interface RSSFeedConfig {
+  title: string;
+  description: string;
+  link: string;
+  language: string;
+  copyright: string;
+  items: RSSFeedItem[];
+}

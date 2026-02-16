@@ -507,6 +507,71 @@ const newsletterService = {
     });
     return data;
   },
+
+  async createSubscriber(subscriberData: Record<string, unknown>) {
+    const { data } = await api.post('/newsletter/subscribers', subscriberData);
+    return data;
+  },
+
+  // Campaigns
+  async getCampaigns(params?: Record<string, unknown>) {
+    const { data } = await api.get('/newsletter/campaigns', { params });
+    return data;
+  },
+
+  async getCampaign(id: string | number) {
+    const { data } = await api.get(`/newsletter/campaigns/${id}`);
+    return data;
+  },
+
+  async createCampaign(campaignData: Record<string, unknown>) {
+    const { data } = await api.post('/newsletter/campaigns', campaignData);
+    return data;
+  },
+
+  async updateCampaign(id: string | number, campaignData: Record<string, unknown>) {
+    const { data } = await api.put(`/newsletter/campaigns/${id}`, campaignData);
+    return data;
+  },
+
+  async deleteCampaign(id: string | number) {
+    await api.delete(`/newsletter/campaigns/${id}`);
+  },
+
+  async sendCampaign(id: number) {
+    const { data } = await api.post(`/newsletter/campaigns/${id}/send`);
+    return data;
+  },
+
+  async duplicateCampaign(id: number) {
+    const { data } = await api.post(`/newsletter/campaigns/${id}/duplicate`);
+    return data;
+  },
+
+  // Templates
+  async getTemplates(params?: Record<string, unknown>) {
+    const { data } = await api.get('/newsletter/templates', { params });
+    return data;
+  },
+
+  async getTemplate(id: string | number) {
+    const { data } = await api.get(`/newsletter/templates/${id}`);
+    return data;
+  },
+
+  async createTemplate(templateData: Record<string, unknown>) {
+    const { data } = await api.post('/newsletter/templates', templateData);
+    return data;
+  },
+
+  async updateTemplate(id: string | number, templateData: Record<string, unknown>) {
+    const { data } = await api.put(`/newsletter/templates/${id}`, templateData);
+    return data;
+  },
+
+  async deleteTemplate(id: string | number) {
+    await api.delete(`/newsletter/templates/${id}`);
+  },
 };
 
 const seoService = {
