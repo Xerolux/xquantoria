@@ -5,23 +5,43 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Services\PostRevisionService;
+use App\Services\Database\QueryOptimizerService;
+use App\Traits\Cacheable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
-    protected PostRevisionService $revisionService;
+    use Cacheable;
 
-    public function __construct(PostRevisionService $revisionService)
+    protected PostRevisionService $revisionService;
+    protected QueryOptimizerService $queryOptimizer;
+
+    public function __construct(PostRevisionService $revisionService, QueryOptimizerService $queryOptimizer)
     {
         $this->revisionService = $revisionService;
+        $this->queryOptimizer = $queryOptimizer;
     }
+
     public function index(Request $request)
     {
         $this->authorize('viewAny', Post::class);
 
-        // Eager loading to prevent N+1 queries - only select needed fields
+        $cacheKey = $this->getCacheKey('posts', 'list', $request->status ?? 'all', $request->page ?? 1, $request->per_page ?? 15);
+        
+        if (!$request->has('search') && !$request->has('category_id') && !$request->has('tag_id')) {
+            return $this->cacheQuery($cacheKey, function () use ($request) {
+                return $this->buildPostsQuery($request);
+            }, 300);
+        }
+
+        return $this->buildPostsQuery($request);
+    }
+
+    private function buildPostsQuery(Request $request)
+    {
         $query = Post::with([
             'author:id,name,email,display_name',
             'categories:id,name,slug',
@@ -46,8 +66,11 @@ class PostController extends Controller
         }
 
         if ($request->has('search')) {
-            $query->where('title', 'ilike', '%' . $request->search . '%')
-                ->orWhere('content', 'ilike', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'ilike', "%{$search}%")
+                    ->orWhere('content', 'ilike', "%{$search}%");
+            });
         }
 
         $posts = $query->orderBy('created_at', 'desc')
@@ -97,6 +120,8 @@ class PostController extends Controller
         if (isset($validated['tags'])) {
             $post->tags()->attach($validated['tags']);
         }
+
+        $this->invalidatePostCache();
 
         return response()->json($post->load(['author', 'categories', 'tags']), 201);
     }
@@ -158,7 +183,6 @@ class PostController extends Controller
             $post->tags()->sync($validated['tags']);
         }
 
-        // Create revision if requested
         if ($request->boolean('create_revision', false)) {
             $this->revisionService->createRevision(
                 $post,
@@ -167,6 +191,8 @@ class PostController extends Controller
                 $validated['revision_reason'] ?? 'Manual save'
             );
         }
+
+        $this->invalidatePostCache($post->slug);
 
         return response()->json($post->load(['author', 'categories', 'tags']));
     }
@@ -208,7 +234,10 @@ class PostController extends Controller
 
         $this->authorize('delete', $post);
 
+        $slug = $post->slug;
         $post->delete();
+
+        $this->invalidatePostCache($slug);
 
         return response()->json(null, 204);
     }
@@ -223,17 +252,23 @@ class PostController extends Controller
             'posts.*.content' => 'required|string',
         ]);
 
-        $posts = collect($validated['posts'])->map(function ($data) {
-            return Post::create([
+        $postsData = collect($validated['posts'])->map(function ($data) {
+            return [
                 'title' => $data['title'],
                 'slug' => Str::slug($data['title']),
                 'content' => $data['content'],
                 'author_id' => Auth::id(),
                 'status' => 'draft',
-            ]);
-        });
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        })->toArray();
 
-        return response()->json($posts, 201);
+        $this->queryOptimizer->bulkInsert('posts', $postsData, 50);
+
+        $this->invalidatePostCache();
+
+        return response()->json(['message' => 'Posts created successfully', 'count' => count($postsData)], 201);
     }
 
     public function bulkDestroy(Request $request)
@@ -247,6 +282,22 @@ class PostController extends Controller
 
         Post::whereIn('id', $validated['ids'])->delete();
 
+        $this->invalidatePostCache();
+
         return response()->json(null, 204);
+    }
+
+    protected function invalidatePostCache(?string $slug = null): void
+    {
+        $this->clearCache('posts');
+        
+        if ($slug) {
+            Cache::forget("public:post:{$slug}");
+            Cache::forget("post:{$slug}");
+        }
+        
+        Cache::forget('public:homepage');
+        Cache::forget('categories:tree');
+        Cache::forget('tags:popular');
     }
 }

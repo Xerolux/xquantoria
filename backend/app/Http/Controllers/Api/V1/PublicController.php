@@ -159,71 +159,83 @@ class PublicController extends Controller
 
     public function categories()
     {
-        $categories = Category::withCount(['posts' => function ($q) {
-            $q->where('status', 'published');
-        }])
-            ->with(['parent:id,name,slug', 'children:id,name,slug,parent_id'])
-            ->orderBy('name')
-            ->get();
+        return Cache::remember('public:categories', 3600, function () {
+            $categories = Category::withCount(['posts' => function ($q) {
+                $q->where('status', 'published');
+            }])
+                ->with(['parent:id,name,slug', 'children:id,name,slug,parent_id'])
+                ->orderBy('name')
+                ->get();
 
-        return response()->json([
-            'categories' => $categories,
-            'settings' => $this->getPublicSettings(),
-        ]);
+            return response()->json([
+                'categories' => $categories,
+                'settings' => $this->getPublicSettings(),
+            ]);
+        });
     }
 
     public function category(string $slug)
     {
-        $category = Category::with(['parent', 'children'])
-            ->where('slug', $slug)
-            ->firstOrFail();
+        $cacheKey = "public:category:{$slug}";
+        
+        return Cache::remember($cacheKey, 600, function () use ($slug) {
+            $category = Category::with(['parent', 'children'])
+                ->where('slug', $slug)
+                ->firstOrFail();
 
-        $posts = Post::with(['author:id,name,display_name', 'featuredImage:id,url,alt_text'])
-            ->where('status', 'published')
-            ->whereHas('categories', function ($q) use ($slug) {
-                $q->where('slug', $slug);
-            })
-            ->orderBy('published_at', 'desc')
-            ->paginate(12);
+            $posts = Post::with(['author:id,name,display_name', 'featuredImage:id,url,alt_text'])
+                ->where('status', 'published')
+                ->whereHas('categories', function ($q) use ($slug) {
+                    $q->where('slug', $slug);
+                })
+                ->orderBy('published_at', 'desc')
+                ->paginate(12);
 
-        return response()->json([
-            'category' => $category,
-            'posts' => $posts,
-            'settings' => $this->getPublicSettings(),
-        ]);
+            return response()->json([
+                'category' => $category,
+                'posts' => $posts,
+                'settings' => $this->getPublicSettings(),
+            ]);
+        });
     }
 
     public function tags()
     {
-        $tags = Tag::withCount(['posts' => function ($q) {
-            $q->where('status', 'published');
-        }])
-            ->orderBy('name')
-            ->get();
+        return Cache::remember('public:tags', 3600, function () {
+            $tags = Tag::withCount(['posts' => function ($q) {
+                $q->where('status', 'published');
+            }])
+                ->orderBy('name')
+                ->get();
 
-        return response()->json([
-            'tags' => $tags,
-            'settings' => $this->getPublicSettings(),
-        ]);
+            return response()->json([
+                'tags' => $tags,
+                'settings' => $this->getPublicSettings(),
+            ]);
+        });
     }
 
     public function tag(string $slug)
     {
-        $tag = Tag::where('slug', $slug)->firstOrFail();
+        $cacheKey = "public:tag:{$slug}";
+        
+        return Cache::remember($cacheKey, 600, function () use ($slug) {
+            $tag = Tag::where('slug', $slug)->firstOrFail();
 
-        $posts = Post::with(['author:id,name,display_name', 'categories:id,name,slug', 'featuredImage:id,url,alt_text'])
-            ->where('status', 'published')
-            ->whereHas('tags', function ($q) use ($slug) {
-                $q->where('slug', $slug);
-            })
-            ->orderBy('published_at', 'desc')
-            ->paginate(12);
+            $posts = Post::with(['author:id,name,display_name', 'categories:id,name,slug', 'featuredImage:id,url,alt_text'])
+                ->where('status', 'published')
+                ->whereHas('tags', function ($q) use ($slug) {
+                    $q->where('slug', $slug);
+                })
+                ->orderBy('published_at', 'desc')
+                ->paginate(12);
 
-        return response()->json([
-            'tag' => $tag,
-            'posts' => $posts,
-            'settings' => $this->getPublicSettings(),
-        ]);
+            return response()->json([
+                'tag' => $tag,
+                'posts' => $posts,
+                'settings' => $this->getPublicSettings(),
+            ]);
+        });
     }
 
     public function page(string $slug)
@@ -245,22 +257,24 @@ class PublicController extends Controller
 
     public function menu()
     {
-        $pages = Page::where('show_in_menu', true)
-            ->where('status', 'published')
-            ->orderBy('menu_order')
-            ->get(['id', 'title', 'slug', 'menu_order']);
+        return Cache::remember('public:menu', 3600, function () {
+            $pages = Page::where('show_in_menu', true)
+                ->where('status', 'published')
+                ->orderBy('menu_order')
+                ->get(['id', 'title', 'slug', 'menu_order']);
 
-        $categories = Category::withCount(['posts' => function ($q) {
-            $q->where('status', 'published');
-        }])
-            ->orderBy('name')
-            ->get(['id', 'name', 'slug']);
+            $categories = Category::withCount(['posts' => function ($q) {
+                $q->where('status', 'published');
+            }])
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug']);
 
-        return response()->json([
-            'pages' => $pages,
-            'categories' => $categories,
-            'settings' => $this->getPublicSettings(),
-        ]);
+            return response()->json([
+                'pages' => $pages,
+                'categories' => $categories,
+                'settings' => $this->getPublicSettings(),
+            ]);
+        });
     }
 
     public function search(Request $request)
@@ -270,31 +284,35 @@ class PublicController extends Controller
         ]);
 
         $query = $request->q;
+        $cacheKey = 'public:search:' . md5($query);
 
-        $posts = Post::with(['author:id,name,display_name', 'categories:id,name,slug', 'featuredImage:id,url,alt_text'])
-            ->where('status', 'published')
-            ->where(function ($q) use ($query) {
-                $q->where('title', 'ilike', "%{$query}%")
-                    ->orWhere('content', 'ilike', "%{$query}%")
-                    ->orWhere('excerpt', 'ilike', "%{$query}%");
-            })
-            ->orderBy('published_at', 'desc')
-            ->paginate(12);
+        return Cache::remember($cacheKey, 300, function () use ($query) {
+            $posts = Post::with(['author:id,name,display_name', 'categories:id,name,slug', 'featuredImage:id,url,alt_text'])
+                ->where('status', 'published')
+                ->where(function ($q) use ($query) {
+                    $q->where('title', 'ilike', "%{$query}%")
+                        ->orWhere('content', 'ilike', "%{$query}%")
+                        ->orWhere('excerpt', 'ilike', "%{$query}%");
+                })
+                ->orderBy('published_at', 'desc')
+                ->limit(50)
+                ->get();
 
-        $pages = Page::where('status', 'published')
-            ->where(function ($q) use ($query) {
-                $q->where('title', 'ilike', "%{$query}%")
-                    ->orWhere('content', 'ilike', "%{$query}%");
-            })
-            ->orderBy('title')
-            ->get(['id', 'title', 'slug', 'excerpt']);
+            $pages = Page::where('status', 'published')
+                ->where(function ($q) use ($query) {
+                    $q->where('title', 'ilike', "%{$query}%")
+                        ->orWhere('content', 'ilike', "%{$query}%");
+                })
+                ->orderBy('title')
+                ->get(['id', 'title', 'slug', 'excerpt']);
 
-        return response()->json([
-            'query' => $query,
-            'posts' => $posts,
-            'pages' => $pages,
-            'settings' => $this->getPublicSettings(),
-        ]);
+            return response()->json([
+                'query' => $query,
+                'posts' => $posts,
+                'pages' => $pages,
+                'settings' => $this->getPublicSettings(),
+            ]);
+        });
     }
 
     public function archive(Request $request)

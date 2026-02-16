@@ -6,12 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Models\Media;
 use App\Services\ImageService;
 use App\Services\FileValidationService;
+use App\Traits\Cacheable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Bus\Batch;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
 
 class MediaController extends Controller
 {
+    use Cacheable;
+
     protected ImageService $imageService;
     protected FileValidationService $fileValidation;
 
@@ -23,15 +30,26 @@ class MediaController extends Controller
 
     public function index(Request $request)
     {
-        $query = Media::with(['uploader'])->orderBy('created_at', 'desc');
+        $cacheKey = $this->getCacheKey('media', 'list', $request->type ?? 'all', $request->page ?? 1, $request->per_page ?? 20);
+        
+        if (!$request->has('search')) {
+            return $this->cacheQuery($cacheKey, function () use ($request) {
+                return $this->buildMediaQuery($request);
+            }, 300);
+        }
 
-        // Filter by MIME type
+        return $this->buildMediaQuery($request);
+    }
+
+    private function buildMediaQuery(Request $request)
+    {
+        $query = Media::with(['uploader:id,name,email'])->orderBy('created_at', 'desc');
+
         if ($request->has('type')) {
             $mimeType = $request->type === 'image' ? 'image/%' : $request->type;
             $query->where('mime_type', 'LIKE', $mimeType);
         }
 
-        // Search by filename
         if ($request->has('search')) {
             $query->where('original_filename', 'LIKE', '%' . $request->search . '%');
         }
@@ -114,13 +132,19 @@ class MediaController extends Controller
 
         $media = Media::create($mediaData);
 
+        $this->invalidateMediaCache();
+
         return response()->json($media, 201);
     }
 
     public function show($id)
     {
-        $media = Media::with(['uploader'])->findOrFail($id);
-        return response()->json($media);
+        $cacheKey = $this->getCacheKey('media', 'single', $id);
+        
+        return $this->cacheQuery($cacheKey, function () use ($id) {
+            $media = Media::with(['uploader:id,name,email'])->findOrFail($id);
+            return response()->json($media);
+        }, 3600);
     }
 
     public function update(Request $request, $id)
@@ -150,6 +174,8 @@ class MediaController extends Controller
 
         $media->delete();
 
+        $this->invalidateMediaCache();
+
         return response()->json(null, 204);
     }
 
@@ -159,42 +185,64 @@ class MediaController extends Controller
             'files.*' => 'required|file|mimes:jpg,jpeg,png,webp,gif,svg,mp4,webm,pdf|max:51200',
         ]);
 
-        $uploaded = collect($request->file('files'))->map(function ($file) {
-            // Bild-Verarbeitung mit ImageService
-            if (str_starts_with($file->getMimeType(), 'image/')) {
-                $imageData = $this->imageService->processImage($file, $file->getClientOriginalName());
+        $files = $request->file('files');
+        $uploaded = [];
+        $errors = [];
 
-                return Media::create([
-                    'filename' => $imageData['filename'],
-                    'original_filename' => $imageData['original_filename'],
-                    'filepath' => $imageData['filepath'],
-                    'url' => $imageData['url'],
-                    'mime_type' => $imageData['mime_type'],
-                    'filesize' => $imageData['filesize'],
-                    'width' => $imageData['width'],
-                    'height' => $imageData['height'],
-                    'uploaded_by' => auth()->id(),
-                    'thumbnails' => $imageData['thumbnails'],
-                    'webp_url' => $imageData['webp_url'] ?? null,
-                ]);
-            } else {
-                // Non-Image Files
-                $filename = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
-                $filepath = 'media/' . date('Y/m');
-                $path = $file->storeAs($filepath, $filename, 'public');
+        collect($files)->chunk(5)->each(function ($chunk) use (&$uploaded, &$errors) {
+            foreach ($chunk as $file) {
+                try {
+                    if (str_starts_with($file->getMimeType(), 'image/')) {
+                        $imageData = $this->imageService->processImage($file, $file->getClientOriginalName());
 
-                return Media::create([
-                    'filename' => $filename,
-                    'original_filename' => $file->getClientOriginalName(),
-                    'filepath' => $path,
-                    'url' => Storage::disk('public')->url($path),
-                    'mime_type' => $file->getMimeType(),
-                    'filesize' => $file->getSize(),
-                    'uploaded_by' => auth()->id(),
-                ]);
+                        $uploaded[] = Media::create([
+                            'filename' => $imageData['filename'],
+                            'original_filename' => $imageData['original_filename'],
+                            'filepath' => $imageData['filepath'],
+                            'url' => $imageData['url'],
+                            'mime_type' => $imageData['mime_type'],
+                            'filesize' => $imageData['filesize'],
+                            'width' => $imageData['width'],
+                            'height' => $imageData['height'],
+                            'uploaded_by' => auth()->id(),
+                            'thumbnails' => $imageData['thumbnails'],
+                            'webp_url' => $imageData['webp_url'] ?? null,
+                        ]);
+                    } else {
+                        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+                        $filepath = 'media/' . date('Y/m');
+                        $path = $file->storeAs($filepath, $filename, 'public');
+
+                        $uploaded[] = Media::create([
+                            'filename' => $filename,
+                            'original_filename' => $file->getClientOriginalName(),
+                            'filepath' => $path,
+                            'url' => Storage::disk('public')->url($path),
+                            'mime_type' => $file->getMimeType(),
+                            'filesize' => $file->getSize(),
+                            'uploaded_by' => auth()->id(),
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = [
+                        'file' => $file->getClientOriginalName(),
+                        'error' => $e->getMessage(),
+                    ];
+                }
             }
         });
 
-        return response()->json($uploaded, 201);
+        $this->invalidateMediaCache();
+
+        return response()->json([
+            'uploaded' => $uploaded,
+            'count' => count($uploaded),
+            'errors' => $errors,
+        ], 201);
+    }
+
+    protected function invalidateMediaCache(): void
+    {
+        $this->clearCache('media');
     }
 }

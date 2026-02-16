@@ -101,6 +101,60 @@ return new class extends Migration
                 $table->index('created_at', 'idx_page_analytics_created');
             });
         }
+
+        // Downloads - frequently queried for token validation
+        Schema::table('downloads', function (Blueprint $table) {
+            $table->index('access_level', 'idx_downloads_access');
+            $table->index(['expires_at', 'is_active'], 'idx_downloads_expires_active');
+        });
+
+        // Download tokens - critical for secure downloads
+        Schema::table('download_tokens', function (Blueprint $table) {
+            $table->index(['token', 'is_used'], 'idx_download_tokens_token_used');
+            $table->index(['expires_at', 'is_used'], 'idx_download_tokens_expires_used');
+        });
+
+        // Newsletter subscribers - for list queries
+        Schema::table('newsletter_subscribers', function (Blueprint $table) {
+            $table->index(['status', 'created_at'], 'idx_subscribers_status_created');
+            $table->index('email', 'idx_subscribers_email');
+        });
+
+        // Pages - for public queries
+        Schema::table('pages', function (Blueprint $table) {
+            $table->index(['slug', 'status'], 'idx_pages_slug_status');
+            $table->index(['status', 'show_in_menu'], 'idx_pages_status_menu');
+        });
+
+        // Post category pivot
+        Schema::table('post_categories', function (Blueprint $table) {
+            $table->index('category_id', 'idx_post_categories_category');
+        });
+
+        // Post tag pivot
+        Schema::table('post_tags', function (Blueprint $table) {
+            $table->index('tag_id', 'idx_post_tags_tag');
+        });
+
+        // Settings - for public settings query
+        Schema::table('settings', function (Blueprint $table) {
+            $table->index(['key', 'is_public'], 'idx_settings_key_public');
+        });
+
+        // Webhooks - for delivery tracking
+        if (Schema::hasTable('webhooks')) {
+            Schema::table('webhooks', function (Blueprint $table) {
+                $table->index(['is_active', 'event'], 'idx_webhooks_active_event');
+            });
+        }
+
+        // Webhook deliveries
+        if (Schema::hasTable('webhook_deliveries')) {
+            Schema::table('webhook_deliveries', function (Blueprint $table) {
+                $table->index(['webhook_id', 'created_at'], 'idx_webhook_deliveries_webhook_created');
+                $table->index('status', 'idx_webhook_deliveries_status');
+            });
+        }
     }
 
     /**
@@ -185,6 +239,51 @@ return new class extends Migration
                 $table->dropIndex('idx_page_analytics_session');
                 $table->dropIndex('idx_page_analytics_user');
                 $table->dropIndex('idx_page_analytics_created');
+            });
+        }
+
+        Schema::table('downloads', function (Blueprint $table) {
+            $table->dropIndex('idx_downloads_access');
+            $table->dropIndex('idx_downloads_expires_active');
+        });
+
+        Schema::table('download_tokens', function (Blueprint $table) {
+            $table->dropIndex('idx_download_tokens_token_used');
+            $table->dropIndex('idx_download_tokens_expires_used');
+        });
+
+        Schema::table('newsletter_subscribers', function (Blueprint $table) {
+            $table->dropIndex('idx_subscribers_status_created');
+            $table->dropIndex('idx_subscribers_email');
+        });
+
+        Schema::table('pages', function (Blueprint $table) {
+            $table->dropIndex('idx_pages_slug_status');
+            $table->dropIndex('idx_pages_status_menu');
+        });
+
+        Schema::table('post_categories', function (Blueprint $table) {
+            $table->dropIndex('idx_post_categories_category');
+        });
+
+        Schema::table('post_tags', function (Blueprint $table) {
+            $table->dropIndex('idx_post_tags_tag');
+        });
+
+        Schema::table('settings', function (Blueprint $table) {
+            $table->dropIndex('idx_settings_key_public');
+        });
+
+        if (Schema::hasTable('webhooks')) {
+            Schema::table('webhooks', function (Blueprint $table) {
+                $table->dropIndex('idx_webhooks_active_event');
+            });
+        }
+
+        if (Schema::hasTable('webhook_deliveries')) {
+            Schema::table('webhook_deliveries', function (Blueprint $table) {
+                $table->dropIndex('idx_webhook_deliveries_webhook_created');
+                $table->dropIndex('idx_webhook_deliveries_status');
             });
         }
     }
