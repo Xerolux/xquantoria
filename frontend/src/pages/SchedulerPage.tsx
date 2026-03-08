@@ -32,7 +32,7 @@ import {
   WarningOutlined,
   HistoryOutlined,
 } from '@ant-design/icons';
-import { schedulerService } from '../../services/api';
+import { schedulerService } from '../services/api';
 
 const { Title, Text } = Typography;
 

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Typography } from 'antd';
-import { VideoBlock } from '../../../types/blocks';
+import type { VideoBlock as VideoBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface VideoBlockProps {
-  block: VideoBlock;
+  block: VideoBlockType;
 }
 
 const VideoBlock: React.FC<VideoBlockProps> = ({ block }) => {

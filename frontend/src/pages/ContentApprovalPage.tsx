@@ -32,7 +32,7 @@ import {
   EditOutlined,
   EyeOutlined,
 } from '@ant-design/icons';
-import { contentApprovalService } from '../../services/api';
+import { contentApprovalService } from '../services/api';
 
 const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;

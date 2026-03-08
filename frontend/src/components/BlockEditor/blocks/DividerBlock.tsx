@@ -1,9 +1,9 @@
 import React from 'react';
-import { DividerBlock } from '../../../types/blocks';
+import type { DividerBlock as DividerBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface DividerBlockProps {
-  block: DividerBlock;
+  block: DividerBlockType;
 }
 
 const DividerBlock: React.FC<DividerBlockProps> = ({ block }) => {

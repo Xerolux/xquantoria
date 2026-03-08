@@ -1,11 +1,11 @@
 import React from 'react';
 import { Input } from 'antd';
 import { useBlockEditorStore } from '../../../store/blockEditorStore';
-import { EmbedBlock } from '../../../types/blocks';
+import type { EmbedBlock as EmbedBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface EmbedBlockProps {
-  block: EmbedBlock;
+  block: EmbedBlockType;
 }
 
 const EmbedBlock: React.FC<EmbedBlockProps> = ({ block }) => {

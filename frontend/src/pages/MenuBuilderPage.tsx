@@ -37,7 +37,7 @@ import {
   TagOutlined,
   CopyOutlined,
 } from '@ant-design/icons';
-import { menuService } from '../../services/api';
+import { menuService } from '../services/api';
 
 const { Title, Text } = Typography;
 const { Option } = Select;

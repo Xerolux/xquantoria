@@ -33,10 +33,10 @@ import {
   EyeOutlined,
   RobotOutlined,
   PictureOutlined,
-  H1Outlined,
+  FontSizeOutlined,
   UnorderedListOutlined,
   OrderedListOutlined,
-  QuoteOutlined,
+  MessageOutlined,
   CodeOutlined,
   LinkOutlined,
   TableOutlined,
@@ -63,14 +63,9 @@ import {
 } from '@ant-design/icons';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Editor } from '@tinymce/tinymce-react';
-import ReactFlow, { Controls, Background } from 'react-flow-renderer';
-import { DndContext, DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { postService, categoryService, tagService, mediaService, aiService } from '../services/api';
 import type { Post, Category, Tag as TagType, Media } from '../types';
 import dayjs from 'dayjs';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -98,9 +93,9 @@ interface ContentBlock {
 
 const BLOCK_TYPES = [
   { type: 'paragraph', icon: <FileTextOutlined />, label: 'Paragraph' },
-  { type: 'heading', icon: <H1Outlined />, label: 'Heading' },
+  { type: 'heading', icon: <FontSizeOutlined />, label: 'Heading' },
   { type: 'image', icon: <PictureOutlined />, label: 'Image' },
-  { type: 'quote', icon: <QuoteOutlined />, label: 'Quote' },
+  { type: 'quote', icon: <MessageOutlined />, label: 'Quote' },
   { type: 'list', icon: <UnorderedListOutlined />, label: 'List' },
   { type: 'code', icon: <CodeOutlined />, label: 'Code' },
   { type: 'cta', icon: <ThunderboltOutlined />, label: 'Call to Action' },

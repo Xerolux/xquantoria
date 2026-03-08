@@ -5,7 +5,7 @@ import BlockContent from './BlockContent';
 import './BlockComponents.css';
 
 interface ColumnsBlockProps {
-  block: ColumnsBlock;
+  block: ColumnsBlockType;
 }
 
 const ColumnsBlock: React.FC<ColumnsBlockProps> = ({ block }) => {

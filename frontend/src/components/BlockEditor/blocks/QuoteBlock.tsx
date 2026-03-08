@@ -1,10 +1,10 @@
 import React from 'react';
 import { Typography } from 'antd';
-import { QuoteBlock } from '../../../types/blocks';
+import type { QuoteBlock as QuoteBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface QuoteBlockProps {
-  block: QuoteBlock;
+  block: QuoteBlockType;
 }
 
 const QuoteBlock: React.FC<QuoteBlockProps> = ({ block }) => {

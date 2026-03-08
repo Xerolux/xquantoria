@@ -2,14 +2,14 @@ import React, { useRef } from 'react';
 import { Input, Button, Upload, message } from 'antd';
 import { PictureOutlined, UploadOutlined } from '@ant-design/icons';
 import { useBlockEditorStore } from '../../../store/blockEditorStore';
-import { ImageBlock } from '../../../types/blocks';
+import type { ImageBlock as ImageBlockType } from '../../../types/blocks';
 import { mediaService } from '../../../services/api';
 import './BlockComponents.css';
 
 const { TextArea } = Input;
 
 interface ImageBlockProps {
-  block: ImageBlock;
+  block: ImageBlockType;
 }
 
 const ImageBlock: React.FC<ImageBlockProps> = ({ block }) => {

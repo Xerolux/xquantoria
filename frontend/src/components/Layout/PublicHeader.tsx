@@ -25,11 +25,10 @@ import {
   FileTextOutlined,
   InfoCircleOutlined,
   MailOutlined,
-  RssOutlined,
   LoginOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { useAuthStore } from '../store/authStore';
+import { useAuthStore } from '../../store/authStore';
 
 const { Header } = Layout;
 const { Search } = Input;

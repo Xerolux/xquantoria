@@ -53,8 +53,9 @@ import {
   GlobalOutlined,
   LinkOutlined,
 } from '@ant-design/icons';
-import type { ColumnsType, UploadProps } from 'antd/es/table';
-import { pluginService } from '../../services/api';
+import type { ColumnsType } from 'antd/es/table';
+import type { UploadProps } from 'antd/es/upload';
+import { pluginService } from '../services/api';
 
 const { Text, Title, Paragraph } = Typography;
 const { TabPane } = Tabs;

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Alert } from 'antd';
 import { InfoCircleOutlined, WarningOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { CalloutBlock } from '../../../types/blocks';
+import type { CalloutBlock as CalloutBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface CalloutBlockProps {
-  block: CalloutBlock;
+  block: CalloutBlockType;
 }
 
 const VARIANT_CONFIG = {

@@ -33,7 +33,7 @@ import {
   EyeOutlined,
   DatabaseOutlined,
 } from '@ant-design/icons';
-import { queueMonitorService } from '../../services/api';
+import { queueMonitorService } from '../services/api';
 
 const { Title, Text } = Typography;
 

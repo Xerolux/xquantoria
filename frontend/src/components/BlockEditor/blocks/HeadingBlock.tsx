@@ -7,7 +7,7 @@ import './BlockComponents.css';
 const { Title } = Typography;
 
 interface HeadingBlockProps {
-  block: HeadingBlock;
+  block: HeadingBlockType;
 }
 
 const HeadingBlock: React.FC<HeadingBlockProps> = ({ block }) => {

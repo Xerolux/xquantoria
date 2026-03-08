@@ -1,10 +1,10 @@
 import React from 'react';
 import { Typography } from 'antd';
-import { CodeBlock } from '../../../types/blocks';
+import type { CodeBlock as CodeBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface CodeBlockProps {
-  block: CodeBlock;
+  block: CodeBlockType;
 }
 
 const CodeBlock: React.FC<CodeBlockProps> = ({ block }) => {

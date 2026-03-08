@@ -6,7 +6,7 @@ import { ListBlock, ListStyle } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface ListBlockProps {
-  block: ListBlock;
+  block: ListBlockType;
 }
 
 const ListBlock: React.FC<ListBlockProps> = ({ block }) => {

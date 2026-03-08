@@ -14,9 +14,9 @@ import {
   message,
 } from 'antd';
 import {
-  RssOutlined,
+  GlobalOutlined,
   CopyOutlined,
-  ExternalLinkOutlined,
+  LinkOutlined,
   SearchOutlined,
   FilterOutlined,
 } from '@ant-design/icons';
@@ -110,7 +110,7 @@ const RSSFeedPage: React.FC<RSSFeedPageProps> = ({
       <div style={{ maxWidth: 800, margin: '0 auto' }}>
         <Card style={{ marginBottom: 24 }}>
           <div style={{ textAlign: 'center' }}>
-            <RssOutlined style={{ fontSize: 48, color: '#f26522', marginBottom: 16 }} />
+            <GlobalOutlined style={{ fontSize: 48, color: '#f26522', marginBottom: 16 }} />
             <Title level={2} style={{ marginBottom: 8 }}>
               RSS Feed
             </Title>
@@ -128,7 +128,7 @@ const RSSFeedPage: React.FC<RSSFeedPageProps> = ({
               <Button icon={<CopyOutlined />} onClick={copyFeedUrl}>
                 Kopieren
               </Button>
-              <Button icon={<ExternalLinkOutlined />} href={fullFeedUrl} target="_blank">
+              <Button icon={<LinkOutlined />} href={fullFeedUrl} target="_blank">
                 Öffnen
               </Button>
             </div>

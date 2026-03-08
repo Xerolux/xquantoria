@@ -26,7 +26,7 @@ import {
   RiseOutlined,
   FallOutlined,
   GlobalOutlined,
-  DeviceOutlined,
+  DesktopOutlined,
   ClockCircleOutlined,
 } from '@ant-design/icons';
 import { Line, Column, Pie, Area } from '@ant-design/charts';
@@ -87,7 +87,7 @@ interface AnalyticsData {
 
 const AnalyticsDashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] useState<[dayjs.Dayjs, dayjs.Dayjs]>([
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
     dayjs().subtract(30, 'days'),
     dayjs(),
   ]);
@@ -303,7 +303,7 @@ const AnalyticsDashboardPage: React.FC = () => {
               renderItem={(item) => (
                 <List.Item>
                   <List.Item.Meta
-                    avatar={<DeviceOutlined />}
+                    avatar={<DesktopOutlined />}
                     title={item.device}
                     description={
                       <Progress

@@ -23,50 +23,53 @@ import TabsSettings from './TabsSettings';
 
 interface BlockSettingsProps {
   block: Block;
+  onUpdate?: (updates: Partial<Block>) => void;
 }
 
-const BlockSettings: React.FC<BlockSettingsProps> = ({ block }) => {
+const BlockSettings: React.FC<BlockSettingsProps> = ({ block, onUpdate }) => {
+  const handleUpdate = onUpdate || (() => {});
+
   switch (block.type) {
     case 'paragraph':
-      return <ParagraphSettings block={block} />;
+      return <ParagraphSettings block={block} onUpdate={handleUpdate} />;
     case 'heading':
-      return <HeadingSettings block={block} />;
+      return <HeadingSettings block={block} onUpdate={handleUpdate} />;
     case 'image':
-      return <ImageSettings block={block} />;
+      return <ImageSettings block={block} onUpdate={handleUpdate} />;
     case 'gallery':
-      return <GallerySettings block={block} />;
+      return <GallerySettings block={block} onUpdate={handleUpdate} />;
     case 'quote':
-      return <QuoteSettings block={block} />;
+      return <QuoteSettings block={block} onUpdate={handleUpdate} />;
     case 'code':
-      return <CodeSettings block={block} />;
+      return <CodeSettings block={block} onUpdate={handleUpdate} />;
     case 'list':
-      return <ListSettings block={block} />;
+      return <ListSettings block={block} onUpdate={handleUpdate} />;
     case 'divider':
-      return <DividerSettings block={block} />;
+      return <DividerSettings block={block} onUpdate={handleUpdate} />;
     case 'spacer':
-      return <SpacerSettings block={block} />;
+      return <SpacerSettings block={block} onUpdate={handleUpdate} />;
     case 'button':
-      return <ButtonSettings block={block} />;
+      return <ButtonSettings block={block} onUpdate={handleUpdate} />;
     case 'callout':
-      return <CalloutSettings block={block} />;
+      return <CalloutSettings block={block} onUpdate={handleUpdate} />;
     case 'embed':
-      return <EmbedSettings block={block} />;
+      return <EmbedSettings block={block} onUpdate={handleUpdate} />;
     case 'html':
-      return <HtmlSettings block={block} />;
+      return <HtmlSettings block={block} onUpdate={handleUpdate} />;
     case 'table':
-      return <TableSettings block={block} />;
+      return <TableSettings block={block} onUpdate={handleUpdate} />;
     case 'video':
-      return <VideoSettings block={block} />;
+      return <VideoSettings block={block} onUpdate={handleUpdate} />;
     case 'audio':
-      return <AudioSettings block={block} />;
+      return <AudioSettings block={block} onUpdate={handleUpdate} />;
     case 'file':
-      return <FileSettings block={block} />;
+      return <FileSettings block={block} onUpdate={handleUpdate} />;
     case 'columns':
-      return <ColumnsSettings block={block} />;
+      return <ColumnsSettings block={block} onUpdate={handleUpdate} />;
     case 'accordion':
-      return <AccordionSettings block={block} />;
+      return <AccordionSettings block={block} onUpdate={handleUpdate} />;
     case 'tabs':
-      return <TabsSettings block={block} />;
+      return <TabsSettings block={block} onUpdate={handleUpdate} />;
     default:
       return <div>No settings available</div>;
   }

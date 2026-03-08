@@ -11,7 +11,7 @@ import {
   MailOutlined,
   PhoneOutlined,
   EnvironmentOutlined,
-  RssOutlined,
+  GlobalOutlined,
 } from '@ant-design/icons';
 
 const { Title, Text, Paragraph } = Typography;
@@ -134,7 +134,7 @@ const PublicFooter: React.FC<PublicFooterProps> = ({
 
             <div style={{ marginTop: 16 }}>
               <Link to="/feed" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                <RssOutlined /> RSS Feed
+                <GlobalOutlined /> RSS Feed
               </Link>
             </div>
           </Col>

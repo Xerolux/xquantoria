@@ -1,11 +1,11 @@
 import React from 'react';
 import { Button as AntButton } from 'antd';
 import { useBlockEditorStore } from '../../../store/blockEditorStore';
-import { ButtonBlock } from '../../../types/blocks';
+import type { ButtonBlock as ButtonBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface ButtonBlockProps {
-  block: ButtonBlock;
+  block: ButtonBlockType;
 }
 
 const ButtonBlock: React.FC<ButtonButtonBlockProps> = ({ block }) => {

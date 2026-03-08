@@ -43,7 +43,7 @@ import {
   SyncOutlined,
   ClockCircleOutlined,
   HistoryOutlined,
-  AppstoreOutlined,
+  CheckCircleOutlined,
   SwapOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';

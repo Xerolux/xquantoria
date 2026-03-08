@@ -34,7 +34,7 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import api from '../../services/api';
+import api from '../services/api';
 
 const { Title, Text, Paragraph } = Typography;
 const { Option } = Select;

@@ -13,7 +13,7 @@ import {
   message,
 } from 'antd';
 import {
-  CookieOutlined,
+  GiftOutlined,
   SettingOutlined,
   CheckOutlined,
   InfoCircleOutlined,
@@ -185,7 +185,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({
       >
         <Space direction="vertical" style={{ width: '100%' }} size="middle">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <CookieOutlined style={{ fontSize: 32, color: '#1890ff' }} />
+            <GiftOutlined style={{ fontSize: 32, color: '#1890ff' }} />
             <div>
               <Title level={4} style={{ margin: 0 }}>
                 Cookie-Einstellungen
@@ -231,7 +231,7 @@ const CookieBanner: React.FC<CookieBannerProps> = ({
       <Modal
         title={
           <Space>
-            <CookieOutlined />
+            <GiftOutlined />
             Cookie-Einstellungen
           </Space>
         }

@@ -28,7 +28,7 @@ import {
   HeartOutlined,
   MessageOutlined,
   RightOutlined,
-  RssOutlined,
+  GlobalOutlined,
 } from '@ant-design/icons';
 import { publicService } from '../services/api';
 import dayjs from 'dayjs';
@@ -275,7 +275,7 @@ const HomePage: React.FC = () => {
             <Card style={{ marginBottom: 24 }}>
               <Space direction="vertical" style={{ width: '100%' }}>
                 <Link to="/feed">
-                  <Button block icon={<RssOutlined />}>
+                  <Button block icon={<GlobalOutlined />}>
                     RSS Feed
                   </Button>
                 </Link>

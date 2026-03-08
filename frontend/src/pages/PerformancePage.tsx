@@ -28,10 +28,10 @@ import {
   ReloadOutlined,
   ClearOutlined,
   DashboardOutlined,
-  MemoryOutlined,
+  DatabaseOutlined,
   HddOutlined,
 } from '@ant-design/icons';
-import { performanceService } from '../../services/api';
+import { performanceService } from '../services/api';
 
 const { Title, Text } = Typography;
 
@@ -209,7 +209,7 @@ const PerformancePage: React.FC = () => {
 
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={8}>
-          <Card title={<><MemoryOutlined /> Memory Usage</>}>
+          <Card title={<><DatabaseOutlined /> Memory Usage</>}>
             <Progress
               type="dashboard"
               percent={data?.overview.memory_usage?.percent || 0}

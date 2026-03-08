@@ -1,10 +1,10 @@
 import React from 'react';
 import { Table } from 'antd';
-import { TableBlock } from '../../../types/blocks';
+import type { TableBlock as TableBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface TableBlockProps {
-  block: TableBlock;
+  block: TableBlockType;
 }
 
 const TableBlock: React.FC<TableBlockProps> = ({ block }) => {

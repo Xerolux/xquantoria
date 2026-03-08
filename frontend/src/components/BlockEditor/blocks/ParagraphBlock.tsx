@@ -7,7 +7,7 @@ import './BlockComponents.css';
 const { TextArea } = Input;
 
 interface ParagraphBlockProps {
-  block: ParagraphBlock;
+  block: ParagraphBlockType;
 }
 
 const ParagraphBlock: React.FC<ParagraphBlockProps> = ({ block }) => {

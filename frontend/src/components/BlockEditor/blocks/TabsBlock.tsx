@@ -1,10 +1,10 @@
 import React from 'react';
 import { Tabs, Typography } from 'antd';
-import { TabsBlock } from '../../../types/blocks';
+import type { TabsBlock as TabsBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface TabsBlockProps {
-  block: TabsBlock;
+  block: TabsBlockType;
 }
 
 const TabsBlock: React.FC<TabsBlockProps> = ({ block }) => {

@@ -23,7 +23,7 @@ import {
   BellFilled,
   DeleteOutlined,
   GlobalOutlined,
-  BrowserOutlined,
+  LaptopOutlined,
   MobileOutlined,
   SyncOutlined,
   CheckCircleOutlined,
@@ -215,7 +215,7 @@ const PushSettingsPage: React.FC = () => {
     if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
       return <MobileOutlined />;
     }
-    return <BrowserOutlined />;
+    return <LaptopOutlined />;
   };
 
   const getDeviceName = (userAgent: string) => {

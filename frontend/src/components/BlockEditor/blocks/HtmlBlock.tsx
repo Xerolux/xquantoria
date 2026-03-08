@@ -1,11 +1,11 @@
 import React from 'react';
 import { Input } from 'antd';
 import { useBlockEditorStore } from '../../../store/blockEditorStore';
-import { HtmlBlock } from '../../../types/blocks';
+import type { HtmlBlock as HtmlBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface HtmlBlockProps {
-  block: HtmlBlock;
+  block: HtmlBlockType;
 }
 
 const HtmlBlock: React.FC<HtmlBlockProps> = ({ block }) => {

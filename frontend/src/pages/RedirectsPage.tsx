@@ -21,7 +21,7 @@ import {
   Badge,
 } from 'antd';
 import {
-  RedirectOutlined,
+  SwapOutlined,
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
@@ -33,7 +33,7 @@ import {
   PauseCircleOutlined,
   PlayCircleOutlined,
 } from '@ant-design/icons';
-import { redirectService } from '../../services/api';
+import { redirectService } from '../services/api';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -316,7 +316,7 @@ const RedirectsPage: React.FC = () => {
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col xs={24} sm={12} md={6}>
           <Card>
-            <Statistic title="Total Redirects" value={stats?.total || 0} prefix={<RedirectOutlined />} />
+            <Statistic title="Total Redirects" value={stats?.total || 0} prefix={<SwapOutlined />} />
           </Card>
         </Col>
         <Col xs={24} sm={12} md={6}>
@@ -348,7 +348,7 @@ const RedirectsPage: React.FC = () => {
       <Card
         title={
           <Title level={4} style={{ margin: 0 }}>
-            <RedirectOutlined /> Redirect Management
+            <SwapOutlined /> Redirect Management
           </Title>
         }
         extra={

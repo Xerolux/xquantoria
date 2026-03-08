@@ -1,10 +1,10 @@
 import React from 'react';
 import { Typography } from 'antd';
-import { AudioBlock } from '../../../types/blocks';
+import type { AudioBlock as AudioBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface AudioBlockProps {
-  block: AudioBlock;
+  block: AudioBlockType;
 }
 
 const AudioBlock: React.FC<AudioBlockProps> = ({ block }) => {

@@ -1,10 +1,10 @@
 import React from 'react';
 import { Row, Col, Image, Empty } from 'antd';
-import { GalleryBlock } from '../../../types/blocks';
+import type { GalleryBlock as GalleryBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface GalleryBlockProps {
-  block: GalleryBlock;
+  block: GalleryBlockType;
 }
 
 const GalleryBlock: React.FC<GalleryBlockProps> = ({ block }) => {

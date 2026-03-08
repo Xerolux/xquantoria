@@ -1,11 +1,11 @@
 import React from 'react';
 import { Button, Typography } from 'antd';
 import { DownloadOutlined, FileOutlined } from '@ant-design/icons';
-import { FileBlock } from '../../../types/blocks';
+import type { FileBlock as FileBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface FileBlockProps {
-  block: FileBlock;
+  block: FileBlockType;
 }
 
 const FileBlock: React.FC<FileBlockProps> = ({ block }) => {

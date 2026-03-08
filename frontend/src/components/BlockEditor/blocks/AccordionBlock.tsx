@@ -1,10 +1,10 @@
 import React from 'react';
 import { Collapse, Typography } from 'antd';
-import { AccordionBlock } from '../../../types/blocks';
+import type { AccordionBlock as AccordionBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface AccordionBlockProps {
-  block: AccordionBlock;
+  block: AccordionBlockType;
 }
 
 const AccordionBlock: React.FC<AccordionBlockProps> = ({ block }) => {

@@ -1,11 +1,11 @@
 import React from 'react';
 import { InputNumber, Switch, Divider } from 'antd';
 import { useBlockEditorStore } from '../../../store/blockEditorStore';
-import { SpacerBlock } from '../../../types/blocks';
+import type { SpacerBlock as SpacerBlockType } from '../../../types/blocks';
 import './BlockComponents.css';
 
 interface SpacerBlockProps {
-  block: SpacerBlock;
+  block: SpacerBlockType;
 }
 
 const SpacerBlock: React.FC<SpacerBlockProps> = ({ block }) => {
